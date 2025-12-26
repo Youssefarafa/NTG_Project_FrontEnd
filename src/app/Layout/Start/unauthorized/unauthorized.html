@@ -1,0 +1,78 @@
+<div
+  class="theme-container py-2 min-h-[100vh] mt-[-64px] w-full flex items-center justify-center bg-primary-50 dark:bg-primary-950 px-4 transition-colors duration-500"
+>
+  <div class="w-full max-w-5xl flex justify-center">
+    <p-card
+      styleClass="bg-white dark:!bg-primary-900 backdrop-blur-2xl border border-primary-200 dark:border-primary-800 shadow-xl !rounded-[2.5rem] w-full"
+    >
+      <div class="relative w-full p-6 sm:p-12">
+        <div
+          class="absolute -top-24 -left-24 w-64 h-64 bg-primary-500/5 dark:bg-primary-400/5 rounded-full blur-3xl pointer-events-none"
+        ></div>
+
+        <div
+          class="relative z-10 flex flex-col-reverse lg:flex-row items-center justify-between gap-10"
+        >
+          <div class="w-full lg:w-3/5 text-center lg:text-left space-y-8">
+            <h1
+              class="text-7xl sm:text-8xl font-black text-rose-600/90 dark:text-rose-400/80 tracking-tighter"
+            >
+              403<span class="opacity-50 text-primary-400 dark:text-primary-600 ml-2">!</span>
+            </h1>
+
+            <div class="space-y-4">
+              <p
+                class="text-3xl sm:text-4xl font-bold text-primary-800 dark:text-primary-100 leading-tight"
+              >
+                Access Denied <br class="hidden sm:block" />
+                <span class="text-2xl font-semibold opacity-80">Restricted Area</span>
+              </p>
+              <p
+                class="text-lg text-primary-600 dark:text-primary-400 max-w-md mx-auto lg:mx-0 leading-relaxed font-medium"
+              >
+                We're sorry, but you don't have permission to access this page. Please try logging
+                in with a different account or return home.
+              </p>
+            </div>
+
+            <div class="pt-6 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <button
+                pButton
+                pRipple
+                type="button"
+                (click)="goHome()"
+                label="Go to Home"
+                icon="pi pi-home"
+                class="!bg-primary-600/90 hover:!bg-primary-600 dark:!bg-primary-700 dark:hover:!bg-primary-600 !border-none !text-white !font-bold !py-4 !px-10 !rounded-2xl !text-lg shadow-lg shadow-primary-500/10 transition-all active:scale-95"
+              ></button>
+
+              <button
+                pButton
+                pRipple
+                type="button"
+                (click)="logout()"
+                label="Switch Account"
+                icon="pi pi-refresh"
+                class="p-button-outlined !border-2 !border-primary-300 dark:!border-primary-700 !text-primary-500 dark:!text-primary-300 !font-bold !py-4 !px-10 !rounded-2xl !text-lg transition-all active:scale-95 hover:!bg-primary-100 dark:hover:!bg-primary-800"
+              ></button>
+            </div>
+          </div>
+
+          <div class="w-full lg:w-2/5 flex justify-center">
+            <div class="relative group">
+              <div
+                class="absolute inset-0 bg-primary-400/10 dark:bg-primary-500/5 blur-3xl rounded-full scale-75"
+              ></div>
+
+              <img
+                src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked%20with%20Key.png"
+                alt="Unauthorized"
+                class="relative w-44 h-44 sm:w-56 sm:h-56 object-contain opacity-90 dark:opacity-80 drop-shadow-xl animate-float"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</div>

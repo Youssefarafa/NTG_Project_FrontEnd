@@ -1,0 +1,132 @@
+<div
+  class="min-h-screen bg-primary-50/75 dark:bg-primary-950 transition-colors duration-500 overflow-x-hidden"
+>
+  <div class="max-w-7xl mx-auto px-4 py-12 space-y-16 sm:space-y-24">
+    <section
+      class="relative text-center bg-primary-50 dark:bg-primary-900/20 rounded-3xl shadow-sm overflow-hidden pt-16 sm:pt-24 pb-20 border border-primary-300 dark:border-primary-700"
+    >
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-primary-100/50 via-white to-transparent dark:from-primary-800/70 dark:via-primary-900/10 dark:to-transparent opacity-80"
+      ></div>
+
+      <div class="relative z-10 px-6">
+        <h1
+          class="text-4xl sm:text-5xl md:text-6xl font-black text-primary-900 dark:text-white mb-6 leading-tight tracking-tight"
+        >
+          Your <span class="text-primary-500 dark:text-primary-300">Next Career</span> Move <br class="hidden sm:block" />
+          Starts Here.
+        </h1>
+
+        <p
+          class="max-w-3xl mx-auto text-lg sm:text-xl text-primary-700 dark:text-primary-200 mb-10 leading-relaxed font-medium"
+        >
+          RecruitSys is the ultimate platform connecting skilled professionals with innovative
+          companies. Streamline your hiring process or fast-track your career today.
+        </p>
+
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-5">
+          <button
+            pButton
+            pRipple
+            label="Create New Account"
+            routerLink="/register"
+            class="!w-full sm:!w-auto !bg-primary-600 !text-white !font-bold !py-4 !px-10 !rounded-xl !text-lg hover:!bg-primary-700 transition shadow-lg shadow-primary-500/20"
+          ></button>
+
+          <button
+            pButton
+            pRipple
+            label="I Have an Account"
+            routerLink="/login"
+            class="!w-full sm:!w-auto !bg-white dark:!bg-primary-800 !text-primary-700 dark:!text-white !border-2 !border-primary-200 dark:!border-primary-700 !font-bold !py-4 !px-10 !rounded-xl !text-lg hover:!bg-primary-50 dark:hover:!bg-primary-700 transition"
+          ></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-4">
+      <h2 class="text-3xl sm:text-4xl font-bold text-center text-primary-900 dark:text-white mb-4">
+        Simple Steps to Success
+      </h2>
+      <p class="text-center text-lg text-primary-600 dark:text-primary-300 mb-12 max-w-2xl mx-auto">
+        A clear path for both job seekers and hiring managers to achieve their goals.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        @for (step of [ {n:'1', t:'Create Your Profile', d:'Sign up in minutes to showcase your
+        skills or post openings.'}, {n:'2', t:'Discover & Connect', d:'Candidates find jobs.
+        Managers discover a pool of talent.'}, {n:'3', t:'Apply & Evaluate', d:'Seamless application
+        process and powerful evaluation tools.'}, {n:'4', t:'Achieve Your Goal', d:'Land your dream
+        job or hire the perfect addition to your team.'} ]; track step.n) {
+        <div class="text-center p-4 group">
+          <div
+            class="flex items-center justify-center h-20 w-20 rounded-2xl bg-primary-100 dark:bg-primary-800 mx-auto mb-6 border-2 border-primary-200 dark:border-primary-700"
+          >
+            <span class="text-3xl font-black text-primary-600 dark:text-primary-400">{{
+              step.n
+            }}</span>
+          </div>
+          <h3 class="text-xl font-bold text-primary-900 dark:text-white mb-3">{{ step.t }}</h3>
+          <p class="text-primary-600 dark:text-primary-300 leading-relaxed text-sm">{{ step.d }}</p>
+        </div>
+        }
+      </div>
+    </section>
+
+    <section
+      class="py-12 px-6 sm:px-10 bg-primary-50 dark:bg-primary-900/30 rounded-[2rem] border border-primary-300 dark:border-primary-700"
+    >
+      <h2 class="text-3xl font-bold text-center text-primary-900 dark:text-white mb-12">
+        Powerful Features for Everyone
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <p-card
+          styleClass="dark:!bg-primary-950 border border-primary-200 dark:border-primary-700 shadow-md transition-all duration-300 overflow-hidden !rounded-2xl"
+        >
+          <div class="text-center p-4">
+            <div
+              class="flex items-center justify-center h-14 w-14 rounded-xl bg-primary-100 dark:bg-primary-800 mx-auto mb-6"
+            >
+              <i class="pi pi-search text-xl text-primary-600 dark:text-primary-400"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-primary-900 dark:text-white mb-4">
+              Intuitive Job Search
+            </h3>
+            <p class="text-primary-700 dark:text-primary-300 leading-relaxed">
+              Candidates can easily browse, search, and apply for jobs that match their skills and
+              experience. Track every application from start to finish.
+            </p>
+          </div>
+        </p-card>
+
+        <p-card
+          styleClass="dark:!bg-primary-950 border border-primary-200 dark:border-primary-700 shadow-md transition-all duration-300 overflow-hidden !rounded-2xl"
+        >
+          <div class="text-center p-4">
+            <div
+              class="flex items-center justify-center h-14 w-14 rounded-xl bg-primary-100 dark:bg-primary-800 mx-auto mb-6"
+            >
+              <i class="pi pi-briefcase text-xl text-primary-600 dark:text-primary-400"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-primary-900 dark:text-white mb-4">
+              Advanced Hiring Tools
+            </h3>
+            <p class="text-primary-700 dark:text-primary-300 leading-relaxed">
+              Managers can post jobs, manage applicants, and create detailed evaluation processes.
+              Track candidates through every stage of the pipeline.
+            </p>
+          </div>
+        </p-card>
+      </div>
+    </section>
+
+    <footer class="text-center py-12 border-t border-primary-400 dark:border-primary-400/50">
+      <p class="text-primary-500 dark:text-primary-400 font-medium">
+        &copy; {{ currentYear }}
+        <span class="text-primary-700 dark:text-white font-bold">RecruitSys</span>. All Rights
+        Reserved.
+      </p>
+    </footer>
+  </div>
+</div>

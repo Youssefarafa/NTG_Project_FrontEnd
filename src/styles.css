@@ -1,3 +1,339 @@
 /* You can add global styles to this file, and also import other style files */
+@layer reset, primeng, tailwind-base, tailwind-components, tailwind-utilities;
+@layer tailwind-base {
+  @tailwind base;
+}
+@layer tailwind-components {
+  @tailwind components;
+}
+@layer tailwind-utilities {
+  @tailwind utilities;
+}
+@layer reset {
+  /** ===== Light Mode Variables (White Mode) ===== */
+  :root {
+    /** ========== Custom Variables (without p-) ========== */
 
-@import "tailwindcss";
+    /** Primary Colors - Teal */
+    --primary-50: 240 253 250; /** #f0fdfa */
+    --primary-100: 204 251 241; /** #ccfbf1 */
+    --primary-200: 153 246 228; /** #99f6e4 */
+    --primary-300: 94 234 212; /** #5eead4 */
+    --primary-400: 45 212 191; /** #2dd4bf */
+    --primary-500: 13 148 136; /** #0d9488 - MAIN */
+    --primary-600: 15 118 110; /** #0f766e */
+    --primary-700: 17 94 89; /** #115e59 */
+    --primary-800: 19 78 74; /** #134e4a */
+    --primary-900: 4 47 46; /** #042f2e */
+    --primary-950: 2 44 43; /* #022c2b */
+
+    /** Secondary Colors - Slate */
+    --secondary-50: 248 250 252; /** #f8fafc */
+    --secondary-100: 241 245 249; /** #f1f5f9 */
+    --secondary-200: 226 232 240; /** #e2e8f0 - MAIN */
+    --secondary-300: 203 213 225; /** #cbd5e1 */
+    --secondary-400: 148 163 184; /** #94a3b8 */
+    --secondary-500: 100 116 139; /** #64748b */
+    --secondary-600: 71 85 105; /** #475569 */
+    --secondary-700: 51 65 85; /** #334155 */
+    --secondary-800: 30 41 59; /** #1e293b */
+    --secondary-900: 15 23 42; /** #0f172a */
+    --secondary-950: 2 6 23; /* #020617 */
+
+    /** Success Colors - Emerald */
+    --success-50: 236 253 245; /** #ecfdf5 */
+    --success-100: 209 250 229; /** #d1fae5 */
+    --success-200: 167 243 208; /** #a7f3d0 */
+    --success-300: 110 231 183; /** #6ee7b7 */
+    --success-400: 52 211 153; /** #34d399 */
+    --success-500: 16 185 129; /** #10b981 - MAIN */
+    --success-600: 5 150 105; /** #059669 */
+    --success-700: 4 120 87; /** #047857 */
+    --success-800: 6 95 70; /** #065f46 */
+    --success-900: 6 78 59; /** #064e3b */
+    --success-950: 2 44 34; /* #022c22 */
+
+    /** Info Colors - Sky */
+    --info-50: 240 249 255; /** #f0f9ff */
+    --info-100: 224 242 254; /** #e0f2fe */
+    --info-200: 186 230 253; /** #bae6fd */
+    --info-300: 125 211 252; /** #7dd3fc */
+    --info-400: 56 189 248; /** #38bdf8 */
+    --info-500: 14 165 233; /** #0ea5e9 - MAIN */
+    --info-600: 2 132 199; /** #0284c7 */
+    --info-700: 3 105 161; /** #0369a1 */
+    --info-800: 7 89 133; /** #075985 */
+    --info-900: 12 74 110; /** #0c4a6e */
+    --info-950: 8 47 73; /* #082f49 */
+
+    /** Warning Colors - Amber */
+    --warning-50: 255 251 235; /** #fffbeb */
+    --warning-100: 254 243 199; /** #fef3c7 */
+    --warning-200: 253 230 138; /** #fde68a */
+    --warning-300: 252 211 77; /** #fcd34d */
+    --warning-400: 251 191 36; /** #fbbf24 */
+    --warning-500: 245 158 11; /** #f59e0b - MAIN */
+    --warning-600: 217 119 6; /** #d97706 */
+    --warning-700: 180 83 9; /** #b45309 */
+    --warning-800: 146 64 14; /** #92400e */
+    --warning-900: 120 53 15; /** #78350f */
+    --warning-950: 69 26 3; /* #451a03 */
+
+    /** Danger Colors - Red */
+    --danger-50: 254 242 242; /** #fef2f2 */
+    --danger-100: 254 226 226; /** #fee2e2 */
+    --danger-200: 254 202 202; /** #fecaca */
+    --danger-300: 252 165 165; /** #fca5a5 */
+    --danger-400: 248 113 113; /** #f87171 */
+    --danger-500: 239 68 68; /** #ef4444 - MAIN */
+    --danger-600: 220 38 38; /** #dc2626 */
+    --danger-700: 185 28 28; /** #b91c1c */
+    --danger-800: 153 27 27; /** #991b1b */
+    --danger-900: 127 29 29; /** #7f1d1d */
+    --danger-950: 69 10 10; /* #450a0a */
+
+    /** Edit Colors - Indigo (Edit) */
+    --edit-50: 238 242 255; /** #eef2ff */
+    --edit-100: 224 231 255; /** #e0e7ff */
+    --edit-200: 199 210 254; /** #c7d2fe */
+    --edit-300: 165 180 252; /** #a5b4fc */
+    --edit-400: 129 140 248; /** #818cf8 */
+    --edit-500: 99 102 241; /** #6366f1 - MAIN */
+    --edit-600: 79 70 229; /** #4f46e5 */
+    --edit-700: 67 56 202; /** #4338ca */
+    --edit-800: 55 48 163; /** #3730a3 */
+    --edit-900: 49 46 129; /** #312e81 */
+    --edit-950: 30 27 75; /* #1e1b4b */
+
+    /** Surface scale */
+    --surface-0: 255 255 255; /** #ffffff */
+    --surface-50: 248 250 252; /** #f8fafc */
+    --surface-100: 241 245 249; /** #f1f5f9 */
+    --surface-200: 226 232 240; /** #e2e8f0 */
+    --surface-300: 203 213 225; /** #cbd5e1 */
+    --surface-400: 148 163 184; /** #94a3b8 */
+    --surface-500: 100 116 139; /** #64748b */
+    --surface-600: 71 85 105; /** #475569 */
+    --surface-700: 51 65 85; /** #334155 */
+    --surface-800: 30 41 59; /** #1e293b */
+    --surface-900: 15 23 42; /** #0f172a */
+    --surface-950: 2 6 23; /* #020617 */
+
+    /** Text Colors (Light Mode) */
+    --text-color: 15 23 42; /** #0f172a */
+    --text-color-secondary: 71 85 105; /** #475569 */
+    --text-muted: 148 163 184; /** #94a3b8 */
+    /** ========== PrimeNG Variables (referencing custom vars) ========== */
+
+    /** Primary - PrimeNG */
+    --p-primary-50: rgb(var(--primary-50));
+    --p-primary-100: rgb(var(--primary-100));
+    --p-primary-200: rgb(var(--primary-200));
+    --p-primary-300: rgb(var(--primary-300));
+    --p-primary-400: rgb(var(--primary-400));
+    --p-primary-500: rgb(var(--primary-500));
+    --p-primary-600: rgb(var(--primary-600));
+    --p-primary-700: rgb(var(--primary-700));
+    --p-primary-800: rgb(var(--primary-800));
+    --p-primary-900: rgb(var(--primary-900));
+    --p-primary-950: rgb(var(--primary-950));
+    --p-primary-color: rgb(var(--primary-500));
+
+    /** Secondary - PrimeNG */
+    --p-secondary-50: rgb(var(--secondary-50));
+    --p-secondary-100: rgb(var(--secondary-100));
+    --p-secondary-200: rgb(var(--secondary-200));
+    --p-secondary-300: rgb(var(--secondary-300));
+    --p-secondary-400: rgb(var(--secondary-400));
+    --p-secondary-500: rgb(var(--secondary-500));
+    --p-secondary-600: rgb(var(--secondary-600));
+    --p-secondary-700: rgb(var(--secondary-700));
+    --p-secondary-800: rgb(var(--secondary-800));
+    --p-secondary-900: rgb(var(--secondary-900));
+    --p-secondary-950: rgb(var(--secondary-950));
+    --p-secondary-color: rgb(var(--secondary-500));
+
+    /** Success - PrimeNG */
+    --p-success-50: rgb(var(--success-50));
+    --p-success-100: rgb(var(--success-100));
+    --p-success-200: rgb(var(--success-200));
+    --p-success-300: rgb(var(--success-300));
+    --p-success-400: rgb(var(--success-400));
+    --p-success-500: rgb(var(--success-500));
+    --p-success-600: rgb(var(--success-600));
+    --p-success-700: rgb(var(--success-700));
+    --p-success-800: rgb(var(--success-800));
+    --p-success-900: rgb(var(--success-900));
+    --p-success-950: rgb(var(--success-950));
+    --p-success-color: rgb(var(--success-500));
+
+    /** Info - PrimeNG */
+    --p-info-50: rgb(var(--info-50));
+    --p-info-100: rgb(var(--info-100));
+    --p-info-200: rgb(var(--info-200));
+    --p-info-300: rgb(var(--info-300));
+    --p-info-400: rgb(var(--info-400));
+    --p-info-500: rgb(var(--info-500));
+    --p-info-600: rgb(var(--info-600));
+    --p-info-700: rgb(var(--info-700));
+    --p-info-800: rgb(var(--info-800));
+    --p-info-900: rgb(var(--info-900));
+    --p-info-950: rgb(var(--info-950));
+    --p-info-color: rgb(var(--info-500));
+
+    /** Warning - PrimeNG */
+    --p-warning-50: rgb(var(--warning-50));
+    --p-warning-100: rgb(var(--warning-100));
+    --p-warning-200: rgb(var(--warning-200));
+    --p-warning-300: rgb(var(--warning-300));
+    --p-warning-400: rgb(var(--warning-400));
+    --p-warning-500: rgb(var(--warning-500));
+    --p-warning-600: rgb(var(--warning-600));
+    --p-warning-700: rgb(var(--warning-700));
+    --p-warning-800: rgb(var(--warning-800));
+    --p-warning-900: rgb(var(--warning-900));
+    --p-warning-950: rgb(var(--warning-950));
+    --p-warning-color: rgb(var(--warning-500));
+
+    /** Danger - PrimeNG */
+    --p-danger-50: rgb(var(--danger-50));
+    --p-danger-100: rgb(var(--danger-100));
+    --p-danger-200: rgb(var(--danger-200));
+    --p-danger-300: rgb(var(--danger-300));
+    --p-danger-400: rgb(var(--danger-400));
+    --p-danger-500: rgb(var(--danger-500));
+    --p-danger-600: rgb(var(--danger-600));
+    --p-danger-700: rgb(var(--danger-700));
+    --p-danger-800: rgb(var(--danger-800));
+    --p-danger-900: rgb(var(--danger-900));
+    --p-danger-950: rgb(var(--danger-950));
+    --p-danger-color: rgb(var(--danger-500));
+
+    /** Surface - PrimeNG */
+    --p-surface-0: rgb(var(--surface-0));
+    --p-surface-50: rgb(var(--surface-50));
+    --p-surface-100: rgb(var(--surface-100));
+    --p-surface-200: rgb(var(--surface-200));
+    --p-surface-300: rgb(var(--surface-300));
+    --p-surface-400: rgb(var(--surface-400));
+    --p-surface-500: rgb(var(--surface-500));
+    --p-surface-600: rgb(var(--surface-600));
+    --p-surface-700: rgb(var(--surface-700));
+    --p-surface-800: rgb(var(--surface-800));
+    --p-surface-900: rgb(var(--surface-900));
+    --p-surface-950: rgb(var(--surface-950));
+
+    /** Text - PrimeNG */
+    --p-text-color: rgb(var(--text-color));
+    --p-text-color-secondary: rgb(var(--text-color-secondary));
+    --p-text-muted-color: rgb(var(--text-muted));
+  }
+
+  /** ===== Dark Mode Variables ===== */
+  .app-dark {
+    /** ========== PrimeNG Variables (FLIPPED SCALE) ========== */
+
+    /** Primary - PrimeNG */
+    --p-primary-50: rgb(var(--primary-950));
+    --p-primary-100: rgb(var(--primary-900));
+    --p-primary-200: rgb(var(--primary-800));
+    --p-primary-300: rgb(var(--primary-700));
+    --p-primary-400: rgb(var(--primary-600));
+    --p-primary-500: rgb(var(--primary-500));
+    --p-primary-600: rgb(var(--primary-400));
+    --p-primary-700: rgb(var(--primary-300));
+    --p-primary-800: rgb(var(--primary-200));
+    --p-primary-900: rgb(var(--primary-100));
+    --p-primary-950: rgb(var(--primary-50));
+    --p-primary-color: rgb(var(--primary-500));
+
+    /** Secondary - PrimeNG */
+    --p-secondary-50: rgb(var(--secondary-950));
+    --p-secondary-100: rgb(var(--secondary-900));
+    --p-secondary-200: rgb(var(--secondary-800));
+    --p-secondary-300: rgb(var(--secondary-700));
+    --p-secondary-400: rgb(var(--secondary-600));
+    --p-secondary-500: rgb(var(--secondary-500));
+    --p-secondary-600: rgb(var(--secondary-400));
+    --p-secondary-700: rgb(var(--secondary-300));
+    --p-secondary-800: rgb(var(--secondary-200));
+    --p-secondary-900: rgb(var(--secondary-100));
+    --p-secondary-950: rgb(var(--secondary-50));
+    --p-secondary-color: rgb(var(--secondary-500));
+
+    /** Success - PrimeNG */
+    --p-success-50: rgb(var(--success-950));
+    --p-success-100: rgb(var(--success-900));
+    --p-success-200: rgb(var(--success-800));
+    --p-success-300: rgb(var(--success-700));
+    --p-success-400: rgb(var(--success-600));
+    --p-success-500: rgb(var(--success-500));
+    --p-success-600: rgb(var(--success-400));
+    --p-success-700: rgb(var(--success-300));
+    --p-success-800: rgb(var(--success-200));
+    --p-success-900: rgb(var(--success-100));
+    --p-success-950: rgb(var(--success-50));
+    --p-success-color: rgb(var(--success-500));
+
+    /** Info - PrimeNG */
+    --p-info-50: rgb(var(--info-950));
+    --p-info-100: rgb(var(--info-900));
+    --p-info-200: rgb(var(--info-800));
+    --p-info-300: rgb(var(--info-700));
+    --p-info-400: rgb(var(--info-600));
+    --p-info-500: rgb(var(--info-500));
+    --p-info-600: rgb(var(--info-400));
+    --p-info-700: rgb(var(--info-300));
+    --p-info-800: rgb(var(--info-200));
+    --p-info-900: rgb(var(--info-100));
+    --p-info-950: rgb(var(--info-50));
+    --p-info-color: rgb(var(--info-500));
+
+    /** Warning - PrimeNG */
+    --p-warning-50: rgb(var(--warning-950));
+    --p-warning-100: rgb(var(--warning-900));
+    --p-warning-200: rgb(var(--warning-800));
+    --p-warning-300: rgb(var(--warning-700));
+    --p-warning-400: rgb(var(--warning-600));
+    --p-warning-500: rgb(var(--warning-500));
+    --p-warning-600: rgb(var(--warning-400));
+    --p-warning-700: rgb(var(--warning-300));
+    --p-warning-800: rgb(var(--warning-200));
+    --p-warning-900: rgb(var(--warning-100));
+    --p-warning-950: rgb(var(--warning-50));
+    --p-warning-color: rgb(var(--warning-500));
+
+    /** Danger - PrimeNG */
+    --p-danger-50: rgb(var(--danger-950));
+    --p-danger-100: rgb(var(--danger-900));
+    --p-danger-200: rgb(var(--danger-800));
+    --p-danger-300: rgb(var(--danger-700));
+    --p-danger-400: rgb(var(--danger-600));
+    --p-danger-500: rgb(var(--danger-500));
+    --p-danger-600: rgb(var(--danger-400));
+    --p-danger-700: rgb(var(--danger-300));
+    --p-danger-800: rgb(var(--danger-200));
+    --p-danger-900: rgb(var(--danger-100));
+    --p-danger-950: rgb(var(--danger-50));
+    --p-danger-color: rgb(var(--danger-500));
+
+    /** Surface - PrimeNG */
+    --p-surface-0: rgb(var(--surface-950));
+    --p-surface-50: rgb(var(--surface-900));
+    --p-surface-100: rgb(var(--surface-800));
+    --p-surface-200: rgb(var(--surface-700));
+    --p-surface-300: rgb(var(--surface-600));
+    --p-surface-400: rgb(var(--surface-500));
+    --p-surface-500: rgb(var(--surface-400));
+    --p-surface-600: rgb(var(--surface-300));
+    --p-surface-700: rgb(var(--surface-200));
+    --p-surface-800: rgb(var(--surface-100));
+    --p-surface-900: rgb(var(--surface-50));
+    --p-surface-950: rgb(var(--surface-0));
+
+    /** Text - PrimeNG */
+    --p-text-color: rgb(var(--text-color));
+    --p-text-color-secondary: rgb(var(--text-color-secondary));
+    --p-text-muted-color: rgb(var(--text-muted));
+  }
+}

@@ -1,0 +1,68 @@
+<div
+  class="theme-container py-2 min-h-[100vh] mt-[-64px] flex items-center justify-center bg-white dark:bg-gradient-to-b dark:from-primary-950 dark:to-black px-4 transition-colors duration-500 overflow-hidden"
+>
+  <div class="w-full max-w-5xl">
+    <p-card
+      class="dark:!bg-primary-600 bg-primary-50 dark:!bg-opacity-[.3] backdrop-blur-xl border border-primary-100 dark:border-primary-800 shadow-2xl shadow-primary-500/5 !rounded-[2.5rem] overflow-hidden"
+    >
+      <div class="relative w-full p-6 sm:p-12">
+        <div
+          class="absolute -top-24 -left-24 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl pointer-events-none"
+        ></div>
+
+        <div
+          class="relative z-10 flex flex-col-reverse lg:flex-row items-center justify-between gap-10"
+        >
+          <div class="w-full lg:w-3/5 text-center lg:text-left space-y-8">
+            <h1
+              class="text-7xl sm:text-8xl font-black text-primary-900 dark:text-white tracking-tighter"
+            >
+              404<span class="text-primary-600 dark:text-primary-400">.</span><span class="text-primary-600 dark:text-primary-400">.</span><span class="text-primary-600 dark:text-primary-400">.</span>
+            </h1>
+
+            <div class="space-y-4">
+              <p
+                class="text-3xl sm:text-4xl font-extrabold text-primary-800 dark:text-primary-50 leading-tight"
+              >
+                Job Opportunity <br class="hidden sm:block" />
+                Not Found!
+              </p>
+              <p
+                class="text-lg text-primary-600 dark:text-primary-300 max-w-md mx-auto lg:mx-0 leading-relaxed font-medium"
+              >
+                It seems the career path you're looking for has taken a detour. Let's get you back
+                to the right track.
+              </p>
+            </div>
+
+            <div class="pt-6">
+              <button
+                pButton
+                pRipple
+                type="button"
+                (click)="goBack()"
+                label="Return Back"
+                icon="pi pi-arrow-left"
+                class="!bg-primary-600 hover:!bg-primary-700 dark:!bg-primary-500 dark:hover:!bg-primary-400 !text-white !font-bold !py-4 !px-10 !rounded-2xl !text-lg shadow-xl shadow-primary-500/20 transition-all active:scale-95"
+              ></button>
+            </div>
+          </div>
+
+          <div class="w-full lg:w-2/5 flex justify-center">
+            <div class="relative group">
+              <div
+                class="absolute inset-0 bg-primary-400/20 dark:bg-primary-500/10 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-transform duration-700"
+              ></div>
+
+              <img
+                src="https://illustrations.popsy.co/amber/shaking-hands.svg"
+                alt="Lost Opportunity"
+                class="relative w-full h-auto max-w-[340px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:drop-shadow-[0_20px_50px_rgba(var(--primary-500-rgb),0.2)] animate-float"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</div>

@@ -1,59 +1,121 @@
-# NTGProject
+# NG Recruitment Platform
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.0.
+**Angular-Based Recruitment Management System**
 
-## Development server
+## 📌 Overview
 
-To start a local development server, run:
+NG Recruitment Platform is a modern recruitment management system built
+with Angular, designed to streamline the hiring lifecycle for both
+candidates and hiring managers.\
+The platform provides clearly separated workflows, secure
+authentication, and automated communication to manage recruitment
+processes efficiently from job posting to candidate evaluation.
 
-```bash
-ng serve
+------------------------------------------------------------------------
+
+## 🚀 Key Features
+
+### 👤 Candidate Experience
+
+-   Secure registration and authentication
+-   Browse available job opportunities
+-   Apply to multiple job positions
+-   Responsive and user-friendly interface
+
+### 👔 Manager Experience
+
+-   Centralized management dashboard
+-   Job creation and management
+-   Custom hiring process configuration
+-   Candidate selection and evaluation
+-   Automated email communication
+
+------------------------------------------------------------------------
+
+## 🛠️ Technology Stack
+
+### Frontend
+
+-   Angular 21
+-   TypeScript 5.9
+-   RxJS 7.8
+-   Zone.js 0.16
+
+### UI & Styling
+
+-   PrimeNG 21
+-   PrimeIcons 6
+-   Tailwind CSS 3
+-   Angular CDK
+
+### Utilities
+
+-   CryptoJS
+-   ngx-spinner
+-   FontAwesome
+
+------------------------------------------------------------------------
+
+## 🔐 Authentication & Security
+
+-   Role-based access control (Candidate / Manager)
+-   Protected routes via Angular Guards
+-   Token-based authentication ready
+-   Encrypted sensitive data
+
+------------------------------------------------------------------------
+
+## ⚙️ Environment Configuration
+
+### Development
+
+``` ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3000/api',
+  emailServiceUrl: 'http://localhost:3000/email'
+};
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Production
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+``` ts
+export const environment = {
+  production: true,
+  apiUrl: 'https://your-api-domain.com/api',
+  emailServiceUrl: 'https://your-api-domain.com/email'
+};
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+------------------------------------------------------------------------
 
-```bash
-ng generate --help
+## 🚦 Getting Started
+
+### Installation
+
+``` bash
+npm install
+npm start
 ```
 
-## Building
+------------------------------------------------------------------------
 
-To build the project run:
+## 📈 Future Enhancements
 
-```bash
-ng build
-```
+-   Backend integration
+-   Database persistence
+-   Real-time notifications
+-   Advanced analytics
+-   Multi-language support
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+------------------------------------------------------------------------
 
-## Running unit tests
+## 📄 License
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Proprietary Software -- All Rights Reserved
 
-```bash
-ng test
-```
+------------------------------------------------------------------------
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+**Status**: In Development\
+**Version**: 0.0.0\
+**Last Updated**: February 2024

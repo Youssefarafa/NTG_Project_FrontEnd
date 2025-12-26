@@ -1,0 +1,95 @@
+<div
+  class="min-h-screen flex items-center justify-center bg-primary-50 dark:bg-gradient-to-br dark:from-primary-950 dark:to-primary-900 px-4 py-8"
+>
+  <div class="w-full max-w-md">
+    <p-card
+      styleClass="dark:!bg-primary-950 border border-primary-100 dark:border-primary-800 shadow-lg dark:shadow-primary-900/50 overflow-hidden"
+    >
+      <ng-template pTemplate="header">
+        <div
+          class="p-6 bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-800 dark:to-primary-900 text-center relative"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-300 to-primary-400 dark:from-primary-500 dark:to-primary-600"
+          ></div>
+          <div
+            class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm mb-3 border border-white/30"
+          >
+            <i class="pi pi-envelope text-white text-2xl"></i>
+          </div>
+          <h1 class="text-xl font-bold text-white mb-1.5 tracking-tight">Verify Email</h1>
+
+          <p class="text-white/90 text-xs font-light leading-relaxed">
+            An authentication code has been sent to: <br />
+            <span class="font-bold underline decoration-primary-300/50">{{ emailToVerify() }}</span>
+            <button
+              (click)="goBackAndChangeEmail()"
+              class="block mx-auto mt-2 text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition-colors uppercase tracking-wider font-semibold"
+            >
+              Change Email / Back
+            </button>
+          </p>
+        </div>
+      </ng-template>
+
+      <div class="p-6">
+        <form (ngSubmit)="onSubmit()" class="space-y-4">
+          <div class="flex justify-center gap-2 mb-4">
+            @for (digit of digits; track $index) {
+            <input
+              #inputRef
+              type="text"
+              [(ngModel)]="digits[$index]"
+              [name]="'digit' + $index"
+              (keydown)="onKeyDown($event, $index)"
+              (input)="onInput($event, $index)"
+              (paste)="onPaste($event)"
+              class="w-12 h-12 text-center text-lg font-bold text-primary-900 dark:text-primary-100 bg-white dark:bg-primary-900/80 border border-primary-300 dark:border-primary-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-500 transition-all shadow-sm"
+              maxlength="1"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+            />
+            }
+          </div>
+
+          <div class="text-center text-sm text-primary-600 dark:text-primary-400 mb-4">
+            Didn’t receive a code?
+            <button
+              type="button"
+              (click)="resendCode()"
+              [disabled]="!canResend"
+              class="font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Resend
+            </button>
+
+            @if (!canResend) {
+            <span class="ml-2 text-emerald-600 dark:text-emerald-400 font-mono">
+              ({{ formattedCountdown }})
+            </span>
+            }
+          </div>
+
+          @if (errsubmitmessage) {
+          <div
+            class="text-red-600 dark:text-red-400 mt-2 mb-2 text-center text-sm font-semibold animate-pulse bg-red-50 dark:bg-red-900/20 py-2 rounded-md border border-red-100 dark:border-red-900/30"
+          >
+            {{ errsubmitmessage }}
+          </div>
+          }
+
+          <p-button
+            #submitButton
+            type="submit"
+            label="Verify Account"
+            [disabled]="!isOtpValid || isLoading()"
+            [loading]="isLoading()"
+            styleClass="w-full py-3 text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 border-none rounded-lg text-lg font-bold shadow-md transition-all active:scale-[0.98]"
+          ></p-button>
+        </form>
+      </div>
+    </p-card>
+  </div>
+</div>
+
+<p-toast position="top-right"></p-toast>

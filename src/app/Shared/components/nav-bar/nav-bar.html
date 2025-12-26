@@ -1,0 +1,270 @@
+<p-toolbar
+  class="fixed top-0 left-0 right-0 z-50 h-16 md:shadow-2xl"
+  styleClass="px-4 dark:!bg-primary-950/60 !backdrop-blur-sm !border-0 !rounded-none"
+>
+  <ng-template pTemplate="start">
+    @if (navSignal()) {
+    <a
+      [routerLink]="navSignal()!.brand.Link || '/'"
+      routerLinkActive="router-link-active"
+      class="flex items-center space-x-2 no-underline"
+      aria-label="Home"
+    >
+      <img
+        [src]="navSignal()!.brand.logoUrl"
+        [alt]="navSignal()!.brand.logoAlt || navSignal()!.brand.name"
+        class="w-10 h-10 object-contain"
+      />
+      <span class="text-lg font-bold text-black dark:text-primary-50">
+        {{ navSignal()!.brand.name }}
+      </span>
+    </a>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    <div class="flex items-center space-x-6">
+      <div class="hidden md:flex items-center space-x-8">
+        @if (navSignal() && navSignal()!.navLinks) {
+        <ng-container
+          *ngFor="let item of navSignal()!.navLinks; trackBy: trackByLink; let i = index"
+        >
+          @if (!item.children) {
+          <a
+            [routerLink]="item.link"
+            [routerLinkActive]="['text-primary-600', 'dark:text-primary-400', 'font-semibold']"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400"
+            tabindex="0"
+            [attr.aria-label]="item.label + ' page'"
+          >
+            {{ item.label }}
+          </a>
+          } @else {
+          <div class="relative dropdown-container" [id]="'dropdown-' + i">
+            <button
+              [id]="'parent-' + i"
+              class="text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1 parent-button"
+              (click)="toggleDropdown(i)"
+              (mouseenter)="handleMouseEnter(i)"
+              (mouseleave)="handleMouseLeave()"
+              (focusin)="handleFocusIn(i)"
+              (focusout)="handleFocusOut(i)"
+              [attr.aria-expanded]="openDropdown() === i"
+              aria-haspopup="true"
+              [attr.aria-controls]="'submenu-' + i"
+              tabindex="0"
+            >
+              {{ item.label }}
+              <span class="text-[.5rem] opacity-60">▼</span>
+            </button>
+            @if (openDropdown() === i) {
+            <div
+              [id]="'submenu-' + i"
+              class="absolute left-0 z-50 w-48 mt-2 border shadow-lg rounded-md top-full bg-white dark:bg-primary-900 border-primary-100 dark:border-primary-800"
+              role="menu"
+              [attr.aria-labelledby]="'parent-' + i"
+              (mouseenter)="handleDropdownMouseEnter()"
+              (mouseleave)="handleDropdownMouseLeave()"
+            >
+              @for (child of item.children; track child.link || child.label) {
+              <a
+                [routerLink]="child.link"
+                [routerLinkActive]="[
+                  'bg-primary-50',
+                  'dark:bg-primary-800/50',
+                  'text-primary-700',
+                  'dark:text-primary-300'
+                ]"
+                class="block px-4 py-2 text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                tabindex="0"
+                (click)="closeDropdownMenu()"
+              >
+                {{ child.label }}
+              </a>
+              }
+            </div>
+            }
+          </div>
+          }
+        </ng-container>
+        } @if (navSignal() && navSignal()!.navLinks && navSignal()!.navLinks.length > 0) {
+        <div class="h-5 w-px bg-primary-200 dark:bg-primary-800"></div>
+        } @if (userSignal()) {
+        <div class="flex items-center space-x-3">
+          <div
+            class="flex items-center space-x-2 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 rounded-sm"
+          >
+            <span class="text-sm text-primary-800 dark:text-primary-400"> Welcome, </span>
+            <span
+              class="font-medium text-sm text-primary-900 dark:text-primary-300 tracking-tight"
+            >
+              {{ userSignal() }}
+            </span>
+          </div>
+          <div class="h-5 w-px bg-primary-200 dark:bg-primary-800"></div>
+        </div>
+        } @if (navSignal() && navSignal()!.navButtons) {
+        <div class="mr-6 flex items-center space-x-6">
+          @for (button of navSignal()!.navButtons; track trackByLink($index, button)) { @if
+          (button.link) {
+          <a
+            [routerLink]="button.link"
+            class="{{ button.Classes }}"
+            routerLinkActive="{{ button.activeClasses || [] }}"
+            [routerLinkActiveOptions]="{ exact: true }"
+            tabindex="0"
+            [attr.aria-label]="button.label"
+          >
+            {{ button.label }}
+          </a>
+          } @else { 
+            
+          <button class="{{ button.Classes }}" tabindex="0" [attr.aria-label]="button.label" (click)="handleButtonLogin(button)">
+            {{ button.label }}
+          </button>
+          } }
+        </div>
+        }
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <button
+          (click)="DarkLightTheme.toggle()"
+          (mousedown)="$event.preventDefault()"
+          class="flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-full shadow-md cursor-pointer hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-primary-50 dark:bg-primary-800"
+          aria-label="Toggle Dark Mode"
+          tabindex="0"
+        >
+          @if (DarkLightTheme.isDark()) {
+          <svg class="w-5 h-5 text-yellow-400" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5" fill="currentColor" />
+            <g stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </g>
+          </svg>
+          } @else {
+          <svg class="w-5 h-5 text-primary-700" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+          </svg>
+          }
+        </button>
+
+        <button
+          (click)="toggleMobileMenu()"
+          [attr.aria-expanded]="mobileMenu()"
+          class="md:hidden flex flex-col items-center justify-center w-10 h-10 transition-all duration-300 rounded-md shadow-lg cursor-pointer hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500 bg-primary-100 dark:bg-primary-800 hamburger-button"
+          aria-label="Toggle Mobile Menu"
+          tabindex="0"
+        >
+          <span class="block w-6 h-0.5 mb-1 bg-primary-800 dark:bg-primary-100"></span>
+          <span class="block w-6 h-0.5 mb-1 bg-primary-800 dark:bg-primary-100"></span>
+          <span class="block w-6 h-0.5 bg-primary-800 dark:bg-primary-100"></span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-toolbar>
+
+@if (mobileMenu()) {
+<div
+  class="fixed top-16 left-0 right-0 z-40 flex flex-col px-4 py-5 space-y-4 border-t-2 bg-white dark:!bg-primary-950/60 !backdrop-blur-lg border-primary-400 dark:border-primary-800 md:hidden mobile-menu shadow-2xl transition-all"
+>
+  @if (userSignal()) {
+  <div class="pt-1 border-b border-primary-400 pb-4 dark:border-primary-800">
+    <div class="px-4 py-3 pt-2 bg-primary-50/10 dark:bg-primary-900/10 rounded-lg text-center w-full">
+      <span class="text-sm text-primary-500 dark:text-primary-400 mb-1">Welcome, </span>
+      <span class="text-primary-900 dark:text-primary-100 font-bold">{{
+        userSignal()
+      }}</span>
+    </div>
+  </div>
+  } @if (navSignal() && navSignal()!.navLinks) {
+  <div class="flex flex-row flex-wrap gap-2 justify-between">
+    @for (item of navSignal()!.navLinks; track trackByLink($index, item)) { @if (!item.children) {
+    <a
+      [routerLink]="item.link"
+      [routerLinkActive]="[
+        'text-primary-950',
+        'dark:text-primary-950',
+        'font-semibold',
+        '!bg-primary-500',
+        'dark:!bg-primary-950',
+        'hover:!bg-primary-400'
+      ]"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="flex-grow basis-[48%] text-center px-3 py-3 text-primary-800 dark:text-primary-100 transition-colors duration-200 rounded-lg bg-primary-100/70 dark:bg-primary-900/60 hover:bg-primary-200/70 dark:hover:bg-primary-900 focus:outline-none border border-primary-100 dark:border-primary-800/50 shadow-sm"
+      tabindex="0"
+      (click)="closeMobileMenu()"
+    >
+      {{ item.label }}
+    </a>
+    } @else {
+    <div class="w-full space-y-1">
+      <div
+        class="px-3 py-2 font-bold text-xs uppercase tracking-widest text-primary-400 dark:text-primary-500"
+      >
+        {{ item.label }}
+      </div>
+      <div class="flex flex-row flex-wrap gap-2">
+        @for (child of item.children; track child.link || child.label) {
+        <a
+          [routerLink]="child.link"
+          [routerLinkActive]="[
+            'text-primary-600',
+            'dark:text-primary-400',
+            'font-semibold',
+            'bg-primary-50',
+            'dark:bg-primary-900/40'
+          ]"
+          class="flex-grow basis-[48%] px-4 py-3 text-center text-primary-700 dark:text-primary-300 transition-colors duration-200 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900 border border-primary-50 dark:border-primary-800/30"
+          tabindex="0"
+          (click)="closeMobileMenu()"
+        >
+          {{ child.label }}
+        </a>
+        }
+      </div>
+    </div>
+    } }
+  </div>
+  } @if (navSignal() && navSignal()!.navButtons) {
+  <div class="flex flex-row gap-3 pt-4 border-t border-primary-400 dark:border-primary-800">
+    @for (button of navSignal()!.navButtons; track trackByLink($index, button)) { @if (button.link)
+    {
+    <a
+      [routerLink]="button.link"
+      class="{{
+        button.Classes
+      }} flex-1 text-center !py-4 !rounded-xl shadow-lg shadow-primary-500/10 transition-transform active:scale-95"
+      routerLinkActive="{{ button.activeClasses || [] }}"
+      [routerLinkActiveOptions]="{ exact: true }"
+      tabindex="0"
+      [attr.aria-label]="button.label"
+      (click)="closeMobileMenu()"
+    >
+      {{ button.label }}
+    </a>
+    } @else {  
+    <button
+      class="{{
+        button.Classes
+      }} flex-1 !py-4 !rounded-xl shadow-lg transition-transform active:scale-95"
+      tabindex="0"
+      [attr.aria-label]="button.label"
+      (click)="handleButtonLogin(button)"
+    >
+      {{ button.label }}
+    </button>
+    } }
+  </div>
+  }
+</div>
+}

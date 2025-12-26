@@ -1,0 +1,218 @@
+<div
+  class="min-h-screen flex items-center justify-center bg-primary-50 dark:bg-gradient-to-br dark:from-primary-950 dark:to-primary-900 px-4 py-8"
+>
+  <div class="w-full max-w-md">
+    <p-card
+      styleClass="dark:!bg-primary-950 border border-primary-100 dark:border-primary-800 shadow-lg dark:shadow-primary-900/50 overflow-hidden"
+    >
+      <ng-template pTemplate="header">
+        <div
+          class="p-6 bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-800 dark:to-primary-900 text-center relative"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-300 to-primary-400 dark:from-primary-500 dark:to-primary-600"
+          ></div>
+          <div
+            class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm mb-3 border border-white/30"
+          >
+            <i class="pi pi-user-plus text-white text-2xl"></i>
+          </div>
+          <h1 class="text-xl font-bold text-white mb-1.5 tracking-tight">Create Account</h1>
+          <p class="text-white/90 text-xs font-light">Join our recruitment system today</p>
+        </div>
+      </ng-template>
+
+      <div class="p-6">
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-4">
+          <div>
+            <label
+              for="fullName"
+              class="block text-sm font-medium text-primary-900 dark:text-primary-100 mb-2"
+              >Full Name</label
+            >
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-user text-primary-500 dark:text-primary-400" />
+              <input
+                pInputText
+                id="fullName"
+                formControlName="fullName"
+                placeholder="Enter your full name"
+                (blur)="onFieldBlur('fullName')"
+                [class.border-red-400]="showFieldError('fullName')"
+                class="w-full pl-10 py-2.5 text-sm rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-900/80 text-primary-900 dark:text-primary-100 focus:border-primary-400 dark:focus:border-primary-500 transition-colors"
+              />
+            </p-iconfield>
+            @if (showFieldError('fullName')) {
+            <p-message
+              severity="error"
+              [text]="getFirstErrorMessage('fullName')"
+              styleClass="mt-2 !text-xs w-full"
+            />
+            }
+          </div>
+
+          <div>
+            <label
+              for="email"
+              class="block text-sm font-medium text-primary-900 dark:text-primary-100 mb-2"
+              >Email Address</label
+            >
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-envelope text-primary-500 dark:text-primary-400" />
+              <input
+                pInputText
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="Enter your email"
+                (blur)="onFieldBlur('email')"
+                [class.border-red-400]="showFieldError('email')"
+                class="w-full pl-10 py-2.5 text-sm rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-900/80 text-primary-900 dark:text-primary-100 focus:border-primary-400 dark:focus:border-primary-500 transition-colors"
+              />
+            </p-iconfield>
+            @if (showFieldError('email')) {
+            <p-message
+              severity="error"
+              [text]="getFirstErrorMessage('email')"
+              styleClass="mt-2 !text-xs w-full"
+            />
+            }
+          </div>
+
+          <div>
+            <label
+              for="password"
+              class="block text-sm font-medium text-primary-900 dark:text-primary-100 mb-2"
+              >Password</label
+            >
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-lock text-primary-500" />
+              <input
+                pInputText
+                id="password"
+                formControlName="password"
+                [type]="passwordVisible ? 'text' : 'password'"
+                placeholder="Create a password"
+                (blur)="onFieldBlur('password')"
+                [class.border-red-400]="showFieldError('password')"
+                class="w-full pl-10 pr-10 py-2.5 text-sm rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-900/80 text-primary-900 dark:text-primary-100 transition-colors"
+              />
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-500"
+              >
+                <i [ngClass]="passwordVisible ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              </button>
+            </p-iconfield>
+
+            @if (f['password'].value && !f['password'].errors?.['required']) {
+            <div class="mt-2 px-1">
+              @let score = f['password'].errors?.['strengthScore'] ?? 5;
+              <div class="flex items-center gap-2 mb-1">
+                <div class="flex-1 h-1.5 flex gap-1">
+                  @for (i of [1,2,3,4,5]; track i) {
+                  <div
+                    class="h-full flex-1 rounded-full transition-all duration-500"
+                    [ngClass]="{
+                      'bg-red-500': score <= 2 && i <= score,
+                      'bg-amber-500': score > 2 && score < 5 && i <= score,
+                      'bg-emerald-500': score === 5 && i <= score,
+                      'bg-gray-200 dark:bg-gray-700': i > score
+                    }"
+                  ></div>
+                  }
+                </div>
+                <span
+                  class="text-[10px] font-bold uppercase"
+                  [ngClass]="{
+                    'text-red-500': score <= 2,
+                    'text-amber-500': score > 2 && score < 5,
+                    'text-emerald-500': score === 5
+                  }"
+                >
+                  {{ score <= 2 ? 'Weak' : score < 5 ? 'Medium' : 'Strong' }}
+                </span>
+              </div>
+            </div>
+            } @if (showFieldError('password')) {
+            <p-message
+              severity="error"
+              [text]="getFirstErrorMessage('password')"
+              styleClass="mt-2 !text-xs w-full"
+            />
+            }
+          </div>
+
+          <div>
+            <label
+              for="confirmPassword"
+              class="block text-sm font-medium text-primary-900 dark:text-primary-100 mb-2"
+              >Confirm Password</label
+            >
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-lock text-primary-500 dark:text-primary-400" />
+              <input
+                pInputText
+                id="confirmPassword"
+                formControlName="confirmPassword"
+                [type]="confirmPasswordVisible ? 'text' : 'password'"
+                placeholder="Repeat password"
+                (blur)="onFieldBlur('confirmPassword')"
+                [class.border-red-400]="showFieldError('confirmPassword')"
+                class="w-full pl-10 pr-10 py-2.5 text-sm rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-900/80 text-primary-900 dark:text-primary-100 focus:border-primary-400 dark:focus:border-primary-500 transition-colors"
+              />
+              <button
+                type="button"
+                (click)="toggleConfirmPasswordVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-primary-500"
+              >
+                <i [ngClass]="confirmPasswordVisible ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              </button>
+            </p-iconfield>
+            @if (showFieldError('confirmPassword')) {
+            <p-message
+              severity="error"
+              [text]="getFirstErrorMessage('confirmPassword')"
+              styleClass="mt-2 !text-xs w-full"
+            />
+            }
+          </div>
+
+          <p-button
+            type="submit"
+            [loading]="isLoading()"
+            [disabled]="signupForm.invalid && isSubmitted"
+            label="Create Account"
+            icon="pi pi-user-plus"
+            styleClass="w-full mt-4"
+            [ngClass]="{
+              'py-3 rounded-lg text-sm font-semibold shadow-md bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white border-0 transition-all active:scale-95':
+                !isLoading() && !(signupForm.invalid && isSubmitted),
+              'py-3 rounded-lg text-sm font-semibold bg-primary-200 dark:bg-primary-900/60 text-primary-600 dark:text-primary-400 cursor-not-allowed border-0':
+                isLoading() || (signupForm.invalid && isSubmitted)
+            }"
+          />
+
+          <p-divider align="center" styleClass="!border-primary-200 dark:!border-primary-800 !my-4">
+            <span class="text-sm text-primary-500 dark:text-primary-400 px-3">or</span>
+          </p-divider>
+
+          <div class="text-center pt-2">
+            <p class="text-sm text-primary-600 dark:text-primary-400">
+              Already have an account?
+              <button
+                type="button"
+                (click)="navigateToLogin()"
+                class="text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-primary-200 font-semibold ml-1"
+              >
+                Login here
+              </button>
+            </p>
+          </div>
+        </form>
+      </div>
+    </p-card>
+    <p-toast position="top-right" />
+  </div>
+</div>
