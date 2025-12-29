@@ -1,1 +1,181 @@
-<p>add-job works!</p>
+<p-toast></p-toast>
+
+<div class="max-w-4xl mx-auto p-4 sm:p-8">
+  <div
+    class="bg-white dark:bg-primary-800 p-8 rounded-2xl shadow-2xl border border-primary-100 dark:border-primary-700"
+  >
+    <div class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-primary-100">
+        {{ isEditMode() ? 'Update' : 'Create a New' }}
+        <span class="text-teal-600 dark:text-teal-400">Job Posting</span>
+      </h1>
+    </div>
+
+    <form [formGroup]="addJobForm" (ngSubmit)="submitApplication()" class="space-y-8">
+      <fieldset class="p-6 border border-primary-200 dark:border-primary-700 rounded-xl">
+        <legend
+          class="text-xl font-semibold text-primary-800 dark:text-primary-200 px-3 bg-white dark:bg-primary-800"
+        >
+          Job Details
+        </legend>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div class="sm:col-span-2 flex flex-col gap-2">
+            <label class="font-semibold dark:text-primary-300">Job Title</label>
+            <input
+              pInputText
+              formControlName="title"
+              placeholder="e.g. Senior Angular Developer"
+              [class.ng-invalid]="isFieldInvalid('title')"
+              class="w-full px-4 py-3 border rounded-lg dark:bg-primary-700"
+            />
+            @if (isFieldInvalid('title')) {
+            <small class="text-red-500 font-medium italic">Title is required (min 5 chars).</small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold dark:text-primary-300">Reports To</label>
+            <input
+              pInputText
+              formControlName="reportsTo"
+              placeholder="e.g. CTO"
+              [class.ng-invalid]="isFieldInvalid('reportsTo')"
+              class="w-full px-4 py-3 border rounded-lg dark:bg-primary-700"
+            />
+            @if (isFieldInvalid('reportsTo')) {
+            <small class="text-red-500 font-medium italic">Required field.</small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold dark:text-primary-300">Min. Experience</label>
+            <p-inputNumber
+              formControlName="experience"
+              [min]="0"
+              [max]="20"
+              styleClass="w-full"
+              [class.ng-invalid]="isFieldInvalid('experience')"
+              [class.ng-dirty]="addJobForm.get('experience')?.dirty"
+              placeholder="e.g. 5"
+              inputStyleClass="w-full px-4 py-3 border rounded-lg dark:bg-primary-700"
+            ></p-inputNumber>
+            @if (isFieldInvalid('experience')) {
+            <small class="text-red-500 font-medium italic"
+              >Experience must be between 0 and 20.</small
+            >
+            }
+          </div>
+
+          <div class="sm:col-span-2 flex flex-col gap-2">
+            <label class="font-semibold dark:text-primary-300">Expiration Date</label>
+            <p-datepicker
+              formControlName="expiresAt"
+              [minDate]="minDate"
+              appendTo="body"
+              styleClass="w-full"
+              [class.ng-invalid]="isFieldInvalid('expiresAt')"
+              [class.ng-dirty]="addJobForm.get('expiresAt')?.dirty"
+              placeholder="e.g. 2/30/2026"
+              inputStyleClass="w-full px-4 py-3 border rounded-lg dark:bg-primary-700"
+            ></p-datepicker>
+            @if (isFieldInvalid('expiresAt')) {
+            <small class="text-red-500 font-medium italic">Please select an expiration date.</small>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset
+        class="p-6 border border-primary-200 dark:border-primary-700 rounded-xl"
+        formArrayName="responsibilities"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <legend class="text-xl font-semibold dark:text-primary-200">Responsibilities</legend>
+          <button
+            type="button"
+            (click)="addResponsibility()"
+            class="text-teal-600 dark:text-teal-500 font-bold text-sm"
+          >
+            + Add
+          </button>
+        </div>
+        @for(resp of responsibilities.controls; track $index) {
+        <div class="mb-3">
+          <div class="flex items-center gap-3">
+            <input
+              pInputText
+              [formControlName]="$index"
+              class="w-full dark:bg-primary-700"
+              placeholder="Describe a responsibility..."
+            />
+            <button
+              type="button"
+              (click)="removeResponsibility($index)"
+              [disabled]="responsibilities.length <= 1"
+              class="text-red-500 disabled:opacity-30"
+            >
+              <i class="pi pi-minus-circle text-xl"></i>
+            </button>
+          </div>
+          @if (resp.invalid && (resp.dirty || resp.touched)) {
+          <small class="text-red-400 block mt-1">Min 10 characters required.</small>
+          }
+        </div>
+        }
+      </fieldset>
+
+      <fieldset
+        class="p-6 border border-primary-200 dark:border-primary-700 rounded-xl"
+        formArrayName="requiredSkills"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <legend class="text-xl font-semibold dark:text-primary-200">Required Skills</legend>
+          <button
+            type="button"
+            (click)="addSkill()"
+            class="text-teal-600 dark:text-teal-500 font-bold text-sm"
+          >
+            + Add
+          </button>
+        </div>
+        @for(skill of requiredSkills.controls; track $index) {
+        <div class="mb-3">
+          <div class="flex items-center gap-3">
+            <input
+              pInputText
+              [formControlName]="$index"
+              class="w-full dark:bg-primary-700"
+              placeholder="e.g. Angular"
+            />
+            <button
+              type="button"
+              (click)="removeSkill($index)"
+              [disabled]="requiredSkills.length <= 1"
+              class="text-red-500 disabled:opacity-30"
+            >
+              <i class="pi pi-minus-circle text-xl"></i>
+            </button>
+          </div>
+          @if (skill.invalid && (skill.dirty || skill.touched)) {
+          <small class="text-red-400 block mt-1">Min 5 characters required.</small>
+          }
+        </div>
+        }
+      </fieldset>
+
+      <div class="flex justify-end gap-4 pt-6 border-t dark:border-primary-700">
+        <p-button label="Cancel" severity="secondary" [text]="true" (click)="onCancel()"></p-button>
+
+        <p-button
+          type="submit"
+          [label]="isEditMode() ? 'Update Job' : 'Post Job'"
+          [icon]="isEditMode() ? 'pi pi-check' : 'pi pi-send'"
+          [loading]="isSubmitting()"
+          [disabled]="addJobForm.invalid"
+          styleClass="bg-teal-600 px-10 py-4 rounded-xl text-white"
+        ></p-button>
+      </div>
+    </form>
+  </div>
+</div>

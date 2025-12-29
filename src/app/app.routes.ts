@@ -10,7 +10,7 @@ export const routes: Routes = [
 
   {
     path: '',
-    // canActivate: [loginGuard], 
+    // canActivate: [loginGuard],
     loadComponent: () => import('./Layout/Start/start-layout').then((m) => m.StartLayout),
     children: [
       {
@@ -55,7 +55,7 @@ export const routes: Routes = [
         title: 'Available Jobs',
       },
       {
-        path: 'myApplication',
+        path: 'myApplication/:id',
         loadComponent: () =>
           import('./Layout/Candidate/my-application/my-application').then((m) => m.MyApplication),
         title: 'My Application',
@@ -92,7 +92,7 @@ export const routes: Routes = [
       },
       {
         path: 'editJob/:id',
-        loadComponent: () => import('./Layout/Maneger/edit-job/edit-job').then((m) => m.EditJob),
+        loadComponent: () => import('./Layout/Maneger/add-job/add-job').then((m) => m.AddJob),
         title: 'Edit Job',
       },
       {

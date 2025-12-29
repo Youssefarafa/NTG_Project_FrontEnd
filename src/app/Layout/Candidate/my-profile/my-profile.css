@@ -1,0 +1,16 @@
+:host ::ng-deep .p-password.ng-invalid > input,
+:host ::ng-deep .p-password.ng-dirty > input,
+:host ::ng-deep .p-inputtext.ng-invalid,
+:host ::ng-deep .p-inputtext.ng-dirty {
+    border-color: transparent;
+    box-shadow: none !important;
+}
+
+:host ::ng-deep fieldset {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+}
+
+:host-context(.app-dark) ::ng-deep fieldset {
+    border-color: #334155;
+}

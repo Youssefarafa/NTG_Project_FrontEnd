@@ -1,1 +1,125 @@
-<p>available-jobs works!</p>
+<p-toast></p-toast>
+
+<div class="container mx-auto p-4 sm:p-8 min-h-screen">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+      <h1
+        class="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-primary-100 tracking-tight"
+      >
+        Available Jobs
+      </h1>
+      <p class="text-primary-500 dark:text-primary-400 mt-1 italic">
+        Discover your next career move
+      </p>
+    </div>
+    <p-button
+      icon="pi pi-refresh"
+      [loading]="mainLoading()"
+      (onClick)="loadJobs()"
+      severity="secondary"
+      [rounded]="true"
+      label="Refresh"
+      styleClass="p-button-outlined border-primary-300 text-primary-700 dark:text-primary-300"
+    >
+    </p-button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+    @for (job of jobs(); track job.id) {
+    <div
+      class="bg-white dark:bg-primary-800 rounded-2xl shadow-xl flex flex-col justify-between transform hover:-translate-y-2 transition-transform duration-300 border-t-4 border-teal-500 overflow-hidden"
+    >
+      <div class="p-6">
+        <h2
+          class="text-2xl font-bold text-primary-800 dark:text-primary-200 mb-3 group-hover:text-teal-600 transition-colors"
+        >
+          {{ job.title }}
+        </h2>
+
+        <div class="text-primary-600 dark:text-primary-400 mb-4 space-y-2">
+          <p class="text-sm">
+            <span class="font-semibold text-primary-700 dark:text-primary-300">Reports to:</span>
+            {{ job.reportsTo }}
+          </p>
+          <p class="text-sm">
+            <span class="font-semibold text-primary-700 dark:text-primary-300"
+              >Minimum Experience:</span
+            >
+            {{ job.experience }} years
+          </p>
+        </div>
+
+        <div class="mb-4">
+          <h4
+            class="font-semibold text-primary-700 dark:text-primary-300 mb-2 border-b border-primary-300 dark:border-primary-400 pb-1 text-sm"
+          >
+            Responsibilities
+          </h4>
+          <ul
+            class="list-disc list-inside text-primary-600 dark:text-primary-400 space-y-1 mt-2 text-sm"
+          >
+            @for(resp of job.responsibilities.slice(0, 3); track $index) {
+            <li>{{ resp }}</li>
+            } @if(job.responsibilities.length > 3) {
+            <li class="text-primary-500 italic">...and more</li>
+            }
+          </ul>
+        </div>
+
+        <div class="mb-6">
+          <h4
+            class="font-semibold text-primary-700 dark:text-primary-300 mb-2 border-b border-primary-300 dark:border-primary-400 pb-1 text-sm"
+          >
+            Required Skills
+          </h4>
+          <div class="flex flex-wrap gap-2 mt-3">
+            @for(skill of job.requiredSkills; track $index) {
+            <p-tag
+              [value]="skill"
+              [rounded]="true"
+              styleClass="bg-teal-100 text-teal-800 border border-teal-200 dark:bg-teal-900/40 dark:text-teal-300 dark:border-teal-800 font-medium text-[11px]"
+            ></p-tag>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="p-6 bg-white dark:bg-primary-800/90 mt-auto border-t border-primary-300 dark:border-primary-500"
+      >
+        @if (hasApplied(job.id)) {
+        <p-button
+          label="Withdraw Application"
+          icon="pi pi-times-circle"
+          severity="danger"
+          styleClass="w-full font-bold py-3 transition duration-300 transform hover:scale-105"
+          [loading]="isLoading(job.id)"
+          (onClick)="withdraw(job.id)"
+        >
+        </p-button>
+        } @else {
+        <p-button
+          label="Apply Now"
+          icon="pi pi-pencil"
+          styleClass="w-full bg-teal-600 border-none font-bold py-3 transition duration-300 transform hover:scale-105"
+          (onClick)="goToApplyForm(job.id, job.title)"
+        >
+        </p-button>
+        }
+      </div>
+    </div>
+    } @empty {
+    <div
+      class="col-span-full text-center py-16 bg-white dark:bg-primary-800 rounded-2xl shadow-xl border border-primary-100 dark:border-primary-700"
+    >
+      <i class="pi pi-search text-4xl text-primary-400 mb-4 block"></i>
+      <h3 class="mt-2 text-xl font-semibold text-primary-900 dark:text-primary-100">
+        No jobs available
+      </h3>
+      <p class="mt-1 text-primary-500 dark:text-primary-400">
+        Please check back later for new opportunities.
+      </p>
+    </div>
+    }
+  </div>
+</div>

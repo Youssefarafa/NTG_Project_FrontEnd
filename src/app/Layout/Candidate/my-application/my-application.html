@@ -1,1 +1,487 @@
-<p>my-application works!</p>
+<p-toast></p-toast>
+
+<div class="max-w-4xl mx-auto p-4 sm:p-8">
+  @if (jobId() && jobTitle()) {
+  <div
+    class="bg-white dark:bg-primary-800 p-8 rounded-2xl shadow-2xl border border-primary-100 dark:border-primary-700"
+  >
+    <div class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-primary-100">
+        Apply for <span class="text-teal-600 dark:text-teal-400">{{ jobTitle() }}</span>
+      </h1>
+      <p class="text-primary-500 dark:text-primary-400 mt-2">
+        Please fill out the form below to submit your application.
+      </p>
+    </div>
+
+    <form
+      [formGroup]="applicationForm"
+      (ngSubmit)="submitApplication()"
+      class="space-y-8"
+      novalidate
+    >
+      <fieldset class="p-6 border border-primary-200 dark:border-primary-700 rounded-xl">
+        <legend
+          class="text-xl font-semibold text-primary-800 dark:text-primary-200 px-3 bg-white dark:bg-primary-800"
+        >
+          Personal Information
+        </legend>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1"
+              >First Name</label
+            >
+            <input
+              pInputText
+              type="text"
+              formControlName="firstName"
+              class="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-primary-700 dark:text-primary-100 dark:border-primary-600"
+            />
+            @if (isFieldInvalid('firstName')) {
+            <small class="text-red-500 font-medium animate-fade-in dark:text-red-400">
+              <i class="pi pi-times-circle text-xs"></i> First name is required (min 2 chars).
+            </small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1"
+              >Last Name</label
+            >
+            <input
+              pInputText
+              type="text"
+              formControlName="lastName"
+              class="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-primary-700 dark:text-primary-100 dark:border-primary-600"
+            />
+            @if (isFieldInvalid('lastName')) {
+            <small class="text-red-500 font-medium animate-fade-in dark:text-red-400">
+              <i class="pi pi-times-circle text-xs"></i> Last name is required (min 2 chars).
+            </small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1"
+              >Phone Number</label
+            >
+            <input
+              pInputText
+              type="text"
+              formControlName="phone"
+              class="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-primary-700 dark:text-primary-100 dark:border-primary-600"
+            />
+            @if (isFieldInvalid('phone')) {
+            <small class="text-red-500 font-medium animate-fade-in dark:text-red-400">
+              <i class="pi pi-times-circle text-xs"></i> Enter a valid Egyptian number (01...)
+            </small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1">Age</label>
+            <p-inputNumber
+              formControlName="age"
+              [min]="21"
+              [max]="45"
+              styleClass="w-full"
+              inputStyleClass="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg dark:bg-primary-700 dark:text-primary-100 dark:border-primary-600"
+            ></p-inputNumber>
+            @if (isFieldInvalid('age')) {
+            <small class="text-red-500 font-medium animate-fade-in dark:text-red-400">
+              <i class="pi pi-times-circle text-xs"></i> Age must be between 21 and 55.
+            </small>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="p-6 border border-primary-200 dark:border-primary-700 rounded-xl">
+        <legend
+          class="text-xl font-semibold text-primary-800 dark:text-primary-200 px-3 bg-white dark:bg-primary-800"
+        >
+          Education
+        </legend>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1"
+              >University</label
+            >
+            <input
+              pInputText
+              formControlName="university"
+              class="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg dark:bg-primary-700 dark:text-primary-100"
+            />
+            @if (isFieldInvalid('university')) {
+            <small class="text-red-500 font-medium dark:text-red-400"
+              ><i class="pi pi-times-circle text-xs"></i> University is required.</small
+            >
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1">Faculty</label>
+            <input
+              pInputText
+              formControlName="faculty"
+              class="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg dark:bg-primary-700 dark:text-primary-100"
+            />
+            @if (isFieldInvalid('faculty')) {
+            <small class="text-red-500 font-medium dark:text-red-400"
+              ><i class="pi pi-times-circle text-xs"></i> Faculty is required.</small
+            >
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1"
+              >Department</label
+            >
+            <input
+              pInputText
+              formControlName="department"
+              class="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg dark:bg-primary-700 dark:text-primary-100"
+            />
+            @if (isFieldInvalid('department')) {
+            <small class="text-red-500 font-medium dark:text-red-400"
+              ><i class="pi pi-times-circle text-xs"></i> Department is required.</small
+            >
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-primary-700 dark:text-primary-300 font-semibold mb-1"
+              >Graduation Year</label
+            >
+            <p-inputNumber
+              formControlName="graduationYear"
+              [useGrouping]="false"
+              [min]="1990"
+              [max]="currentYear"
+              styleClass="w-full"
+              inputStyleClass="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg dark:bg-primary-700 dark:text-primary-100"
+            ></p-inputNumber>
+            @if (isFieldInvalid('graduationYear')) {
+            <small class="text-red-500 font-medium dark:text-red-400"
+              ><i class="pi pi-times-circle text-xs"></i> Graduation year is required.</small
+            >
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset
+        class="p-6 border border-primary-200 dark:border-primary-700 rounded-xl"
+        formArrayName="workExperience"
+      >
+        <div class="flex justify-between items-center mb-4 px-2">
+          <legend
+            class="text-xl font-semibold text-primary-800 dark:text-primary-200 bg-white dark:bg-primary-800"
+          >
+            Work Experience (Optional)
+          </legend>
+          <button
+            type="button"
+            (click)="addExperience()"
+            class="text-teal-600 font-bold hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-500 text-sm flex items-center gap-1"
+          >
+            <i class="pi pi-plus-circle"></i> Add Experience
+          </button>
+        </div>
+
+        <div class="space-y-6 mt-4">
+          @for(exp of workExperience.controls; track $index) {
+          <div
+            [formGroupName]="$index"
+            class="p-6 bg-primary-50 dark:bg-primary-700/30 rounded-lg relative border-l-4 border-teal-500"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                <label
+                  class="block text-primary-700 dark:text-primary-300 font-semibold mb-2 text-sm"
+                  >Job Title</label
+                >
+                <input
+                  pInputText
+                  formControlName="jobTitle"
+                  class="w-full px-4 py-2 border bg-white dark:bg-primary-600 rounded-lg dark:text-primary-100"
+                  [class.border-red-500]="isExperienceFieldInvalid($index, 'jobTitle')"
+                />
+                @if (isExperienceFieldInvalid($index, 'jobTitle')) {
+                <small class="text-red-500 text-xs">Job title is required.</small>
+                }
+              </div>
+
+              <div>
+                <label
+                  class="block text-primary-700 dark:text-primary-300 font-semibold mb-2 text-sm"
+                  >Company Name</label
+                >
+                <input
+                  pInputText
+                  formControlName="companyName"
+                  class="w-full px-4 py-2 border bg-white dark:bg-primary-600 rounded-lg dark:text-primary-100"
+                  [class.border-red-500]="isExperienceFieldInvalid($index, 'companyName')"
+                />
+                @if (isExperienceFieldInvalid($index, 'companyName')) {
+                <small class="text-red-500 text-xs">Company name is required.</small>
+                }
+              </div>
+
+              <div>
+                <label
+                  class="block text-primary-700 dark:text-primary-300 font-semibold mb-2 text-sm"
+                  >Start Date</label
+                >
+                <p-datepicker
+                  formControlName="startDate"
+                  [maxDate]="maxDate"
+                  appendTo="body"
+                  styleClass="w-full"
+                  inputStyleClass="w-full px-4 py-2 border bg-white dark:bg-primary-600 rounded-lg dark:text-primary-100"
+                  [class.ng-invalid]="isExperienceFieldInvalid($index, 'startDate')"
+                ></p-datepicker>
+                @if (isExperienceFieldInvalid($index, 'startDate') &&
+                exp.get('startDate')?.errors?.['required']) {
+                <small class="text-red-500 text-xs">Required.</small>
+                }
+              </div>
+
+              <div>
+                <label
+                  class="block text-primary-700 dark:text-primary-300 font-semibold mb-2 text-sm"
+                  >End Date</label
+                >
+                <p-datepicker
+                  formControlName="endDate"
+                  [maxDate]="maxDate"
+                  appendTo="body"
+                  styleClass="w-full"
+                  inputStyleClass="w-full px-4 py-2 border bg-white dark:bg-primary-600 rounded-lg dark:text-primary-100"
+                  [class.ng-invalid]="isExperienceFieldInvalid($index, 'endDate')"
+                ></p-datepicker>
+                @if (isExperienceFieldInvalid($index, 'endDate') &&
+                exp.get('endDate')?.errors?.['required']) {
+                <small class="text-red-500 text-xs">Required.</small>
+                }
+              </div>
+
+              <div class="col-span-1 sm:col-span-2">
+                <label
+                  class="block text-primary-700 dark:text-primary-300 font-semibold mb-2 text-sm"
+                  >Key Achievements</label
+                >
+                <textarea
+                  pTextarea
+                  formControlName="achievements"
+                  [rows]="3"
+                  [autoResize]="true"
+                  class="w-full px-4 py-2 border bg-white dark:bg-primary-600 rounded-lg dark:text-primary-100 focus:ring-2 focus:ring-teal-500"
+                  [class.border-red-500]="isExperienceFieldInvalid($index, 'achievements')"
+                  placeholder="Briefly describe your main responsibilities and notable results..."
+                ></textarea>
+                <div class="flex justify-between mt-1">
+                  @if (isExperienceFieldInvalid($index, 'achievements')) {
+                  <small class="text-red-500 text-xs"
+                    >Please share some achievements in max 500 character.</small
+                  >
+                  }
+                  <small class="text-primary-400 text-xs ml-auto">
+                    {{ exp.get('achievements')?.value?.length || 0 }}/500
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            @if (exp.touched && exp.errors?.['dateRangeError']) {
+            <div class="mt-3 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200">
+              <small class="text-red-600 dark:text-red-400 block font-medium">
+                <i class="pi pi-exclamation-triangle"></i> End Date must be a date after the Start
+                Date.
+              </small>
+            </div>
+            }
+
+            <button
+              type="button"
+              (click)="removeExperience($index)"
+              class="absolute top-2 right-2 text-red-500 hover:text-red-700"
+            >
+              <i class="pi pi-times-circle text-xl"></i>
+            </button>
+          </div>
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="p-6 border border-primary-200 dark:border-primary-700 rounded-xl">
+        <legend
+          class="text-xl font-semibold text-primary-800 dark:text-primary-200 px-3 bg-white dark:bg-primary-800"
+        >
+          Internal Reference
+        </legend>
+        <div class="mt-4">
+          <label class="block text-primary-700 dark:text-primary-300 font-semibold mb-4"
+            >Do you have an internal reference?</label
+          >
+          <div class="flex items-center gap-8 mb-6">
+            <div class="flex items-center gap-2">
+              <p-radioButton
+                [value]="true"
+                formControlName="hasInternalReference"
+                inputId="ref-yes"
+              ></p-radioButton>
+              <label for="ref-yes" class="cursor-pointer text-primary-700 dark:text-primary-300"
+                >Yes</label
+              >
+            </div>
+            <div class="flex items-center gap-2">
+              <p-radioButton
+                [value]="false"
+                formControlName="hasInternalReference"
+                inputId="ref-no"
+              ></p-radioButton>
+              <label for="ref-no" class="cursor-pointer text-primary-700 dark:text-primary-300"
+                >No</label
+              >
+            </div>
+          </div>
+
+          @if (applicationForm.get('hasInternalReference')?.value) {
+          <div
+            class="space-y-4 pt-4 border-t dark:border-primary-700"
+            formArrayName="internalReferees"
+          >
+            @for (ref of internalReferees.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="flex flex-col gap-1">
+              <div class="flex items-start gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                  <div class="flex flex-col gap-1">
+                    <input
+                      pInputText
+                      formControlName="name"
+                      placeholder="Referee's Full Name"
+                      class="w-full px-4 py-2 border dark:bg-primary-600 dark:text-primary-100 rounded-lg"
+                    />
+                    @if (isRefereeFieldInvalid(i, 'name')) {
+                    <small class="text-red-500 text-xs font-medium dark:text-red-400"
+                      >Name is required.</small
+                    >
+                    }
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <input
+                      pInputText
+                      formControlName="email"
+                      placeholder="Referee's Email"
+                      class="w-full px-4 py-2 border dark:bg-primary-600 dark:text-primary-100 rounded-lg"
+                    />
+                    @if (isRefereeFieldInvalid(i, 'email')) {
+                    <small class="text-red-500 text-xs font-medium dark:text-red-400"
+                      >Valid email required.</small
+                    >
+                    }
+                  </div>
+                </div>
+                @if (internalReferees.controls.length > 1) {
+                <button type="button" (click)="removeReferee(i)" class="text-red-500 pt-2">
+                  <i class="pi pi-minus-circle text-xl"></i>
+                </button>
+                }
+              </div>
+            </div>
+            }
+            <button
+              type="button"
+              (click)="addReferee()"
+              class="mt-2 text-teal-600 font-bold text-sm"
+            >
+              + Add Another
+            </button>
+          </div>
+          }
+        </div>
+      </fieldset>
+
+      <fieldset
+        class="p-6 border-2 border-dashed border-teal-200 dark:border-primary-700 rounded-xl bg-primary-50/50 dark:bg-primary-800/50"
+      >
+        <div class="flex flex-col gap-3">
+          <label class="text-primary-800 dark:text-primary-200 font-bold flex items-center gap-2">
+            <i class="pi pi-link text-teal-600"></i> CV Google Drive Link
+          </label>
+          <div class="relative">
+            <input
+              pInputText
+              type="url"
+              formControlName="cvLink"
+              placeholder="https://drive.google.com/file/d/..."
+              class="w-full px-4 py-3 border bg-white border-primary-300 text-primary-900 rounded-lg focus:ring-2 focus:ring-teal-500 dark:bg-primary-700 dark:text-primary-100 dark:border-primary-600"
+              [class.border-red-500]="isFieldInvalid('cvLink')"
+            />
+          </div>
+          @if (isFieldInvalid('cvLink')) {
+          <small class="text-red-500 font-medium animate-fade-in">
+            @if (applicationForm.get('cvLink')?.errors?.['required']) {
+            <i class="pi pi-times-circle text-xs"></i> CV link is required. } @else {
+            <i class="pi pi-info-circle text-xs"></i> Please enter a valid URL. }
+          </small>
+          }
+          <p class="text-xs text-primary-500 dark:text-primary-400 italic">
+            <i class="pi pi-info-circle"></i> Make sure the link is shared as "Anyone with the link
+            can view".
+          </p>
+        </div>
+      </fieldset>
+
+      @if (areMainFieldsTouched && applicationForm.errors) {
+      <div class="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-lg animate-fade-in">
+        <h4 class="text-amber-800 font-bold mb-1 flex items-center gap-2">
+          <i class="pi pi-exclamation-triangle"></i> Logical Consistency Check
+        </h4>
+        <ul class="list-disc list-inside text-amber-700 text-sm space-y-1">
+          @if (applicationForm.hasError('invalidGradAge')) {
+          <li>
+            The graduation year is inconsistent with your age (Minimum age for graduation is 20).
+          </li>
+          } @if (applicationForm.hasError('expBeforeGrad')) {
+          <li>Work experience cannot start before your graduation year.</li>
+          }
+        </ul>
+      </div>
+      }
+
+      <div
+        class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t dark:border-primary-700"
+      >
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          [text]="true"
+          routerLink="/candidate/availableJobs"
+          styleClass="px-8 font-bold"
+        ></p-button>
+        <p-button
+          type="submit"
+          label="Submit Application"
+          icon="pi pi-send"
+          [loading]="isSubmitting()"
+          [disabled]="applicationForm.invalid"
+          styleClass="bg-teal-600 border-none px-10 py-4 rounded-xl shadow-lg transition-all"
+        ></p-button>
+      </div>
+    </form>
+  </div>
+  } @else {
+  <div class="text-center py-20 bg-white dark:bg-primary-800 rounded-2xl shadow-xl">
+    <i class="pi pi-search text-5xl text-primary-300 mb-4 block"></i>
+    <h3 class="text-2xl font-bold text-primary-700 dark:text-primary-300">Job not found.</h3>
+    <a
+      routerLink="/candidate/availableJobs"
+      class="mt-4 inline-block text-teal-600 font-bold hover:underline"
+    >
+      Return to Jobs List
+    </a>
+  </div>
+  }
+</div>

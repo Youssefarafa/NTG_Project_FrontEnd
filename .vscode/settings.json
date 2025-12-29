@@ -1,10 +1,15 @@
 {
     "cSpell.words": [
+        "Arafa",
+        "datatable",
+        "dataview",
         "dropdownicon",
+        "emptymessage",
         "fontawesome",
         "Hassan",
         "iconfield",
         "inputicon",
+        "inputnumber",
         "inputtext",
         "Maneger",
         "maxlength",
@@ -13,8 +18,10 @@
         "primeng",
         "primeui",
         "primeuix",
+        "radiobutton",
         "recruitsys",
         "toastr",
-        "toggleable"
+        "toggleable",
+        "Youssef"
     ]
 }

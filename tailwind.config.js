@@ -3,6 +3,12 @@ module.exports = {
   content: ['./src/**/*.{html,ts}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+      },
+      letterSpacing: {
+        tightest: '-.05em',
+      },
       colors: {
         primary: {
           50: 'rgb(var(--primary-50) / <alpha-value>)',

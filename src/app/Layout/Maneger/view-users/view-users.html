@@ -1,1 +1,121 @@
-<p>view-users works!</p>
+<p-toast></p-toast>
+
+<div class="max-w-7xl mx-auto p-4 sm:p-8">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-teal-800 dark:text-teal-200">
+      Registered Candidates
+    </h1>
+    <a
+      routerLink="/manager"
+      class="w-full sm:w-auto text-center bg-teal-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-teal-700 transition duration-300 shadow-lg"
+    >
+      &larr; Back to Dashboard
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-teal-700 dark:text-teal-300 ml-1"
+        >Search by Name</label
+      >
+      <p-iconField iconPosition="left">
+        <p-inputIcon styleClass="pi pi-user"></p-inputIcon>
+        <input
+          type="text"
+          pInputText
+          placeholder="Candidate name..."
+          (input)="onNameSearch($event)"
+          class="w-full rounded-xl border-teal-200 dark:border-teal-700 bg-white dark:bg-teal-950 text-teal-900 dark:text-teal-100"
+        />
+      </p-iconField>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold text-teal-700 dark:text-teal-300 ml-1"
+        >Search by Email</label
+      >
+      <p-iconField iconPosition="left">
+        <p-inputIcon styleClass="pi pi-envelope"></p-inputIcon>
+        <input
+          type="text"
+          pInputText
+          placeholder="Email address..."
+          (input)="onEmailSearch($event)"
+          class="w-full rounded-xl border-teal-200 dark:border-teal-700 bg-white dark:bg-teal-950 text-teal-900 dark:text-teal-100"
+        />
+      </p-iconField>
+    </div>
+  </div>
+
+  <div
+    class="hidden lg:block shadow-2xl rounded-2xl overflow-hidden border border-teal-100 dark:border-teal-700"
+  >
+    <p-table
+      [value]="filteredCandidates()"
+      [rows]="10"
+      [paginator]="true"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      responsiveLayout="scroll"
+      [paginatorDropdownAppendTo]="'body'"
+      styleClass="p-datatable-sm custom-table"
+    >
+      <ng-template pTemplate="header">
+        <tr class="bg-teal-50/50 dark:bg-teal-900/20">
+          <th pSortableColumn="id" class="py-4 px-6">ID <p-sortIcon field="id"></p-sortIcon></th>
+          <th pSortableColumn="name" class="py-4 px-6">
+            Full Name <p-sortIcon field="name"></p-sortIcon>
+          </th>
+          <th pSortableColumn="email" class="py-4 px-6">
+            Email Address <p-sortIcon field="email"></p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr
+          class="border-b border-teal-50 dark:border-teal-900/50 hover:bg-teal-50/30 dark:hover:bg-teal-900/10"
+        >
+          <td class="py-4 px-6 font-mono text-sm text-teal-600">#{{ user.id }}</td>
+          <td class="py-4 px-6 font-bold text-teal-900 dark:text-white">{{ user.name }}</td>
+          <td class="py-4 px-6">{{ user.email }}</td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="3" class="text-center py-10 text-slate-500">
+            No candidates found matching your search.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="lg:hidden">
+    <p-dataView [value]="filteredCandidates()" [paginator]="true" [rows]="5">
+      <ng-template #list let-items>
+        <div class="flex flex-col gap-6">
+          @for (user of items; track user.id) {
+          <div
+            class="bg-white dark:bg-teal-950 p-6 rounded-2xl shadow-lg border border-teal-100 dark:border-teal-800"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xl font-bold text-teal-900 dark:text-teal-50">{{ user.name }}</span>
+              <span class="bg-teal-100 dark:bg-teal-900/70 text-teal-900 dark:text-teal-300 text-[14px] px-2 py-0.5 rounded-full border border-teal-100 dark:border-teal-800">
+                ID: {{user.id}}
+              </span>
+            </div>
+            <p class="text-teal-600 dark:text-teal-400">
+              <i class="pi pi-envelope mr-2"></i>{{ user.email }}
+            </p>
+          </div>
+          } @empty {
+          <div class="text-center py-10 bg-white dark:bg-teal-950 rounded-2xl">
+            <p class="text-slate-500">No candidates found.</p>
+          </div>
+          }
+        </div>
+      </ng-template>
+    </p-dataView>
+  </div>
+</div>

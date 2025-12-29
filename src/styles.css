@@ -336,4 +336,10 @@
     --p-text-color-secondary: rgb(var(--text-color-secondary));
     --p-text-muted-color: rgb(var(--text-muted));
   }
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 }
