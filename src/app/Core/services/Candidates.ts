@@ -10,7 +10,7 @@ export class Candidates {
   private http = inject(HttpClient);
 
 
-  // البيانات الوهمية (Mock Data)
+  // (Mock Data)
   private candidatesList = signal<Candidate[]>([
     { id: 'C001', name: 'Ahmed Ali', email: 'ahmed.ali@example.com', registrationDate: new Date('2023-10-01') },
     { id: 'C002', name: 'Sara Hassan', email: 'sara.h@example.com', registrationDate: new Date('2023-11-15') },

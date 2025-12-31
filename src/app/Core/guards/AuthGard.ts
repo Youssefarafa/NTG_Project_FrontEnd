@@ -19,7 +19,7 @@ export const verifiedGuard: CanActivateFn = () => {
   const auth = inject(Auth);
   const router = inject(Router);
 
-  if (auth.isAuthenticated() && auth.user()?.isVerified) {
+  if (auth.isAuthenticated() && (auth.user()?.isVerified || !auth.isOtpEnabled())) {
     return true;
   }
   router.navigate(['/verify-account']);
@@ -45,8 +45,8 @@ export const loginGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (auth.isAuthenticated()) {
-    const user = auth.user();
-    if (user?.role === 'Manager') {
+    const role = auth.role();
+    if (role === 'Manager') {
       router.navigate(['/manager/dashboard']);
     } else {
       router.navigate(['/candidate/availableJobs']);

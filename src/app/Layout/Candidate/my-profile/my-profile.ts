@@ -1,15 +1,13 @@
-import { Component, signal, inject, OnInit, DestroyRef } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   AbstractControl,
   ValidationErrors,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { Profile } from '../../../Core/services/Profile';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // PrimeNG Imports
 import { MessageService } from 'primeng/api';
@@ -17,6 +15,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
+import { DatePickerModule } from 'primeng/datepicker';
+import { InputMaskModule } from 'primeng/inputmask';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { Auth } from '../../../Core/services/auth';
 
 @Component({
   selector: 'app-my-profile',
@@ -24,6 +26,9 @@ import { ToastModule } from 'primeng/toast';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    InputMaskModule,
+    InputNumberModule,
+    DatePickerModule,
     InputTextModule,
     PasswordModule,
     ButtonModule,
@@ -35,29 +40,32 @@ import { ToastModule } from 'primeng/toast';
 })
 export class MyProfile implements OnInit {
   private fb = inject(FormBuilder);
-  private profileService = inject(Profile);
+  private authService = inject(Auth);
   private messageService = inject(MessageService);
-  private destroyRef = inject(DestroyRef);
+  private cdRef = inject(ChangeDetectorRef);
 
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
 
   isSubmittingProfile = signal(false);
   isSubmittingPassword = signal(false);
-  isLoadingData = signal(true);
+  isLoadingData = signal(false);
 
   ngOnInit() {
     this.initForms();
-    this.fetchUserProfile();
+    this.loadInitialData();
   }
 
   private initForms() {
     this.profileForm = this.fb.group({
-      name: [
-        '',
-        [Validators.required, Validators.minLength(6), Validators.pattern(/^[a-zA-Z\s]*$/)],
-      ],
+      fullName: [{ value: '', disabled: true }, Validators.required],
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
+      birthDate: [null, [Validators.required]],
+      university: ['', Validators.required],
+      faculty: ['', Validators.required],
+      department: ['', Validators.required],
+      graduationYear: [null, [Validators.required, Validators.min(1990), Validators.max(2026)]],
     });
 
     this.passwordForm = this.fb.group(
@@ -75,35 +83,22 @@ export class MyProfile implements OnInit {
       },
       { validators: this.passwordMatchValidator }
     );
-
-    this.passwordForm.get('currentPassword')?.valueChanges.subscribe(() => {
-      if (this.passwordForm.get('currentPassword')?.hasError('serverError')) {
-        this.passwordForm.get('currentPassword')?.setErrors(null);
-      }
-    });
   }
 
-  private fetchUserProfile() {
-    this.profileService
-      .getProfile()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.profileForm.patchValue({
-            name: data.name,
-            email: data.email,
-          });
-          this.isLoadingData.set(false);
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Could not load profile data',
-          });
-          this.isLoadingData.set(false);
-        },
+  private loadInitialData() {
+    const currentUser = this.authService.user();
+    if (currentUser) {
+      this.profileForm.patchValue({
+        fullName: currentUser.fullName,
+        email: currentUser.email,
+        phone: currentUser.phone,
+        birthDate: currentUser.birthDate ? new Date(currentUser.birthDate) : null,
+        university: currentUser.university,
+        faculty: currentUser.faculty,
+        department: currentUser.department,
+        graduationYear: currentUser.graduationYear,
       });
+    }
   }
 
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -112,48 +107,52 @@ export class MyProfile implements OnInit {
     return newPass === confirmPass ? null : { passwordMismatch: true };
   }
 
-  isFieldInvalid(form: FormGroup, fieldName: string): boolean {
-    const field = form.get(fieldName);
-    return !!(field && field.invalid && field.touched);
-  }
-
-  allPasswordFieldsFilled(): boolean {
-    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
-    return !!(currentPassword?.trim() && newPassword?.trim() && confirmPassword?.trim());
+  isFieldInvalid(fieldName: string): boolean {
+    const control = this.profileForm.get(fieldName);
+    return !!(control && control.invalid && (control.touched || control.dirty));
   }
 
   shouldShowFieldError(fieldName: string): boolean {
-    const field = this.passwordForm.get(fieldName);
-    if (field?.hasError('serverError')) return true;
-    if (!this.allPasswordFieldsFilled()) return false;
+    const control = this.passwordForm.get(fieldName);
+    if (!control) return false;
 
-    return !!(field && field.invalid && field.touched);
-  }
-
-  getInputStyleClass(fieldName: string): string {
-    const baseClasses = '!w-full !px-4 !py-3 !border !rounded-lg !transition-colors !duration-200';
-
-    if (this.shouldShowFieldError(fieldName)) {
-      return `${baseClasses} !border-red-500 !bg-red-50 !text-red-900 focus:ring-red-500`;
+    if (fieldName === 'confirmPassword') {
+      return !!(
+        control.touched &&
+        (control.invalid || this.passwordForm.hasError('passwordMismatch'))
+      );
     }
 
-    return `${baseClasses} !border-teal-500 !bg-teal-50 !text-gray-900 focus:ring-teal-500`;
+    return !!(control.invalid && (control.touched || control.hasError('serverError')));
   }
 
+  getSharedInputClass(): string {
+    return 'w-full px-4 py-3 border rounded-lg transition-colors duration-200 text-sm';
+  }
+
+  onFieldBlur(form: FormGroup, fieldName: string) {
+    form.get(fieldName)?.markAsTouched();
+    this.cdRef.markForCheck();
+  }
+
+  // --- Actions ---
   updateProfile() {
     if (this.profileForm.valid) {
       this.isSubmittingProfile.set(true);
-      this.profileService.updateProfile(this.profileForm.getRawValue()).subscribe({
-        next: () => {
+      this.authService.updateProfile(this.profileForm.getRawValue()).subscribe({
+        next: (res) => {
           this.messageService.add({
             severity: 'success',
             summary: 'Success',
-            detail: 'Profile updated',
+            detail: res.message || 'Profile updated',
           });
           this.profileForm.markAsPristine();
           this.isSubmittingProfile.set(false);
         },
-        error: () => this.isSubmittingProfile.set(false),
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
+          this.isSubmittingProfile.set(false);
+        },
       });
     }
   }
@@ -161,32 +160,19 @@ export class MyProfile implements OnInit {
   changePassword() {
     if (this.passwordForm.valid) {
       this.isSubmittingPassword.set(true);
-      this.profileService
-        .changePassword({
-          currentPassword: this.passwordForm.value.currentPassword,
-          newPassword: this.passwordForm.value.newPassword
-        })
-        .subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: 'Password changed successfully',
-            });
-            this.passwordForm.reset();
-            this.isSubmittingPassword.set(false);
-          },
-          error: (err) => {
-            this.isSubmittingPassword.set(false);
-            this.passwordForm.get('currentPassword')?.setErrors({ serverError: true });
-
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Authentication Error',
-              detail: err.error?.message || 'The current password you entered is incorrect',
-            });
-          },
-        });
+      const { currentPassword, newPassword } = this.passwordForm.value;
+      this.authService.changePassword({ currentPassword, newPassword }).subscribe({
+        next: (res) => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: res.message });
+          this.passwordForm.reset();
+          this.isSubmittingPassword.set(false);
+        },
+        error: (err) => {
+          this.passwordForm.get('currentPassword')?.setErrors({ serverError: true });
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
+          this.isSubmittingPassword.set(false);
+        },
+      });
     }
   }
 }

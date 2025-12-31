@@ -1,0 +1,178 @@
+<div class="container mx-auto px-5 py-8 max-w-6xl">
+  <div class="mb-8 flex items-center justify-between">
+    <button
+      routerLink="/manager/dashboard"
+      class="flex items-center text-primary-500 hover:text-primary-800 dark:text-primary-400 font-bold transition-all text-sm group"
+    >
+      <i class="pi pi-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Back to
+      Dashboard
+    </button>
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-bold text-primary-400">Process ID: {{ processId() }}</span>
+      <span
+        class="px-4 py-1.5 bg-primary-950 text-white dark:bg-primary-100 dark:text-primary-950 rounded-full text-[10px] font-black uppercase tracking-widest"
+      >
+        Completed Process
+      </span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div class="lg:col-span-1 space-y-4">
+      <h3
+        class="text-sm font-black text-primary-900 dark:text-primary-100 uppercase tracking-widest px-2"
+      >
+        Candidates
+      </h3>
+      <div class="flex flex-col gap-2">
+        @for (c of candidatesList(); track c.id) {
+        <button
+          (click)="selectCandidate(c.id)"
+          [class.border-teal-500]="selectedApplication()?.applicantName === c.name"
+          [class.bg-white]="selectedApplication()?.applicantName === c.name"
+          class="flex items-center gap-3 p-3 rounded-xl border-2 border-transparent hover:border-primary-200 bg-primary-50/50 dark:bg-primary-800/50 transition-all text-left group"
+        >
+          <div
+            class="w-8 h-8 rounded-full bg-primary-200 dark:bg-primary-700 flex items-center justify-center text-xs font-bold text-primary-700 dark:text-primary-300"
+          >
+            {{ c.name.charAt(0) }}
+          </div>
+          <div class="overflow-hidden">
+            <p class="text-xs font-bold text-primary-900 dark:text-white truncate">{{ c.name }}</p>
+            <p class="text-[10px] text-primary-400 truncate">{{ c.email }}</p>
+          </div>
+        </button>
+        }
+      </div>
+    </div>
+
+    <div class="lg:col-span-3">
+      @if (isLoading()) {
+      <div class="flex flex-col items-center justify-center py-20 space-y-4">
+        <i class="pi pi-spin pi-spinner text-4xl text-teal-600"></i>
+        <p class="text-primary-400 font-bold animate-pulse">Loading candidate details...</p>
+      </div>
+      } @else if (selectedApplication()) {
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 animate-fade-in">
+        <div class="xl:col-span-1 space-y-6">
+          <div
+            class="bg-white dark:bg-primary-800 border border-primary-100 dark:border-primary-700 rounded-3xl p-6 shadow-sm"
+          >
+            <div class="flex flex-col items-center text-center">
+              <div
+                class="w-24 h-24 bg-primary-100 dark:bg-primary-700 rounded-full flex items-center justify-center text-3xl font-black text-primary-600 dark:text-primary-300 mb-4 border-4 border-white dark:border-primary-900 shadow-xl"
+              >
+                {{ selectedApplication()?.applicantName?.charAt(0) }}
+              </div>
+              <h2 class="text-xl font-black text-primary-950 dark:text-white leading-tight">
+                {{ selectedApplication()?.applicantName }}
+              </h2>
+            </div>
+
+            <div class="mt-8 space-y-4 border-t border-primary-50 dark:border-primary-700/50 pt-6">
+              <div class="flex items-center gap-3">
+                <i class="pi pi-phone text-teal-600"></i>
+                <span class="text-sm font-bold text-primary-700 dark:text-primary-300">{{
+                  selectedApplication()?.phone
+                }}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <i class="pi pi-file-pdf text-teal-600"></i>
+                <span class="text-sm font-bold text-primary-700 dark:text-primary-300 truncate">{{
+                  selectedApplication()?.cvFile
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          @if (selectedApplication()?.hasInternalReference) {
+          <div
+            class="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-100 dark:border-emerald-800 p-4 rounded-2xl"
+          >
+            <h5
+              class="text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase mb-2"
+            >
+              Reference
+            </h5>
+            @for (ref of selectedApplication()?.internalReferees; track ref.email) {
+            <p class="text-sm font-bold text-primary-900 dark:text-primary-100">{{ ref.name }}</p>
+            }
+          </div>
+          }
+        </div>
+
+        <div class="xl:col-span-2 space-y-6">
+          <div
+            class="bg-white dark:bg-primary-800 border border-primary-100 dark:border-primary-700 rounded-3xl p-8 shadow-sm"
+          >
+            <h3
+              class="text-lg font-black text-primary-950 dark:text-white mb-6 flex items-center gap-2"
+            >
+              <i class="pi pi-book text-primary-400"></i> Education
+            </h3>
+            <div class="grid grid-cols-2 gap-y-6">
+              <div>
+                <p class="text-[10px] font-black text-primary-400 uppercase tracking-widest">
+                  University
+                </p>
+                <p class="font-bold text-primary-800 dark:text-primary-100">
+                  {{ selectedApplication()?.university }}
+                </p>
+              </div>
+              <div>
+                <p class="text-[10px] font-black text-primary-400 uppercase tracking-widest">
+                  Graduation
+                </p>
+                <p class="font-bold text-primary-800 dark:text-primary-100">
+                  {{ selectedApplication()?.graduationYear }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white dark:bg-primary-800 border border-primary-100 dark:border-primary-700 rounded-3xl p-8 shadow-sm"
+          >
+            <h3
+              class="text-lg font-black text-primary-950 dark:text-white mb-6 flex items-center gap-2"
+            >
+              <i class="pi pi-briefcase text-primary-400"></i> Work Experience
+            </h3>
+            <div
+              class="space-y-8 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-primary-50 dark:before:bg-primary-700"
+            >
+              @for (exp of selectedApplication()?.workExperience; track exp.companyName) {
+              <div class="relative pl-10 group">
+                <div
+                  class="absolute left-0 top-1.5 w-6 h-6 bg-white dark:bg-primary-800 border-2 border-primary-200 dark:border-primary-600 rounded-full group-hover:border-teal-500 transition-colors z-10 flex items-center justify-center"
+                >
+                  <div
+                    class="w-2 h-2 bg-primary-200 dark:bg-primary-600 rounded-full group-hover:bg-teal-500 transition-colors"
+                  ></div>
+                </div>
+                <div class="flex justify-between mb-1">
+                  <h4 class="font-black text-primary-900 dark:text-white">{{ exp.jobTitle }}</h4>
+                  <span
+                    class="text-[9px] font-bold px-2 py-0.5 bg-primary-50 dark:bg-primary-900 text-primary-500 rounded uppercase"
+                  >
+                    {{ exp.startDate | date : 'MMM yyyy' }} - {{ exp.endDate | date : 'MMM yyyy' }}
+                  </span>
+                </div>
+                <p class="text-xs font-bold text-teal-700 dark:text-teal-400 mb-2">
+                  {{ exp.companyName }}
+                </p>
+                <p
+                  class="text-[11px] text-primary-500 dark:text-primary-400 leading-relaxed italic bg-primary-50/50 dark:bg-primary-900/30 p-3 rounded-xl border border-primary-50 dark:border-primary-700/50"
+                >
+                  "{{ exp.achievements }}"
+                </p>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>

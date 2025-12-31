@@ -57,7 +57,6 @@ export class AvailableJobs implements OnInit {
   }
 
   goToApplyForm(jobId: string, jobTitle: string) {
-    console.log('Navigating to job:', jobTitle);
     this.router.navigate(['/candidate/myApplication', jobId], {
       queryParams: { title: jobTitle },
     });
@@ -65,7 +64,6 @@ export class AvailableJobs implements OnInit {
 
   withdraw(jobId: string) {
     if (this.actionLoading()[jobId]) return;
-
     this.toggleActionLoading(jobId, true);
     this.jobService
       .withdrawJob(jobId)

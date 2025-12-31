@@ -1,14 +1,16 @@
 export interface User {
-  id?: number;
+  id: string;
   fullName: string;
   email: string;
-  role?: 'Manager' | 'Candidate';
-  isVerified?: boolean;
-  avatar?: string;
-  phone?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  permissions?: string[];
+  phone: string;
+  birthDate?: string | Date; 
+  university: string;
+  faculty: string;
+  department: string;
+  graduationYear: number;
+  role: string; // 'Manager' | 'Candidate'
+  isVerified: boolean;
+  token?: string; 
 }
 
 export interface RegisterData {
@@ -52,9 +54,10 @@ export interface OtpResponse {
 
 export interface RefreshResponse {
   success: boolean;
-  token?: string;
+  token: string;      
+  refreshToken?: string; 
   user?: User;
-  expiresIn?: number;
+  expiresIn?: number;  
 }
 
 export interface AuthState {

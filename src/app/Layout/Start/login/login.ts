@@ -47,11 +47,12 @@ export class Login {
   private readonly messageService = inject(MessageService);
 
   readonly isLoading = this.auth.isLoading;
+  readonly isRememberMeEnabled = this.auth.isRememberMeEnabled;
 
   loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(50)]),
     password: new FormControl('', [Validators.required]),
-    rememberMe: new FormControl(false),
+    rememberMe: new FormControl(false), 
   });
 
   passwordVisible = false;
@@ -86,30 +87,33 @@ export class Login {
 
   onSubmit() {
     this.isSubmitted = true;
+
     if (this.loginForm.invalid) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
         detail: 'Please check your inputs',
       });
+      this.loginForm.markAllAsTouched();
       return;
     }
 
     const loginData: LoginData = {
       email: this.f.email.value!,
       password: this.f.password.value!,
-      rememberMe: this.f.rememberMe.value || false,
+      rememberMe: this.isRememberMeEnabled() ? this.f.rememberMe.value || false : false,
     };
 
     this.auth.login(loginData).subscribe({
       next: (res) => {
-        if (res.requiresOtp) {
-          this.messageService.add({
-            severity: 'info',
-            summary: 'Verification',
-            detail: 'OTP required',
-          });
-          this.router.navigate(['/confirm-email']);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Login processing...', 
+        });
+
+        if (!!res.requiresOtp && this.auth.isOtpEnabled()) {
+          this.router.navigate(['/verify-account']);
         }
       },
       error: (err) => {

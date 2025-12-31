@@ -1,1 +1,298 @@
-<p>add-process works!</p>
+<p-toast></p-toast>
+
+<div
+  class="max-w-4xl lg:mx-auto bg-white dark:bg-primary-800 p-6 sm:p-8 rounded-2xl shadow-2xl transition-colors duration-300 mt-10 !mb-10 mx-7"
+>
+  <div class="text-center mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-primary-100">
+      Create New Hiring Process
+    </h1>
+    <p class="text-primary-500 dark:text-primary-400 mt-2">
+      Select a job, choose candidates, and provide a test link to begin the assessment.
+    </p>
+  </div>
+
+  <form [formGroup]="addProcessForm" (ngSubmit)="createProcess()" novalidate>
+    <div class="mb-8">
+      <label for="jobId" class="block text-primary-700 dark:text-primary-300 font-semibold mb-2">
+        1. Select Job <span class="text-red-500">*</span>
+      </label>
+      <select
+        id="jobId"
+        formControlName="jobId"
+        (change)="onJobChange($event)"
+        [class.border-red-500]="isFieldInvalid('jobId')"
+        class="w-full px-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-primary-700 dark:text-primary-200 dark:border-primary-600 transition-all"
+      >
+        <option value="" disabled hidden>Choose a job...</option>
+        @for(job of jobs(); track job.id) {
+        <option [value]="job.id">{{ job.title }}</option>
+        }
+      </select>
+      @if(isFieldInvalid('jobId')) {
+      <p class="text-red-500 text-xs mt-1 animate-fadeIn">Please select a job to continue.</p>
+      }
+    </div>
+
+    @if (applicants().length > 0) {
+    <div class="mb-8 animate-fadeIn">
+      <h2 class="text-primary-700 dark:text-primary-300 font-semibold mb-2">
+        2. Select Candidates <span class="text-red-500">*</span>
+      </h2>
+      <div
+        class="space-y-2 max-h-64 overflow-y-auto p-4 border rounded-xl bg-primary-50 dark:bg-primary-900/40"
+        [class.border-red-500]="isFieldInvalid('candidates')"
+        [class.border-primary-200]="!isFieldInvalid('candidates')"
+        formArrayName="candidates"
+      >
+        @for(applicant of applicants(); track applicant.id; let i = $index) {
+        <div
+          class="flex items-center justify-between p-3 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-700/50 transition-colors border border-transparent"
+        >
+          <label [for]="'applicant-' + i" class="flex items-center cursor-pointer w-full group">
+            <input
+              type="checkbox"
+              [id]="'applicant-' + i"
+              [formControlName]="i"
+              class="h-6 w-6 text-teal-600 rounded border-2 border-primary-400 dark:border-primary-500 bg-white dark:bg-primary-700 checked:bg-teal-600 focus:ring-teal-500 transition-all cursor-pointer"
+            />
+            <div class="ml-3 flex flex-col">
+              <span
+                class="text-primary-800 dark:text-primary-200 font-medium group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors"
+              >
+                {{ applicant.name }}
+              </span>
+              <span class="text-xs text-primary-500 dark:text-primary-400 italic">
+                {{ applicant.email }}
+              </span>
+            </div>
+          </label>
+
+          <button
+            type="button"
+            (click)="viewApplication(applicant.id)"
+            class="text-sm bg-white dark:bg-primary-800 border border-primary-200 dark:border-primary-600 text-teal-600 dark:text-teal-400 px-3 py-1.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-all font-semibold flex-shrink-0 shadow-sm"
+          >
+            <i class="pi pi-eye mr-1"></i> View App
+          </button>
+        </div>
+        }
+      </div>
+      @if(isFieldInvalid('candidates')) {
+      <p class="text-red-500 text-xs mt-1 animate-fadeIn">
+        At least one candidate must be selected.
+      </p>
+      }
+    </div>
+    } @else if (selectedJobId()) {
+    <div
+      class="mb-8 p-6 text-center bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-xl animate-pulse"
+    >
+      <p class="text-amber-700 dark:text-amber-400 font-medium">
+        <i class="pi pi-info-circle mr-2"></i> No candidates have applied for this job yet.
+      </p>
+    </div>
+    }
+
+    <div class="mb-8">
+      <label for="testLink" class="block text-primary-700 dark:text-primary-300 font-semibold mb-2">
+        3. Assessment / Test Link <span class="text-red-500">*</span>
+      </label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i
+            class="pi pi-link"
+            [class.text-red-500]="isFieldInvalid('testLink')"
+            [class.text-primary-400]="!isFieldInvalid('testLink')"
+          ></i>
+        </div>
+        <input
+          type="url"
+          id="testLink"
+          formControlName="testLink"
+          placeholder="https://example.com/test-id"
+          [class.border-red-500]="isFieldInvalid('testLink')"
+          class="placeholder-teal-900/50 dark:placeholder-teal-500 w-full pl-10 pr-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-primary-700 dark:text-primary-200 dark:border-primary-600"
+        />
+      </div>
+      @if(isFieldInvalid('testLink')) {
+      <p class="text-red-500 text-xs mt-1 animate-fadeIn">
+        Please enter a valid URL (e.g., https://link.com).
+      </p>
+      }
+    </div>
+
+    <div
+      class="flex flex-col sm:flex-row justify-end gap-4 mt-8 border-t border-primary-100 dark:border-primary-700 pt-6"
+    >
+      <button
+        type="button"
+        routerLink="/manager/dashboard"
+        class="w-full sm:w-auto px-8 py-3 bg-primary-100 text-primary-700 font-bold rounded-xl hover:bg-primary-200 dark:bg-primary-700 dark:text-primary-200 dark:hover:bg-primary-600 transition duration-300"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        [disabled]="addProcessForm.invalid || isLoading()"
+        class="w-full sm:w-auto bg-teal-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-teal-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-teal-500/20 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center min-w-[200px]"
+      >
+        @if (isLoading()) {
+        <i class="pi pi-spin pi-spinner mr-2"></i>
+        Creating... } @else {
+        <i class="pi pi-send mr-2"></i>
+        Create Process & Notify }
+      </button>
+    </div>
+  </form>
+</div>
+
+@if (isApplicationModalOpen()) {
+<div
+  class="fixed inset-0 bg-primary-900/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fadeIn"
+  (click)="closeApplicationModal()"
+>
+  <div
+    class="bg-white dark:bg-primary-800 rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col"
+    (click)="$event.stopPropagation()"
+  >
+    @if (selectedApplication(); as app) {
+    <div
+      class="p-6 border-b dark:border-primary-700 flex justify-between items-center bg-primary-50 dark:bg-primary-800/50"
+    >
+      <div>
+        <h2 class="text-2xl font-bold text-primary-900 dark:text-primary-100">
+          {{ app.applicantName }}
+        </h2>
+        <p class="text-sm text-teal-600 dark:text-teal-400 font-medium italic">
+          Candidate Profile Overview
+        </p>
+      </div>
+      <button
+        (click)="closeApplicationModal()"
+        class="p-2 rounded-full hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
+      >
+        <i class="pi pi-times text-xl text-primary-500"></i>
+      </button>
+    </div>
+
+    <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div
+          class="bg-primary-50 dark:bg-primary-900/30 p-4 rounded-2xl border border-primary-100 dark:border-primary-700"
+        >
+          <h3 class="text-xs uppercase tracking-wider font-bold text-primary-500 mb-1">Age</h3>
+          <p class="text-xl font-bold text-primary-800 dark:text-primary-200">
+            {{ app.age }} Years
+          </p>
+        </div>
+        <div
+          class="bg-primary-50 dark:bg-primary-900/30 p-4 rounded-2xl border border-primary-100 dark:border-primary-700"
+        >
+          <h3 class="text-xs uppercase tracking-wider font-bold text-primary-500 mb-1">Phone</h3>
+          <p class="text-lg font-bold text-primary-800 dark:text-primary-200">{{ app.phone }}</p>
+        </div>
+        <div
+          class="bg-primary-50 dark:bg-primary-900/30 p-4 rounded-2xl border border-primary-100 dark:border-primary-700"
+        >
+          <h3 class="text-xs uppercase tracking-wider font-bold text-primary-500 mb-1">
+            Graduation
+          </h3>
+          <p class="text-xl font-bold text-primary-800 dark:text-primary-200">
+            {{ app.graduationYear }}
+          </p>
+        </div>
+
+        <div class="col-span-1 sm:col-span-3">
+          <h3 class="text-xs uppercase tracking-wider font-bold text-primary-500 mb-2">
+            Education Background
+          </h3>
+          <p class="text-lg text-primary-800 dark:text-primary-200 leading-relaxed">
+            Graduate of <span class="font-bold text-teal-600">{{ app.university }}</span
+            >, {{ app.faculty }} ({{ app.department }})
+          </p>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <h3 class="text-lg font-bold text-primary-900 dark:text-primary-100 mb-4 flex items-center">
+          <i class="pi pi-briefcase mr-2 text-teal-500"></i> Work Experience
+        </h3>
+
+        @if (app.workExperience && app.workExperience.length > 0) {
+        <div class="space-y-4">
+          @for(exp of app.workExperience; track $index) {
+          <div
+            class="p-5 bg-white dark:bg-primary-900/50 rounded-2xl border-l-4 shadow-sm border border-primary-100 dark:border-primary-700 border-l-teal-500"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <p class="font-bold text-primary-900 dark:text-white text-lg">{{ exp.jobTitle }}</p>
+              <span
+                class="text-xs font-bold bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 px-2 py-1 rounded"
+              >
+                {{ exp.startDate | date : 'MMM yyyy' }} -
+                {{ exp.endDate ? (exp.endDate | date : 'MMM yyyy') : 'Present' }}
+              </span>
+            </div>
+            <p class="text-teal-600 dark:text-teal-400 text-sm font-medium mb-2">
+              {{ exp.companyName }}
+            </p>
+            <p
+              class="text-primary-600 dark:text-primary-400 text-sm leading-relaxed whitespace-pre-line"
+            >
+              {{ exp.achievements }}
+            </p>
+          </div>
+          }
+        </div>
+        } @else {
+        <div
+          class="text-center p-6 border-2 border-dashed border-primary-200 dark:border-primary-700 rounded-2xl"
+        >
+          <p class="text-primary-500 italic">No professional experience listed.</p>
+        </div>
+        }
+      </div>
+
+      <div class="mt-4">
+        <h3 class="text-lg font-bold text-primary-900 dark:text-primary-100 mb-4 flex items-center">
+          <i class="pi pi-users mr-2 text-teal-500"></i> Internal Reference
+        </h3>
+        @if (app.hasInternalReference && app.internalReferees && app.internalReferees.length > 0) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          @for(referee of app.internalReferees; track $index) {
+          <div
+            class="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-100 dark:border-primary-700 flex items-center"
+          >
+            <div
+              class="h-10 w-10 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 mr-3"
+            >
+              <i class="pi pi-user"></i>
+            </div>
+            <div>
+              <p class="font-semibold text-sm dark:text-primary-200">{{ referee.name }}</p>
+              <p class="text-xs text-primary-500">{{ referee.email }}</p>
+            </div>
+          </div>
+          }
+        </div>
+        } @else {
+        <p class="text-primary-500 italic text-sm">No internal references provided.</p>
+        }
+      </div>
+    </div>
+
+    <div
+      class="p-4 bg-primary-50 dark:bg-primary-800/80 border-t dark:border-primary-700 text-right"
+    >
+      <button
+        (click)="closeApplicationModal()"
+        class="px-8 py-2 bg-teal-600 text-white font-bold rounded-xl transition-all hover:bg-teal-700 hover:scale-105 active:scale-95 shadow-md shadow-teal-500/20"
+      >
+        Got it
+      </button>
+    </div>
+    }
+  </div>
+</div>
+}

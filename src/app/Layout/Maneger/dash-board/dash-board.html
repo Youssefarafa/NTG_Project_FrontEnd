@@ -1,1 +1,217 @@
-<p>dash-board works!</p>
+<div class="container mx-auto px-5 py-8 max-w-7xl">
+  <header
+    class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-primary-200/60 dark:border-primary-700/50 pb-8"
+  >
+    <div>
+      <h1
+        class="text-3xl md:text-4xl font-black text-primary-950 dark:text-white leading-none tracking-tight"
+      >
+        Welcome back,
+        <span class="text-teal-600 dark:text-teal-400">Mohammed Hassan</span>
+      </h1>
+      <p
+        class="text-primary-600 dark:text-primary-400 mt-2 text-base font-medium flex items-center gap-2"
+      >
+        You have
+        <span
+          class="px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-full text-xs font-bold border border-teal-100 dark:border-teal-800"
+        >
+          {{ ongoingProcesses() }} active processes
+        </span>
+      </p>
+    </div>
+
+    <div class="flex gap-3">
+      <button
+        routerLink="/manager/addJob"
+        class="flex items-center bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-sm hover:shadow-teal-500/20 active:scale-95"
+      >
+        <i class="pi pi-plus text-xs mr-2"></i> Post Job
+      </button>
+      <button
+        routerLink="/manager/addProcess"
+        class="flex items-center bg-primary-900 dark:bg-white dark:text-primary-950 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-sm active:scale-95"
+      >
+        <i class="pi pi-bolt text-xs mr-2"></i> New Process
+      </button>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+    <div
+      routerLink="/manager/viewJobs"
+      class="group bg-primary-100/45 dark:bg-primary-800 p-6 rounded-2xl border border-primary-200 dark:border-primary-700 hover:border-teal-500 hover:shadow-md transition-all cursor-pointer"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 bg-white dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 rounded-xl flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all"
+        >
+          <i class="pi pi-briefcase text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[10px] font-black text-primary-400 uppercase tracking-[0.15em]">
+            Active Jobs
+          </p>
+          <p class="text-3xl font-black text-primary-950 dark:text-white mt-0.5">
+            {{ totalJobs() }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div
+      routerLink="/manager/viewUsers"
+      class="group bg-primary-100/45 dark:bg-primary-800 p-6 rounded-2xl border border-primary-200 dark:border-primary-700 hover:border-cyan-500 hover:shadow-md transition-all cursor-pointer"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 bg-white dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 rounded-xl flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-all"
+        >
+          <i class="pi pi-users text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[10px] font-black text-primary-400 uppercase tracking-[0.15em]">
+            Candidates
+          </p>
+          <p class="text-3xl font-black text-primary-950 dark:text-white mt-0.5">
+            {{ totalCandidates() }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div
+      (click)="scrollToActiveProcesses()"
+      class="group bg-primary-100/45 dark:bg-primary-800 p-6 rounded-2xl border border-primary-200 dark:border-primary-700 hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 bg-white dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all"
+        >
+          <i class="pi pi-sync text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[10px] font-black text-primary-400 uppercase tracking-[0.15em]">
+            In Progress
+          </p>
+          <p class="text-3xl font-black text-primary-950 dark:text-white mt-0.5">
+            {{ ongoingProcesses() }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <section id="active-processes-section" class="space-y-6">
+      <div class="flex items-center gap-3 pb-2">
+        <div class="w-1.5 h-6 bg-teal-500 rounded-full"></div>
+        <h2 class="text-xl font-black text-primary-900 dark:text-white tracking-tight">
+          Active Pipelines
+        </h2>
+        <span
+          class="ml-auto text-[9px] font-black px-2 py-1 bg-primary-900 text-white dark:bg-teal-500 dark:text-primary-950 rounded-md uppercase"
+          >Live</span
+        >
+      </div>
+
+      <div class="grid gap-3">
+        @for (proc of activeProcesses(); track proc.id) {
+        <div
+          (click)="navigateToProcessActive(proc.id)"
+          class="group bg-primary-100/75 dark:bg-primary-800/40 p-5 rounded-2xl border border-primary-200 dark:border-primary-700/50 hover:border-teal-500 hover:shadow-sm transition-all cursor-pointer flex items-center justify-between"
+        >
+          <div class="flex items-center gap-4">
+            <div class="flex -space-x-2">
+              @for (c of proc.candidates.slice(0, 3); track c.id) {
+              <div
+                class="w-9 h-9 rounded-full border-2 border-white dark:border-primary-800 bg-primary-100 dark:bg-primary-700 flex items-center justify-center text-xs font-bold text-primary-700 dark:text-primary-200 uppercase"
+              >
+                {{ c.name.charAt(0) }}
+              </div>
+              }
+            </div>
+            <div>
+              <h4
+                class="font-bold text-primary-900 dark:text-primary-50 group-hover:text-teal-600 transition-colors"
+              >
+                {{ proc.jobTitle }}
+              </h4>
+              <p
+                class="text-[10px] text-primary-500 dark:text-primary-400 font-bold uppercase tracking-wider mt-0.5"
+              >
+                {{ proc.candidates.length }} Candidates in process
+              </p>
+            </div>
+          </div>
+          <i
+            class="pi pi-arrow-right text-primary-500 group-hover:text-teal-800 transition-all transform group-hover:translate-x-1"
+          ></i>
+        </div>
+        } @empty {
+        <div
+          class="text-center py-16 bg-white/50 dark:bg-primary-900/20 rounded-2xl border border-dashed border-primary-200 dark:border-primary-800"
+        >
+          <i class="pi pi-inbox text-primary-200 text-3xl mb-2 block"></i>
+          <p class="text-primary-400 text-sm font-medium">No active pipelines found.</p>
+        </div>
+        }
+      </div>
+    </section>
+
+    <section class="space-y-6">
+      <div class="flex items-center gap-3 pb-2">
+        <div class="w-1.5 h-6 bg-primary-300 dark:bg-primary-600 rounded-full"></div>
+        <h2 class="text-xl font-black text-primary-900 dark:text-white tracking-tight">
+          Recent History
+        </h2>
+      </div>
+
+      <div class="relative group">
+        <i
+          class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 group-focus-within:text-teal-500 transition-colors"
+        ></i>
+        <input
+          type="text"
+          (input)="onSearch($event)"
+          placeholder="Search history..."
+          class="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-primary-800 border border-primary-200 dark:border-primary-700 rounded-xl text-sm font-medium outline-none focus:border-primary-200 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/10 dark:focus:ring-primary-400/10 transition-all shadow-sm placeholder-slate-400 dark:placeholder-slate-200/50"
+        />
+      </div>
+
+      <div class="space-y-3">
+        @for (proc of filteredCompletedProcesses(); track proc.id) {
+        <div
+          (click)="navigateToProcessComplete(proc.id)"
+          class="p-4 bg-primary-100/75 dark:bg-primary-800/20 border border-primary-100 dark:border-primary-700/40 rounded-xl flex items-center justify-between hover:bg-primary-100/35 dark:hover:bg-primary-800 transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-primary-400"
+        >
+          <div>
+            <h4 class="text-sm font-bold text-primary-800 dark:text-primary-200">
+              {{ proc.jobTitle }}
+            </h4>
+            <div class="flex items-center gap-2 mt-1">
+              <span
+                class="text-[8px] font-black px-1.5 py-0.5 bg-primary-100 dark:bg-primary-700 text-primary-500 dark:text-primary-400 rounded uppercase"
+                >Archived</span
+              >
+              <span class="text-[10px] text-primary-500 font-medium">{{
+                proc.completedAt | date : 'mediumDate'
+              }}</span>
+            </div>
+          </div>
+          <i
+            class="pi pi-external-link text-[10px] text-primary-500 group-hover:text-primary-600"
+          ></i>
+        </div>
+        } @empty {
+        <div
+          class="text-center py-12 border border-dashed border-primary-200 dark:border-primary-800 rounded-2xl"
+        >
+          <p class="text-primary-400 text-xs font-bold uppercase tracking-[0.1em]">
+            No records found
+          </p>
+        </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

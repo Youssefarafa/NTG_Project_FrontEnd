@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { Job } from '../models/JobsData';
+import { ApplyJobRequest } from '../models/MyApplicationData';
 
 @Injectable({ providedIn: 'root' })
 export class Jobs {
@@ -12,12 +13,12 @@ export class Jobs {
   // private http = inject(HttpClient);
   // private readonly apiUrl = 'https://api.yourdomain.com/jobs';
 
-  // getJobs(): Observable<Job[]> {
-  //   return this.http.get<Job[]>(this.apiUrl);
+  // getJobs(): Observable<Partial<Job>[]> {
+  //   return this.http.get<Partial<Job>[]>(this.apiUrl);
   // }
 
-  // getJobById(id: string): Observable<Job> {
-  //   return this.http.get<Job>(`${this.apiUrl}/${id}`);
+  // getJobById(id: string): Observable<Partial<Job>> {
+  //   return this.http.get<Partial<Job>>(`${this.apiUrl}/${id}`);
   // }
 
   // addJob(jobData: Omit<Job, 'id' | 'isApplied'>): Observable<Job> {
@@ -36,8 +37,8 @@ export class Jobs {
   //   return this.http.delete(`${this.apiUrl}/${id}`);
   // }
 
-  // applyToJob(jobId: string): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/apply`, { jobId });
+  // applyToJob(data: ApplyJobRequest): Observable<any> {
+  //   return this.http.post(`${this.apiUrl}/apply`, data);
   // }
 
   // withdrawJob(jobId: string): Observable<any> {
@@ -96,7 +97,6 @@ export class Jobs {
       ...jobData,
       id: Math.random().toString(36).substr(2, 9),
       isApplied: false,
-      expiresAt: jobData.expiresAt,
     };
     this.jobs.set([...this.jobs(), newJob]);
     return of({ success: true }).pipe(delay(800));
@@ -127,14 +127,9 @@ export class Jobs {
     return of({ success: true }).pipe(delay(300));
   }
 
-  applyToJob(jobId: string): Observable<any> {
-    const jobIndex = this.jobs().findIndex((j) => j.id === jobId);
-    if (jobIndex === -1) return throwError(() => new Error('Job not found'));
-
-    const updated = [...this.jobs()];
-    updated[jobIndex] = { ...updated[jobIndex], isApplied: true };
-    this.jobs.set(updated);
-    return of({ success: true }).pipe(delay(400));
+  applyToJob(data: any): Observable<any> {
+    console.log('Sending Payload to Server:', data);
+    return of({ success: true, message: 'Application Received' }).pipe(delay(2000));
   }
 
   withdrawJob(jobId: string): Observable<any> {

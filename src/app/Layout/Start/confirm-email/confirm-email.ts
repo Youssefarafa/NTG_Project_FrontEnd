@@ -53,7 +53,6 @@ export class ConfirmEmail implements OnInit, OnDestroy {
 
   errsubmitmessage = '';
 
-  // استخدام Signals من السيرفس مباشرة
   readonly isLoading = this._AuthService.isLoading;
   readonly emailToVerify = this._AuthService.otpEmail;
 
@@ -62,7 +61,6 @@ export class ConfirmEmail implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.startCountdown();
-    // حماية الصفحة: إذا لم يوجد إيميل في السيرفس، العودة للرئيسية
     if (!this.emailToVerify()) {
       this._Router.navigate(['/login']);
     }
@@ -89,7 +87,7 @@ export class ConfirmEmail implements OnInit, OnDestroy {
   }
 
   startCountdown(): void {
-    this.countdown = 300; // 5 دقائق
+    this.countdown = 300;
     this.timerSubscription?.unsubscribe();
     this.timerSubscription = interval(1000).subscribe(() => {
       if (this.countdown > 0) {
@@ -101,7 +99,6 @@ export class ConfirmEmail implements OnInit, OnDestroy {
     });
   }
 
-  // العودة وتصفير حالة الـ OTP في السيرفس
   goBackAndChangeEmail(): void {
     this._AuthService.cancelOtp();
     this._Router.navigate(['/register']);
@@ -145,7 +142,7 @@ export class ConfirmEmail implements OnInit, OnDestroy {
           summary: 'Verified',
           detail: 'Your account has been successfully verified!',
         });
-        // السيرفس بداخلها دالة handleAuthSuccess تقوم بالتوجيه حسب الـ Role
+        setTimeout(() => this._Router.navigate(['/login']), 2000);
       },
       error: (err) => {
         this.errsubmitmessage = err.message;
@@ -154,7 +151,6 @@ export class ConfirmEmail implements OnInit, OnDestroy {
     });
   }
 
-  /* --- Logic لوحة المفاتيح --- */
   onPaste(event: ClipboardEvent) {
     event.preventDefault();
     const pasteData = event.clipboardData?.getData('text/plain').replace(/\D/g, '').slice(0, 6);
@@ -185,11 +181,14 @@ export class ConfirmEmail implements OnInit, OnDestroy {
 
   onInput(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
-    const value = input.value.replace(/\D/g, '');
+    const value = input.value.slice(-1);
     this.digits[index] = value;
-
-    if (value && index < 5) this.focusNext(index);
-    else if (this.isOtpValid) this.submitButton.nativeElement.focus();
+    this.cdRef.detectChanges();
+    if (value && index < 5) {
+      this.focusNext(index);
+    } else if (this.isOtpValid) {
+      this.submitButton.nativeElement.focus();
+    }
   }
 
   private focusPrevious(index: number) {

@@ -138,6 +138,7 @@ export class Register {
 
   onSubmit() {
     this.isSubmitted = true;
+
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
       return;
@@ -150,19 +151,26 @@ export class Register {
     };
 
     this.auth.register(registerData).subscribe({
-      next: () => {
+      next: (res) => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Success',
-          detail: 'Account created! Please verify your email.',
+          summary: 'Registration Successful',
+          detail:
+            !!res.requiresOtp && this.auth.isOtpEnabled()
+              ? 'Please check your email for the verification code.'
+              : 'Account created! You can now log in.',
+          life: 3000,
         });
-        this.router.navigate(['/confirm-email']);
+
+        if (!!res.requiresOtp && this.auth.isOtpEnabled()) {
+          this.router.navigate(['/verify-account']);
+        }
       },
       error: (err) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Registration Failed',
-          detail: err?.message || 'Email might already be registered',
+          detail: err?.message || 'Something went wrong, please try again.',
           life: 5000,
         });
         this.cdRef.markForCheck();

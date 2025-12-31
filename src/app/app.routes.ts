@@ -96,6 +96,16 @@ export const routes: Routes = [
         title: 'Edit Job',
       },
       {
+        path: 'processActive/:id',
+        loadComponent: () => import('./Layout/Maneger/process-active/process-active').then((m) => m.ProcessActive),
+        title: 'Edit Job',
+      },
+      {
+        path: 'processComplete/:id',
+        loadComponent: () => import('./Layout/Maneger/process-complete/process-complete').then((m) => m.ProcessComplete),
+        title: 'Edit Job',
+      },
+      {
         path: 'addProcess',
         loadComponent: () =>
           import('./Layout/Maneger/add-process/add-process').then((m) => m.AddProcess),
@@ -123,6 +133,7 @@ export const routes: Routes = [
   },
   {
     path: 'verify-account',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./Layout/Start/confirm-email/confirm-email').then((m) => m.ConfirmEmail),
     title: 'Verify Your Account',

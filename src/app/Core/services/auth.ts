@@ -1,30 +1,32 @@
 import { Injectable, inject, signal, computed, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser } from '@angular/common';
-import {
-  HttpClient,
-  HttpErrorResponse,
-} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError, BehaviorSubject, of, timer } from 'rxjs';
-import {
-  catchError,
-  switchMap,
-  tap,
-  filter,
-  take,
-  finalize,
-  retry,
-} from 'rxjs/operators';
+import { catchError, switchMap, tap, filter, take, finalize, retry } from 'rxjs/operators';
 import * as CryptoJS from 'crypto-js';
 import { environment } from '../../Shared/environment';
 import { HttpContext } from '@angular/common/http';
-import { AuthState, LoginData, LoginResponse, OtpResponse, RefreshResponse, RegisterData, RegisterResponse, User, VerifyOtpData } from '../models/AuthData';
+import {
+  AuthState,
+  LoginData,
+  LoginResponse,
+  OtpResponse,
+  RefreshResponse,
+  RegisterData,
+  RegisterResponse,
+  User,
+  VerifyOtpData,
+} from '../models/AuthData';
 import { SKIP_SPINNER } from '../interceptors/AuthInterceptor';
 
 /* ===================== Auth Service ===================== */
 @Injectable({ providedIn: 'root' })
 export class Auth {
+  readonly isOtpEnabled = signal<boolean>(false);
+  readonly isRememberMeEnabled = signal<boolean>(false);
+  readonly isRefreshEnabled = signal<boolean>(false);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
@@ -38,7 +40,7 @@ export class Auth {
     user: 'current_user',
     tokenExpiry: 'token_expiry',
     rememberMe: 'remember_me',
-  } as const; // 🔥 Signals State
+  } as const; // Signals State
 
   private _user = signal<User | null>(null);
   private _isRefreshing = signal<boolean>(false);
@@ -82,9 +84,11 @@ export class Auth {
     timer(0, this.TOKEN_REFRESH_INTERVAL)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        if (this.isAuthenticated() && !this._isRefreshing()) {
+        if (this.isRefreshEnabled() && this.isAuthenticated() && !this._isRefreshing()) {
           if (this.getTokenTimeLeft() < 5 * 60 * 1000) {
-            this.refreshToken().subscribe();
+            this.refreshToken()
+              .pipe(catchError(() => of(null)))
+              .subscribe();
           }
         }
       });
@@ -103,14 +107,15 @@ export class Auth {
 
   register(data: RegisterData): Observable<RegisterResponse> {
     this._isAuthenticating.set(true);
-    return this.http.post<RegisterResponse>(`${this.API_URL}/auth/register`, data).pipe(
+
+    return this.http.post<RegisterResponse>(`${this.API_URL}/api/auth/register`, data).pipe(
       tap((res) => {
         if (res?.success) {
-          if (res.requiresOtp) {
+          if (!!res?.requiresOtp && this.isOtpEnabled()) {
             this._requiresOtp.set(true);
             this._otpEmail.set(data.email);
-          } else if (res.token && res.user?.isVerified) {
-            this.handleAuthSuccess(res);
+          } else {
+            this.router.navigate(['/login']);
           }
         }
       }),
@@ -120,18 +125,23 @@ export class Auth {
   }
 
   login(data: LoginData): Observable<LoginResponse> {
-    this._isAuthenticating.set(true); // Save remember me
-    if (data.rememberMe) {
+    this._isAuthenticating.set(true);
+    const shouldRemember = this.isRememberMeEnabled() && !!data.rememberMe;
+    const { rememberMe, ...payload } = data;
+    if (shouldRemember) {
       localStorage.setItem(this.STORAGE_KEYS.rememberMe, 'true');
+    } else {
+      localStorage.removeItem(this.STORAGE_KEYS.rememberMe);
     }
-    return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, data).pipe(
+    return this.http.post<LoginResponse>(`${this.API_URL}/api/auth/login`, payload).pipe(
       tap((res) => {
         if (res?.success) {
-          if (res.requiresOtp) {
+          if (!!res.requiresOtp && this.isOtpEnabled()) {
             this._requiresOtp.set(true);
             this._otpEmail.set(data.email);
           } else if (res.token && res.user) {
-            this.handleAuthSuccess(res, data.rememberMe ? 30 * 24 * 3600 : 3600);
+            const expiresIn = shouldRemember ? 30 * 24 * 3600 : 3600;
+            this.handleAuthSuccess(res, expiresIn);
           }
         }
       }),
@@ -142,7 +152,7 @@ export class Auth {
 
   verifyOtp(data: VerifyOtpData): Observable<OtpResponse> {
     this._isAuthenticating.set(true);
-    return this.http.post<OtpResponse>(`${this.API_URL}/auth/verify-otp`, data).pipe(
+    return this.http.post<OtpResponse>(`${this.API_URL}/api/auth/verify-otp`, data).pipe(
       tap((res) => {
         if (res.success && res.token && res.user) {
           this._requiresOtp.set(false);
@@ -177,14 +187,34 @@ export class Auth {
 
   private handleAuthSuccess(
     res: RegisterResponse | LoginResponse | OtpResponse,
-    expiresIn: number = 3600
+    expiresIn?: number
   ): void {
     if (res?.success && res.token && res.user) {
-      this.storeAuthData(res.token, res.user, expiresIn);
+      let finalExpiresIn = expiresIn;
+
+      if (!finalExpiresIn) {
+        const isRemembered =
+          isPlatformBrowser(this.platformId) &&
+          localStorage.getItem(this.STORAGE_KEYS.rememberMe) === 'true';
+
+        finalExpiresIn = this.isRememberMeEnabled() && isRemembered ? 30 * 24 * 3600 : 3600;
+      }
+
+      this.storeAuthData(res.token, res.user, finalExpiresIn);
       this._user.set(res.user);
-      this._requiresOtp.set(false); // Redirect based on user role
+      this._requiresOtp.set(false);
       this.redirectAfterLogin(res.user);
     }
+  }
+
+  private storeAuthData(token: string, user: User, expiresIn: number): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    localStorage.setItem(this.STORAGE_KEYS.token, this.encrypt(token));
+    localStorage.setItem(this.STORAGE_KEYS.user, JSON.stringify(user));
+
+    const expiryTime = new Date().getTime() + expiresIn * 1000;
+    localStorage.setItem(this.STORAGE_KEYS.tokenExpiry, expiryTime.toString());
   }
 
   private redirectAfterLogin(user: User): void {
@@ -197,20 +227,12 @@ export class Auth {
           this.router.navigate(['/manager/dashboard']);
           break;
         case 'Candidate':
-          this.router.navigate(['/candidate/profile']);
+          this.router.navigate(['/candidate/availableJobs']);
           break;
         default:
           this.router.navigate(['/dashboard']);
       }
     }
-  }
-
-  private storeAuthData(token: string, user: User, expiresIn: number = 3600): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    localStorage.setItem(this.STORAGE_KEYS.token, this.encrypt(token));
-    localStorage.setItem(this.STORAGE_KEYS.user, JSON.stringify(user));
-    const expiryTime = new Date().getTime() + expiresIn * 1000;
-    localStorage.setItem(this.STORAGE_KEYS.tokenExpiry, expiryTime.toString());
   }
 
   private encrypt(text: string): string {
@@ -243,13 +265,17 @@ export class Auth {
 
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
-      const rememberMe = localStorage.getItem(this.STORAGE_KEYS.rememberMe) === 'true';
+      const isRemembered = localStorage.getItem(this.STORAGE_KEYS.rememberMe) === 'true';
+      const keepRememberKey = this.isRememberMeEnabled() && isRemembered;
+
       Object.values(this.STORAGE_KEYS).forEach((key) => {
-        if (key !== this.STORAGE_KEYS.rememberMe || !rememberMe) {
-          localStorage.removeItem(key);
+        if (key === this.STORAGE_KEYS.rememberMe && keepRememberKey) {
+          return;
         }
+        localStorage.removeItem(key);
       });
     }
+
     this._user.set(null);
     this._requiresOtp.set(false);
     this._otpEmail.set('');
@@ -257,6 +283,10 @@ export class Auth {
   } /* ===================== Refresh Logic ===================== */
 
   refreshToken(): Observable<RefreshResponse> {
+    if (!this.isRefreshEnabled()) {
+      return of({ success: false, token: '' } as RefreshResponse);
+    }
+
     if (this._isRefreshing()) {
       return this.refreshTokenSubject.pipe(
         filter((t) => t !== null),
@@ -280,8 +310,14 @@ export class Auth {
         tap((res) => {
           this._isRefreshing.set(false);
           if (res?.success && res.token) {
-            const expiresIn = res.expiresIn || 3600;
-            this.storeAuthData(res.token, res.user || this.user()!, expiresIn);
+            const isRemembered =
+              isPlatformBrowser(this.platformId) &&
+              localStorage.getItem(this.STORAGE_KEYS.rememberMe) === 'true';
+            const shouldKeepLongSession = this.isRememberMeEnabled() && isRemembered;
+
+            const finalExpiresIn = shouldKeepLongSession ? res.expiresIn || 30 * 24 * 3600 : 3600;
+
+            this.storeAuthData(res.token, res.user || this.user()!, finalExpiresIn);
             this.refreshTokenSubject.next(res.token);
           }
         }),
@@ -317,7 +353,6 @@ export class Auth {
   changePassword(data: {
     currentPassword: string;
     newPassword: string;
-    confirmPassword: string;
   }): Observable<{ success: boolean; message: string }> {
     return this.http
       .post<{ success: boolean; message: string }>(`${this.API_URL}/auth/change-password`, data)
@@ -331,14 +366,12 @@ export class Auth {
 
   private handleHttpError(error: HttpErrorResponse) {
     let message = error.error?.message || 'An unexpected error occurred.';
-
     switch (error.status) {
       case 0:
         message = 'Unable to connect to the server. Please check your internet connection.';
         break;
-
       case 401:
-        if (error.error?.requiresOtp) {
+        if (error.error?.requiresOtp && this.isOtpEnabled()) {
           this._requiresOtp.set(true);
           message = 'Please enter the verification code to continue.';
         } else {
@@ -376,4 +409,3 @@ export class Auth {
     }
   }
 }
-

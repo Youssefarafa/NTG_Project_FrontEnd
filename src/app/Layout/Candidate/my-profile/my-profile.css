@@ -1,16 +1,26 @@
-:host ::ng-deep .p-password.ng-invalid > input,
-:host ::ng-deep .p-password.ng-dirty > input,
-:host ::ng-deep .p-inputtext.ng-invalid,
-:host ::ng-deep .p-inputtext.ng-dirty {
-    border-color: transparent;
-    box-shadow: none !important;
+:host ::ng-deep .p-inputtext {
+    background-color: #f0fdfa !important; 
+    border-color: #2dd4bf !important;
+    color: #134e4a !important;
 }
 
-:host ::ng-deep fieldset {
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+:host-context(.app-dark) ::ng-deep .p-inputtext {
+    background-color: #03413F !important; 
+    color: #f0fdfa !important;
 }
 
-:host-context(.app-dark) ::ng-deep fieldset {
-    border-color: #334155;
+:host-context(.app-dark) ::ng-deep .p-inputtext:not(.border-red-400) {
+    border-color: #188A7F !important;
 }
+
+:host ::ng-deep .p-inputtext.border-red-400 {
+    border-color: #ef4444 !important;
+}
+
+/* الـ Divider */
+:host { --divider-bg: #ffffff; }
+:host-context(.app-dark) { --divider-bg: #042f2e; }
+:host ::ng-deep .p-divider-content {
+    background-color: var(--divider-bg) !important;
+}
+
