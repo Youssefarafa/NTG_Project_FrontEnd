@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Jobs } from '../../../Core/services/Jobs';
-import { Job } from '../../../Core/models/JobsData';
+import { Job, JobsResponse } from '../../../Core/models/JobsData';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
@@ -12,6 +12,7 @@ import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-view-jobs',
+  standalone: true, 
   imports: [
     CommonModule,
     RouterModule,
@@ -36,20 +37,32 @@ export class ViewJobs implements OnInit {
   }
 
   loadJobs() {
-    this.jobsService.getJobs().subscribe({
-      next: (data) => this.jobs.set(data),
-      error: () => this.showToast('error', 'Error', 'Failed to load jobs'),
+    this.jobsService.getJobsManager().subscribe({
+      next: (res: JobsResponse) => {
+        if (res.success && res.data) {
+          this.jobs.set(res.data as Job[]);
+        }
+      },
+      error: (err) => {
+        const errorMsg = err.error?.message || 'Failed to load jobs';
+        this.showToast('error', 'Error', errorMsg);
+      },
     });
   }
 
   deleteJob(id: string, title: string) {
     if (confirm(`Are you sure you want to delete "${title}"?`)) {
       this.jobsService.deleteJob(id).subscribe({
-        next: () => {
-          this.jobs.set(this.jobs().filter((j) => j.id !== id));
-          this.showToast('success', 'Deleted', 'Job removed successfully');
+        next: (res: JobsResponse) => {
+          if (res.success) {
+            this.jobs.update((prev) => prev.filter((j) => j.id !== id));
+            this.showToast('success', 'Deleted', res.message || 'Job removed successfully');
+          }
         },
-        error: () => this.showToast('error', 'Error', 'Failed to delete job'),
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Delete operation failed';
+          this.showToast('error', 'Error', errorMsg);
+        },
       });
     }
   }
@@ -62,5 +75,4 @@ export class ViewJobs implements OnInit {
   private showToast(severity: string, summary: string, detail: string) {
     this.messageService.add({ severity, summary, detail });
   }
-  
 }

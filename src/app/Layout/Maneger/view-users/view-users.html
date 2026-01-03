@@ -1,13 +1,13 @@
 <p-toast></p-toast>
 
-<div class="max-w-7xl mx-auto p-4 sm:p-8">
+<div class="max-w-8xl mx-auto p-4 sm:p-8">
   <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
-    <h1 class="text-2xl sm:text-3xl font-bold text-teal-800 dark:text-teal-200">
+    <h1 class="text-2xl sm:text-3xl font-bold text-primary-800 dark:text-primary-200">
       Registered Candidates
     </h1>
     <a
       routerLink="/manager"
-      class="w-full sm:w-auto text-center bg-teal-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-teal-700 transition duration-300 shadow-lg"
+      class="w-full sm:w-auto text-center bg-primary-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-primary-700 transition duration-300 shadow-lg"
     >
       &larr; Back to Dashboard
     </a>
@@ -15,7 +15,7 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
     <div class="flex flex-col gap-2">
-      <label class="text-sm font-semibold text-teal-700 dark:text-teal-300 ml-1"
+      <label class="text-sm font-semibold text-primary-700 dark:text-primary-300 ml-1"
         >Search by Name</label
       >
       <p-iconField iconPosition="left">
@@ -25,13 +25,13 @@
           pInputText
           placeholder="Candidate name..."
           (input)="onNameSearch($event)"
-          class="w-full rounded-xl border-teal-200 dark:border-teal-700 bg-white dark:bg-teal-950 text-teal-900 dark:text-teal-100"
+          class="w-full rounded-xl border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-950 text-primary-900 dark:text-primary-100"
         />
       </p-iconField>
     </div>
 
     <div class="flex flex-col gap-2">
-      <label class="text-sm font-semibold text-teal-700 dark:text-teal-300 ml-1"
+      <label class="text-sm font-semibold text-primary-700 dark:text-primary-300 ml-1"
         >Search by Email</label
       >
       <p-iconField iconPosition="left">
@@ -41,14 +41,14 @@
           pInputText
           placeholder="Email address..."
           (input)="onEmailSearch($event)"
-          class="w-full rounded-xl border-teal-200 dark:border-teal-700 bg-white dark:bg-teal-950 text-teal-900 dark:text-teal-100"
+          class="w-full rounded-xl border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-950 text-primary-900 dark:text-primary-100"
         />
       </p-iconField>
     </div>
   </div>
 
   <div
-    class="hidden lg:block shadow-2xl rounded-2xl overflow-hidden border border-teal-100 dark:border-teal-700"
+    class="hidden lg:block shadow-2xl rounded-3xl overflow-hidden border border-primary-100 dark:border-primary-800 bg-white dark:bg-primary-950"
   >
     <p-table
       [value]="filteredCandidates()"
@@ -56,35 +56,91 @@
       [paginator]="true"
       [rowsPerPageOptions]="[5, 10, 20]"
       responsiveLayout="scroll"
-      [paginatorDropdownAppendTo]="'body'"
       styleClass="p-datatable-sm custom-table"
     >
       <ng-template pTemplate="header">
-        <tr class="bg-teal-50/50 dark:bg-teal-900/20">
-          <th pSortableColumn="id" class="py-4 px-6">ID <p-sortIcon field="id"></p-sortIcon></th>
-          <th pSortableColumn="name" class="py-4 px-6">
-            Full Name <p-sortIcon field="name"></p-sortIcon>
+        <tr class="bg-primary-50 dark:bg-primary-900/40">
+          <th
+            pSortableColumn="name"
+            class="py-5 px-6 text-left text-primary-900 dark:text-primary-100 uppercase text-xs tracking-widest font-bold"
+          >
+            Candidate <p-sortIcon field="name"></p-sortIcon>
           </th>
-          <th pSortableColumn="email" class="py-4 px-6">
-            Email Address <p-sortIcon field="email"></p-sortIcon>
+          <th
+            class="py-5 px-6 text-left text-primary-900 dark:text-primary-100 uppercase text-xs tracking-widest font-bold"
+          >
+            Contact Info
+          </th>
+          <th
+            class="py-5 px-6 text-left text-primary-900 dark:text-primary-100 uppercase text-xs tracking-widest font-bold"
+          >
+            Academic Information
           </th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-user>
         <tr
-          class="border-b border-teal-50 dark:border-teal-900/50 hover:bg-teal-50/30 dark:hover:bg-teal-900/10"
+          class="border-b border-primary-100 dark:border-primary-800/60 hover:bg-primary-50/40 dark:hover:bg-primary-900/20 transition-colors"
         >
-          <td class="py-4 px-6 font-mono text-sm text-teal-600">#{{ user.id }}</td>
-          <td class="py-4 px-6 font-bold text-teal-900 dark:text-white">{{ user.name }}</td>
-          <td class="py-4 px-6">{{ user.email }}</td>
-        </tr>
-      </ng-template>
+          <td class="py-5 px-6">
+            <div class="flex items-center gap-4">
+              <div
+                class="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white flex items-center justify-center font-bold shadow-md"
+              >
+                {{ user.name?.charAt(0) || '?' }}
+              </div>
+              <div class="flex flex-col">
+                <span class="font-extrabold text-primary-950 dark:text-white text-base leading-tight">
+                  {{ user.name || 'Anonymous User' }}
+                </span>
+                <span
+                  class="text-[11px] text-slate-600 dark:text-primary-300 font-bold mt-1.5 flex items-center gap-1"
+                >
+                  <i class="pi pi-calendar text-[10px] text-primary-600 dark:text-primary-400"></i>
+                  {{ user.birthDate ? (user.birthDate | date : 'dd/MM/yyyy') : 'Date Unknown' }}
+                </span>
+              </div>
+            </div>
+          </td>
 
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="3" class="text-center py-10 text-slate-500">
-            No candidates found matching your search.
+          <td class="py-5 px-6">
+            <div class="flex flex-col gap-1.5 text-sm">
+              <span class="flex items-center font-semibold text-slate-800 dark:text-primary-100">
+                <i class="pi pi-envelope mr-2.5 text-primary-600 dark:text-primary-400 text-[12px]"></i>
+                {{ user.email || 'No Email' }}
+              </span>
+              <span class="flex items-center text-slate-700 dark:text-primary-200 font-medium">
+                <i class="pi pi-phone mr-2.5 text-primary-600 dark:text-primary-400 text-[12px]"></i>
+                {{ user.phoneNumber || 'No Phone' }}
+              </span>
+            </div>
+          </td>
+
+          <td class="py-5 px-6">
+            <div
+              class="flex justify-between items-center bg-slate-50 dark:bg-primary-900/30 p-3.5 rounded-2xl border border-primary-100 dark:border-primary-800"
+            >
+              <div class="flex flex-col">
+                <span class="font-bold text-primary-950 dark:text-primary-50 leading-tight">
+                  {{ user.university || 'University N/A' }}
+                </span>
+                <span class="text-xs text-slate-700 dark:text-primary-200 mt-1 font-medium">
+                  {{ user.faculty || 'Faculty' }} • {{ user.department || 'Department' }}
+                </span>
+              </div>
+              <div
+                class="flex flex-col items-end border-l border-primary-200 dark:border-primary-700 pl-4 ml-2"
+              >
+                <span
+                  class="text-[9px] uppercase font-black text-primary-700 dark:text-primary-400 tracking-tighter"
+                  >Graduated</span
+                >
+                <span class="font-black text-primary-900 dark:text-white text-sm">
+                  {{ user.graduationYear || '----' }}
+                </span>
+              </div>
+            </div>
           </td>
         </tr>
       </ng-template>
@@ -94,24 +150,77 @@
   <div class="lg:hidden">
     <p-dataView [value]="filteredCandidates()" [paginator]="true" [rows]="5">
       <ng-template #list let-items>
-        <div class="flex flex-col gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           @for (user of items; track user.id) {
           <div
-            class="bg-white dark:bg-teal-950 p-6 rounded-2xl shadow-lg border border-teal-100 dark:border-teal-800"
+            class="bg-white dark:bg-primary-950 rounded-[2.5rem] p-1 shadow-xl border border-primary-50 dark:border-primary-900"
           >
-            <div class="flex justify-between items-start mb-2">
-              <span class="text-xl font-bold text-teal-900 dark:text-teal-50">{{ user.name }}</span>
-              <span class="bg-teal-100 dark:bg-teal-900/70 text-teal-900 dark:text-teal-300 text-[14px] px-2 py-0.5 rounded-full border border-teal-100 dark:border-teal-800">
-                ID: {{user.id}}
-              </span>
+            <div class="p-6">
+              <div class="flex items-center gap-4 mb-6">
+                <div
+                  class="h-16 w-16 rounded-3xl bg-primary-600 text-white flex items-center justify-center text-3xl font-black shadow-lg"
+                >
+                  {{ user.name?.charAt(0) || '?' }}
+                </div>
+                <div>
+                  <h3 class="text-xl font-black text-primary-950 dark:text-white leading-tight">
+                    {{ user.name || 'Unnamed' }}
+                  </h3>
+                  <span class="text-xs font-bold text-primary-500 flex items-center mt-1">
+                    <i class="pi pi-calendar mr-1.5"></i>
+                    {{ user.birthDate ? (user.birthDate | date : 'dd/MM/yyyy') : 'N/A' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-3 mb-6">
+                <div
+                  class="flex items-center p-3.5 bg-slate-50 dark:bg-primary-900/20 rounded-2xl border border-slate-100 dark:border-transparent"
+                >
+                  <i class="pi pi-envelope text-primary-600 mr-4"></i>
+                  <span class="text-sm font-bold text-slate-800 dark:text-primary-100 truncate">
+                    {{ user.email || 'Email not provided' }}
+                  </span>
+                </div>
+                <div
+                  class="flex items-center p-3.5 bg-slate-50 dark:bg-primary-900/20 rounded-2xl border border-slate-100 dark:border-transparent"
+                >
+                  <i class="pi pi-phone text-primary-600 mr-4"></i>
+                  <span class="text-sm font-bold text-slate-800 dark:text-primary-100">
+                    {{ user.phoneNumber || 'No phone number' }}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                class="bg-gradient-to-br mt-5 from-primary-600 to-primary-800 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden"
+              >
+                <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full"></div>
+
+                <div class="flex justify-between items-start mb-4 relative z-10">
+                  <div class="flex flex-col">
+                    <p class="text-[10px] font-bold uppercase text-primary-200 tracking-widest mb-1.5">
+                      University
+                    </p>
+                    <p class="text-lg font-black leading-tight">
+                      {{ user.university || 'Not Listed' }}
+                    </p>
+                  </div>
+                  <div
+                    class="bg-white/20 backdrop-blur-lg px-4 py-1.5 rounded-2xl text-center border border-white/30"
+                  >
+                    <p class="text-[8px] font-bold uppercase leading-none mb-1">Class</p>
+                    <p class="text-sm font-black">{{ user.graduationYear || '--' }}</p>
+                  </div>
+                </div>
+
+                <div class="border-t border-white/20 pt-4 relative z-10">
+                  <p class="text-sm font-bold text-primary-50">
+                    {{ user.faculty || 'N/A' }} • {{ user.department || 'N/A' }}
+                  </p>
+                </div>
+              </div>
             </div>
-            <p class="text-teal-600 dark:text-teal-400">
-              <i class="pi pi-envelope mr-2"></i>{{ user.email }}
-            </p>
-          </div>
-          } @empty {
-          <div class="text-center py-10 bg-white dark:bg-teal-950 rounded-2xl">
-            <p class="text-slate-500">No candidates found.</p>
           </div>
           }
         </div>

@@ -5,6 +5,12 @@ export interface Job {
   experience: number;
   responsibilities: string[];
   requiredSkills: string[];
-  isApplied: boolean;
+  isApplied?: boolean;
   expiresAt?: string | Date;
+}
+
+export interface JobsResponse {
+  success: boolean;
+  data?: Partial<Job>[] | Partial<Job>;
+  message?: string;
 }

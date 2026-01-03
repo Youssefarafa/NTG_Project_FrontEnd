@@ -1,52 +1,83 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { delay, Observable, of } from 'rxjs';
-import { HiringProcess } from '../models/ProcessData'; 
+import { DashboardResponse } from '../models/DashboardData';
+import { environment } from '../../Shared/environment';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class DashboardService {
   // private http = inject(HttpClient);
-  // private apiUrl = 'https://your-api-url.com/api';
-  private mockProcesses: HiringProcess[] = [
-    {
-      id: 'proc_001',
-      jobTitle: 'Frontend Developer',
-      status: 'active',
-      candidates: [
-        { id: 'app_101', name: 'Ahmed Mansour', email: 'ahmed.m@example.com' },
-        { id: 'app_102', name: 'Sara Selim', email: 'sara.s@example.com' }
-      ]
+  // private readonly API_URL = environment.apiUrl;
+  // getDashboardData(): Observable<DashboardResponse> {
+  //   return this.http.get<DashboardResponse>(`${this.API_URL}/api/dashboard/summary`);
+  // }
+
+  // searchHistory(query: string): Observable<DashboardResponse> {
+  //   return this.http.get<DashboardResponse>(`${this.API_URL}/api/dashboard/history/search`, {
+  //     params: { q: query },
+  //   });
+  // }
+
+  // ==========================================
+  // 2. Mock API Methods
+  // ==========================================
+  private mockSummary: DashboardResponse = {
+    success: true,
+    data: {
+      totalJobs: 12,
+      totalCandidates: 150,
+      ongoingProcessesCount: 5,
+      activePipelines: [
+        {
+          id: 'p1',
+          jobTitle: 'Frontend Developer',
+          candidates: [
+            { id: 'c1', name: 'Ahmed Hassan', email: 'ahmed@example.com' } as any,
+            { id: 'c2', name: 'Sara Ali', email: 'sara@example.com' } as any,
+          ],
+        },
+      ],
+      recentHistory: [
+        {
+          id: 'p3',
+          jobTitle: 'UI Designer',
+          completedAt: '2025-12-01',
+          candidates: [{ id: 'c10', name: 'Mona Zaki', email: 'mona@test.com' }] as any,
+        },
+        {
+          id: 'p4',
+          jobTitle: 'Project Manager',
+          completedAt: '2025-11-15',
+          candidates: [{ id: 'c11', name: 'John Doe', email: 'john@company.com' }] as any,
+        },
+      ],
     },
-    {
-      id: 'proc_002',
-      jobTitle: 'Backend Engineer',
-      status: 'completed',
-      completedAt: new Date('2025-11-20'),
-      candidates: [
-        { id: 'app_103', name: 'Mohamed Ali', email: 'm.ali@example.com' }
-      ]
-    }
-  ];
+  };
 
-  /*
-  getDashboardStats(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/dashboard/stats`);
-  }
-  */
-  getDashboardStats(): Observable<any> {
-    return of({
-      totalJobs: 15,
-      totalCandidates: 120,
-      ongoingProcesses: this.mockProcesses.filter(p => p.status === 'active').length
-    }).pipe(delay(500));
+  getDashboardData(): Observable<DashboardResponse> {
+    return of(this.mockSummary).pipe(delay(1000));
   }
 
-  /*
-  getAllHiringProcesses(): Observable<HiringProcess[]> {
-    return this.http.get<HiringProcess[]>(`${this.apiUrl}/hiring-processes`);
-  }
-  */
-  getAllHiringProcesses(): Observable<HiringProcess[]> {
-    return of(this.mockProcesses).pipe(delay(800));
+  searchHistory(query: string): Observable<DashboardResponse> {
+    const q = query.toLowerCase();
+
+    const filtered = this.mockSummary.data.recentHistory.filter((item) => {
+      const matchJob = item.jobTitle.toLowerCase().includes(q);
+
+      const matchCandidate = item.candidates.some(
+        (c) => c.name.toLowerCase().includes(q) || (c as any).email?.toLowerCase().includes(q)
+      );
+
+      return matchJob || matchCandidate;
+    });
+
+    const searchResponse: DashboardResponse = {
+      success: true,
+      data: filtered as any,
+    };
+
+    return of(searchResponse).pipe(delay(800));
   }
 }

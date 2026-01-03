@@ -1,6 +1,6 @@
 <p-toast></p-toast>
 
-<div class="max-w-7xl mx-auto p-4 sm:p-8">
+<div class="max-w-8xl mx-auto p-4 sm:p-8">
   <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
     <h1 class="text-2xl sm:text-3xl font-bold text-teal-800 dark:text-teal-200">
       Manage Created Jobs
@@ -14,7 +14,7 @@
   </div>
 
   <div
-    class="hidden lg:block shadow-2xl rounded-2xl overflow-hidden border border-teal-100 dark:border-teal-700"
+    class="hidden xl:block shadow-2xl rounded-2xl overflow-hidden border border-teal-100 dark:border-teal-700"
   >
     <p-table
       [value]="jobs()"
@@ -29,6 +29,9 @@
         <tr class="bg-teal-50/50 dark:bg-teal-900/20">
           <th pSortableColumn="title" class="py-4 px-6 text-left">
             Job Title <p-sortIcon field="title"></p-sortIcon>
+          </th>
+          <th pSortableColumn="reportsTo" class="py-4 px-6 text-left">
+            Reports To <p-sortIcon field="reportsTo"></p-sortIcon>
           </th>
           <th class="py-4 px-6 text-left">Responsibilities</th>
           <th class="py-4 px-6 text-left">Required Skills</th>
@@ -48,14 +51,20 @@
           class="border-b border-teal-50 dark:border-teal-900/50 hover:bg-teal-50/30 dark:hover:bg-teal-900/10 transition-colors"
         >
           <td class="py-4 px-6 font-bold text-teal-900 dark:text-white">{{ job.title }}</td>
+          <td class="py-4 px-6">
+            <span class="text-sm text-teal-600 dark:text-teal-400 font-medium">
+              {{ job.reportsTo || 'N/A' }}
+            </span>
+          </td>
           <td class="py-4 px-6 max-w-xs">
             <div class="flex flex-wrap gap-1">
-              @for (res of job.responsibilities.slice(0, 2); track $index) {
+              @for (res of job.responsibilities?.slice(0, 2); track $index) {
               <span
-                class="text-[10px] bg-primary-100 dark:bg-primary-700 px-2 py-0.5 rounded italic truncate"
-                >• {{ res }}</span
+                class="text-[10px] bg-teal-100 dark:bg-teal-800 px-2 py-0.5 rounded italic truncate"
               >
-              } @if (job.responsibilities.length > 2) {
+                • {{ res }}
+              </span>
+              } @if (job.responsibilities?.length > 2) {
               <span class="text-[10px] text-teal-600 font-bold"
                 >+{{ job.responsibilities.length - 2 }} more</span
               >
@@ -73,14 +82,17 @@
               }
             </div>
           </td>
-          <td class="text-center mx-auto font-semibold"><p class="text-center">{{ job.experience }}y</p></td>
+          <td class="text-center mx-auto font-semibold">
+            <p class="text-center">{{ job.experience }}y</p>
+          </td>
           <td class="py-4 px-6">
             <div class="flex flex-col">
-              <span [class.text-red-500]="isExpired(job)">{{
-                job.expiresAt | date : 'mediumDate'
-              }}</span>
+              <span [class.text-red-500]="isExpired(job)">
+                {{ job.expiresAt | date : 'mediumDate' }}
+              </span>
               @if (isExpired(job)) {
-              <span class="text-[10px] font-bold text-red-600 uppercase">Expired</span> }
+              <span class="text-[10px] font-bold text-red-600 uppercase">Expired</span>
+              }
             </div>
           </td>
           <td class="py-4 px-6 text-center">
@@ -88,8 +100,9 @@
               <a
                 [routerLink]="['/manager/editJob', job.id]"
                 class="p-2 text-indigo-600 hover:bg-indigo-200 rounded-lg"
-                ><i class="pi pi-pencil"></i
-              ></a>
+              >
+                <i class="pi pi-pencil"></i>
+              </a>
               <button
                 (click)="deleteJob(job.id, job.title)"
                 class="p-2 text-red-600 hover:bg-red-200 rounded-lg"
@@ -103,60 +116,103 @@
     </p-table>
   </div>
 
-  <div class="lg:hidden flex justify-center">
-    <div class="w-full max-w-2xl">
-      <p-dataView #dv [value]="jobs()" [paginator]="true" [rows]="5">
+  <div class="xl:hidden flex justify-center">
+    <div class="w-full max-w-7xl">
+      <p-dataView #dv [value]="jobs()" [paginator]="true" [rows]="6">
         <ng-template #list let-items>
-          <div class="flex flex-col gap-6">
-            @for (job of items; track job.id; let first = $first) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+            @for (job of items; track job.id) {
             <div
-              class="bg-white dark:bg-teal-950 p-6 rounded-2xl shadow-lg border border-teal-100 dark:border-teal-800"
+              class="bg-white dark:bg-teal-950 p-6 rounded-2xl shadow-lg border border-teal-100 dark:border-teal-800 flex flex-col justify-between"
               [class.border-red-300]="isExpired(job)"
             >
-              <div class="flex justify-between items-start mb-4">
-                <div class="flex flex-col">
-                  <span class="text-xl font-bold text-teal-900 dark:text-teal-50">{{
-                    job.title
-                  }}</span>
-                  <span class="text-sm text-teal-600 dark:text-teal-400"
-                    >Reports to: {{ job.reportsTo }}</span
-                  >
+              <div>
+                <div class="flex justify-between items-start mb-2">
+                  <div class="flex flex-col">
+                    <span class="text-xl font-bold text-teal-900 dark:text-teal-50">
+                      {{ job.title }}
+                    </span>
+                    <span class="text-sm text-teal-600 dark:text-teal-400">
+                      Reports to: {{ job.reportsTo || 'N/A' }}
+                    </span>
+                  </div>
+                  <p-tag
+                    [value]="job.experience + 'Y Exp'"
+                    [rounded]="true"
+                    severity="success"
+                  ></p-tag>
                 </div>
-                <p-tag [value]="job.experience + 'Y Exp'" [rounded]="true" severity="info"></p-tag>
-              </div>
 
-              <div class="flex flex-wrap gap-2 mb-6">
-                @for (skill of job.requiredSkills; track $index) {
-                <p-tag [value]="skill" class="custom-skill-tag"></p-tag>
-                }
-              </div>
-
-              <div
-                class="flex justify-between items-center mb-6 pt-4 border-t border-teal-50 dark:border-teal-900"
-              >
-                <div class="flex flex-col">
-                  <span class="text-xs uppercase text-primary-400 font-bold">Expires At</span>
-                  <span class="text-base font-medium" [class.text-red-500]="isExpired(job)">
-                    {{ job.expiresAt | date : 'mediumDate' }}
-                  </span>
+                <div class="mb-4">
+                  <h4 class="text-xs font-bold uppercase text-teal-700 dark:text-teal-300 mb-2">
+                    Responsibilities:
+                  </h4>
+                  <div class="flex flex-wrap gap-1">
+                    @for (res of job.responsibilities?.slice(0, 3); track $index) {
+                    <span
+                      class="text-[11px] bg-teal-50 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 px-2 py-1 rounded border border-teal-100 dark:border-teal-800 italic"
+                    >
+                      • {{ res }}
+                    </span>
+                    } @if (job.responsibilities?.length > 3) {
+                    <span class="text-[11px] text-teal-600 font-bold self-center">
+                      +{{ job.responsibilities.length - 3 }} more
+                    </span>
+                    }
+                  </div>
                 </div>
-                @if (isExpired(job)) { <p-tag value="EXPIRED" severity="danger"></p-tag> }
+
+                <div class="mb-6">
+                  <h4 class="text-xs font-bold uppercase text-teal-700 dark:text-teal-300 mb-2">
+                    Skills:
+                  </h4>
+                  <div class="flex flex-wrap gap-2">
+                    @for (skill of job.requiredSkills; track $index) {
+                    <span
+                      class="bg-teal-600 text-white text-[10px] px-2.5 py-1 rounded-full shadow-sm"
+                    >
+                      {{ skill }}
+                    </span>
+                    }
+                  </div>
+                </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <a [routerLink]="['/manager/editJob', job.id]" class="w-full">
+              <div>
+                <div
+                  class="flex justify-between items-center mb-6 pt-4 border-t border-teal-50 dark:border-teal-900"
+                >
+                  <div class="flex flex-col">
+                    <span class="text-[10px] uppercase text-teal-500 font-extrabold"
+                      >Expires At</span
+                    >
+                    <span
+                      class="text-base font-semibold text-teal-900 dark:text-teal-100"
+                      [class.text-red-500]="isExpired(job)"
+                    >
+                      {{ job.expiresAt | date : 'mediumDate' }}
+                    </span>
+                  </div>
+                  @if (isExpired(job)) {
+                  <p-tag value="EXPIRED" severity="danger"></p-tag>
+                  }
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <a [routerLink]="['/manager/editJob', job.id]" class="w-full">
+                    <p-button
+                      icon="pi pi-pencil"
+                      label="Edit"
+                      styleClass="p-button-primary p-button-sm w-full shadow-md"
+                    ></p-button>
+                  </a>
                   <p-button
-                    icon="pi pi-pencil"
-                    label="Edit"
-                    styleClass="p-button-outlined p-button-sm w-full p-button-teal"
+                    icon="pi pi-trash"
+                    label="Delete"
+                    (onClick)="deleteJob(job.id, job.title)"
+                    styleClass="p-button-sm p-button-danger p-button-outlined w-full"
                   ></p-button>
-                </a>
-                <p-button
-                  icon="pi pi-trash"
-                  label="Delete"
-                  (onClick)="deleteJob(job.id, job.title)"
-                  styleClass="p-button-sm p-button-danger p-button-text bg-red-50 dark:bg-red-900/10 w-full"
-                ></p-button>
+                </div>
               </div>
             </div>
             }

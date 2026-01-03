@@ -14,7 +14,7 @@ import { Toast } from 'primeng/toast';
 import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
 import { Jobs } from '../../../Core/services/Jobs';
-import { Job } from '../../../Core/models/JobsData';
+import { Job, JobsResponse } from '../../../Core/models/JobsData';
 
 @Component({
   selector: 'app-available-jobs',
@@ -24,14 +24,14 @@ import { Job } from '../../../Core/models/JobsData';
   templateUrl: './available-jobs.html',
   styleUrl: './available-jobs.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-}) 
+})
 export class AvailableJobs implements OnInit {
   private jobService = inject(Jobs);
   private messageService = inject(MessageService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
-
-  jobs = signal<Job[]>([]);
+  
+  jobs = signal<Partial<Job>[]>([]);
   appliedJobIds = signal<Set<string>>(new Set());
   mainLoading = signal<boolean>(false);
   actionLoading = signal<Record<string, boolean>>({});
@@ -43,15 +43,26 @@ export class AvailableJobs implements OnInit {
   loadJobs() {
     this.mainLoading.set(true);
     this.jobService
-      .getJobs()
+      .getJobsCandidate()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => {
-          this.jobs.set(data);
-          const alreadyAppliedIds = data.filter((j) => j.isApplied).map((j) => j.id);
-          this.appliedJobIds.set(new Set(alreadyAppliedIds));
+        next: (res: JobsResponse) => {
+          if (res.success && res.data) {
+            const jobsList = (res.data as Partial<Job>[]) || [];
+            this.jobs.set(jobsList);
+
+            const alreadyAppliedIds = jobsList
+              .filter((j) => j.isApplied && j.id)
+              .map((j) => j.id as string);
+
+            this.appliedJobIds.set(new Set(alreadyAppliedIds));
+          }
         },
-        error: () => this.showError('Could not load jobs'),
+        error: (err) => {
+          this.mainLoading.set(false);
+          const errorMsg = err.error?.message || 'Could not connect to server';
+          this.showError(errorMsg);
+        },
         complete: () => this.mainLoading.set(false),
       });
   }
@@ -64,24 +75,32 @@ export class AvailableJobs implements OnInit {
 
   withdraw(jobId: string) {
     if (this.actionLoading()[jobId]) return;
+
     this.toggleActionLoading(jobId, true);
     this.jobService
       .withdrawJob(jobId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
-          this.appliedJobIds.update((prev) => {
-            const nextSet = new Set(prev);
-            nextSet.delete(jobId);
-            return nextSet;
-          });
-          this.messageService.add({
-            severity: 'info',
-            summary: 'Withdrawn',
-            detail: 'Application removed.',
-          });
+        next: (res: JobsResponse) => {
+          if (res.success) {
+            this.appliedJobIds.update((prev) => {
+              const nextSet = new Set(prev);
+              nextSet.delete(jobId);
+              return nextSet;
+            });
+
+            this.messageService.add({
+              severity: 'info',
+              summary: 'Withdrawn',
+              detail: res.message || 'Application removed successfully.',
+            });
+          }
         },
-        error: () => this.showError('Failed to withdraw'),
+        error: (err) => {
+          this.toggleActionLoading(jobId, false);
+          const errorMsg = err.error?.message || 'Withdrawal failed';
+          this.showError(errorMsg);
+        },
         complete: () => this.toggleActionLoading(jobId, false),
       });
   }

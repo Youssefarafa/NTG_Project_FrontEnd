@@ -1,136 +1,98 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { delay, Observable, of, throwError } from 'rxjs';
-// import { JobApplication } from '../models/MyApplication';
+import { ApplicantJoinData, ApplicantsResponse, CreateProcessPayload } from '../models/ProcessData';
+import { environment } from '../../Shared/environment';
+import { Observable, of, delay } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class Process {
-  /**
-   * -------------------------------------------------------
-   * REAL API IMPLEMENTATION (للاستخدام المستقبلي)
-   * -------------------------------------------------------
-   */
-  // private http = inject(HttpClient);
-  // private apiUrl = 'https://your-api-url.com/api';
+  //   private readonly API_URL = environment.apiUrl;
+  //   private http = inject(HttpClient);
 
-  /**
-   * -------------------------------------------------------
-   * MOCK DATA (البيانات الوهمية الحالية)
-   * -------------------------------------------------------
-   */
+  // getApplicantsByJob(jobId: string): Observable<ApplicantsResponse> {
+  //   return this.http.get<ApplicantsResponse>(`${this.API_URL}/api/applicants/${jobId}`);
+  // }
 
-  // قائمة المتقدمين لكل وظيفة
-  private mockApplicantsByJob: Record<string, any[]> = {
-    '1': [
-      { id: 'app_101', name: 'Ahmed Mansour', email: 'ahmed.m@example.com' },
-      { id: 'app_102', name: 'Sara Selim', email: 'sara.s@example.com' },
-    ],
-    '2': [
-      { id: 'proc_002', name: 'Mohamed Ali', email: 'm.ali@example.com' }
-    ],
-  };
+  // createHiringProcess(payload: CreateProcessPayload): Observable<ProcessResponse> {
+  //   return this.http.post<ProcessResponse>(`${this.API_URL}/api/process/create`, payload);
+  // }
 
-  // تفاصيل طلبات التوظيف (يجب أن تتطابق المفاتيح مع الـ IDs)
-  private mockApplicationDetails: Record<string, any> = {
-    // البيانات الجديدة الخاصة بـ proc_002
-    'proc_002': {
-      jobId: '2',
-      applicantName: 'Mohamed Ali',
-      phone: '01122334455',
-      age: 30,
-      university: 'Mansoura University',
-      faculty: 'Computers and Information',
-      department: 'Information Systems',
-      graduationYear: 2016,
-      workExperience: [
-        {
-          jobTitle: 'Senior Full Stack Developer',
-          companyName: 'Tech Solutions',
-          startDate: '2019-01-01',
-          endDate: '2023-12-01',
-          achievements: 'Led the development of a cloud-based ERP system using Angular and NestJS.',
-        },
-        {
-          jobTitle: 'Junior Web Developer',
-          companyName: 'Digital Wave',
-          startDate: '2016-08-01',
-          endDate: '2018-12-31',
-          achievements: 'Built 20+ responsive landing pages and integrated REST APIs.',
-        }
-      ],
-      hasInternalReference: true,
-      internalReferees: [
-        { name: 'Dr. Ibrahim Hassan', email: 'ibrahim.h@company.com' }
-      ],
-      cvFile: 'mohamed_ali_resume.pdf',
-    },
-
-    // البيانات السابقة
-    'app_101': {
-      jobId: '1',
-      applicantName: 'Ahmed Mansour',
-      phone: '01012345678',
-      age: 28,
+  // ==========================================
+  // 2. Mock API Methods
+  // ==========================================
+  private mockApplicants = signal<ApplicantJoinData[]>([
+    {
+      id: 'app-101',
+      fullName: 'Ahmed Mohamed Ali',
+      email: 'ahmed.m@example.com',
+      phone: '+20123456789',
+      birthDate: '1996-05-15',
       university: 'Cairo University',
       faculty: 'Engineering',
       department: 'Computer Science',
-      graduationYear: 2019,
+      graduationYear: 2018,
+      cvFile: 'cv-ahmed.pdf',
+      hasInternalReference: true,
+      internalReferees: [{ name: 'Eng. Youssef', email: 'khaled@company.com' }],
       workExperience: [
         {
-          jobTitle: 'Senior Frontend Developer',
-          companyName: 'Global Tech',
-          startDate: '2021-01-01',
-          endDate: '2024-05-01',
-          achievements: 'Led a team of 4 developers to rebuild the core product using Angular 17.',
-        }
+          jobTitle: 'Frontend Developer',
+          companyName: 'Tech Solutions',
+          startDate: '2019-01-01',
+          endDate: '2021-12-31',
+          achievements: 'Developed 10+ dashboard components.\nImproved site performance by 20%.',
+        },
       ],
-      hasInternalReference: true,
-      internalReferees: [{ name: 'Eng. Khaled Ali', email: 'khaled.ali@company.com' }],
-      cvFile: 'cv_ahmed_mansour.pdf',
     },
-
-    'app_102': {
-      jobId: '1',
-      applicantName: 'Sara Selim',
-      phone: '01298765432',
-      age: 24,
-      university: 'Alexandria University',
-      faculty: 'Commerce',
-      department: 'Accounting',
-      graduationYear: 2022,
-      workExperience: [],
+    {
+      id: 'app-102',
+      fullName: 'Sara youssef',
+      email: 'sara.i@example.com',
+      phone: '+20111222333',
+      birthDate: '1998-09-20',
+      university: 'Ain Shams University',
+      faculty: 'Computer & IT',
+      department: 'Software Engineering',
+      graduationYear: 2020,
+      cvFile: 'cv-sara.pdf',
       hasInternalReference: false,
       internalReferees: [],
-      cvFile: 'sara_resume.pdf',
-    }
-  };
+      workExperience: [
+        {
+          jobTitle: 'Junior Developer',
+          companyName: 'Startup X',
+          startDate: '2021-03-01',
+          endDate: '', // Present
+          achievements: 'Integrated RESTful APIs.\nCollaborated with UX/UI designers.',
+        },
+      ],
+    },
+  ]);
 
-  /**
-   * جلب قائمة المتقدمين بناءً على رقم الوظيفة
-   */
-  getApplicantsByJob(jobId: string): Observable<any[]> {
-    const applicants = this.mockApplicantsByJob[jobId] || [];
-    return of(applicants).pipe(delay(600));
+  getApplicantsByJob(jobId: string): Observable<ApplicantsResponse> {
+    console.log(`Mock: Fetching applicants for job ID: ${jobId}`);
+
+    const mockResponse: ApplicantsResponse = {
+      success: true,
+      message: 'Applicants loaded successfully from Mock API',
+      data: this.mockApplicants(),
+    };
+
+    return of(mockResponse).pipe(delay(1000));
   }
 
-  /**
-   * جلب تفاصيل طلب التوظيف بناءً على الـ ID
-   */
-  getApplicationDetails(id: string): Observable<any> {
-    const details = this.mockApplicationDetails[id];
-    if (details) {
-      return of(details).pipe(delay(400));
-    } else {
-      // استخدام throwError بدلاً من throw لضمان توافق RxJS
-      return throwError(() => new Error(`Application with ID ${id} not found`));
-    }
-  }
+  createHiringProcess(payload: CreateProcessPayload): Observable<any> {
+    console.log('Mock: Submitting Hiring Process with Payload:', payload);
 
-  /**
-   * إنشاء عملية توظيف جديدة
-   */
-  createHiringProcess(payload: any): Observable<any> {
-    console.log('Final Payload sent to Server:', payload);
-    return of({ success: true, message: 'Process created successfully' }).pipe(delay(1000));
+    const mockResponse = {
+      success: true,
+      message: 'Hiring process created successfully and emails sent to candidates.',
+      data: {
+        processId: 'proc-' + Math.random().toString(36).substr(2, 9),
+        createdAt: new Date(),
+      },
+    };
+
+    return of(mockResponse).pipe(delay(1500));
   }
 }

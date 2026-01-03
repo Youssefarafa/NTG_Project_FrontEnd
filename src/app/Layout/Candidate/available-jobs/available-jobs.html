@@ -58,9 +58,9 @@
           <ul
             class="list-disc list-inside text-primary-600 dark:text-primary-400 space-y-1 mt-2 text-sm"
           >
-            @for(resp of job.responsibilities.slice(0, 3); track $index) {
+            @for(resp of job.responsibilities?.slice(0, 3); track $index) {
             <li>{{ resp }}</li>
-            } @if(job.responsibilities.length > 3) {
+            } @if(job.responsibilities!.length > 3) {
             <li class="text-primary-500 italic">...and more</li>
             }
           </ul>
@@ -87,14 +87,14 @@
       <div
         class="p-6 bg-white dark:bg-primary-800/90 mt-auto border-t border-primary-300 dark:border-primary-500"
       >
-        @if (hasApplied(job.id)) {
+        @if (hasApplied(job.id!)) {
         <p-button
           label="Withdraw Application"
           icon="pi pi-times-circle"
           severity="danger"
           styleClass="w-full font-bold py-3 transition duration-300 transform hover:scale-105"
-          [loading]="isLoading(job.id)"
-          (onClick)="withdraw(job.id)"
+          [loading]="isLoading(job.id!)"
+          (onClick)="withdraw(job.id!)"
         >
         </p-button>
         } @else {
@@ -102,7 +102,7 @@
           label="Apply Now"
           icon="pi pi-pencil"
           styleClass="w-full bg-teal-600 border-none font-bold py-3 transition duration-300 transform hover:scale-105"
-          (onClick)="goToApplyForm(job.id, job.title)"
+          (onClick)="goToApplyForm(job.id!, job.title!)"
         >
         </p-button>
         }

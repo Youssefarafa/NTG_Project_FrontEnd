@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectorRef, effect } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -54,6 +54,18 @@ export class MyProfile implements OnInit {
   ngOnInit() {
     this.initForms();
     this.loadInitialData();
+  }
+
+  constructor() {
+    effect(() => {
+      const u = this.authService.user();
+      if (u) {
+        this.profileForm.patchValue({
+          ...u,
+          birthDate: u.birthDate ? new Date(u.birthDate) : null,
+        });
+      }
+    });
   }
 
   private initForms() {
@@ -138,8 +150,14 @@ export class MyProfile implements OnInit {
   // --- Actions ---
   updateProfile() {
     if (this.profileForm.valid) {
+      const rawData = this.profileForm.getRawValue();
+      const payload = {
+        ...rawData,
+        birthDate:
+          rawData.birthDate instanceof Date ? rawData.birthDate.toISOString() : rawData.birthDate,
+      };
       this.isSubmittingProfile.set(true);
-      this.authService.updateProfile(this.profileForm.getRawValue()).subscribe({
+      this.authService.updateProfile(payload).subscribe({
         next: (res) => {
           this.messageService.add({
             severity: 'success',

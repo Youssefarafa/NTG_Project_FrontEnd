@@ -2,47 +2,56 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
-import { Job } from '../models/JobsData';
+import { Job, JobsResponse } from '../models/JobsData';
 import { ApplyJobRequest } from '../models/MyApplicationData';
+import { environment } from '../../Shared/environment';
 
 @Injectable({ providedIn: 'root' })
 export class Jobs {
   // ==========================================
   // 1. Real API Methods
   // ==========================================
+  // private readonly API_URL = environment.apiUrl;
   // private http = inject(HttpClient);
-  // private readonly apiUrl = 'https://api.yourdomain.com/jobs';
 
-  // getJobs(): Observable<Partial<Job>[]> {
-  //   return this.http.get<Partial<Job>[]>(this.apiUrl);
+  // getJobsCandidate(): Observable<JobsResponse> {
+  //   return this.http.get<JobsResponse>(`${this.API_URL}/api/jobsCandidate`);
   // }
 
-  // getJobById(id: string): Observable<Partial<Job>> {
-  //   return this.http.get<Partial<Job>>(`${this.apiUrl}/${id}`);
+  // getJobById(id: string): Observable<JobsResponse> {
+  //   return this.http.get<JobsResponse>(`${this.API_URL}/api/job/${id}`);
   // }
 
-  // addJob(jobData: Omit<Job, 'id' | 'isApplied'>): Observable<Job> {
+  // addJob(jobData: Omit<Job, 'id' | 'isApplied'>): Observable<JobsResponse> {
   //   const payload = {
   //     ...jobData,
-  //     expiresAt: new Date(jobData.expiresAt).toISOString(),
+  //     expiresAt: jobData.expiresAt ? new Date(jobData.expiresAt).toISOString() : undefined,
   //   };
-  //   return this.http.post<Job>(this.apiUrl, payload);
+  //   return this.http.post<JobsResponse>(`${this.API_URL}/api/job`, payload);
   // }
 
-  // updateJob(id: string, jobData: any): Observable<any> {
-  //   return this.http.put(`${this.apiUrl}/${id}`, jobData);
+  // updateJob(id: string, jobData: Partial<Job>): Observable<JobsResponse> {
+  //   const payload = {
+  //     ...jobData,
+  //     expiresAt: jobData.expiresAt ? new Date(jobData.expiresAt).toISOString() : undefined,
+  //   };
+  //   return this.http.put<JobsResponse>(`${this.API_URL}/api/job/${id}`, payload);
   // }
 
-  // deleteJob(id: string): Observable<any> {
-  //   return this.http.delete(`${this.apiUrl}/${id}`);
+  // getJobsManager(): Observable<JobsResponse> {
+  //   return this.http.get<JobsResponse>(`${this.API_URL}/api/jobsManager`);
   // }
 
-  // applyToJob(data: ApplyJobRequest): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/apply`, data);
+  // deleteJob(id: string): Observable<JobsResponse> {
+  //   return this.http.delete<JobsResponse>(`${this.API_URL}/api/job/${id}`);
   // }
 
-  // withdrawJob(jobId: string): Observable<any> {
-  //   return this.http.delete(`${this.apiUrl}/withdraw/${jobId}`);
+  // applyToJob(data: ApplyJobRequest): Observable<JobsResponse> {
+  //   return this.http.post<JobsResponse>(`${this.API_URL}/api/job/apply`, data);
+  // }
+
+  // withdrawJob(jobId: string): Observable<JobsResponse> {
+  //   return this.http.delete<JobsResponse>(`${this.API_URL}/api/job/withdraw/${jobId}`);
   // }
 
   // ==========================================
@@ -80,16 +89,78 @@ export class Jobs {
     },
   ]);
 
-  getJobs(): Observable<Job[]> {
-    return of(this.jobs()).pipe(delay(500));
+  private mockJobs = signal<Job[]>([
+    {
+      id: '1',
+      title: 'Senior Angular Developer',
+      reportsTo: 'Engineering Manager',
+      experience: 5,
+      responsibilities: ['Architecting UI', 'Mentoring juniors'],
+      requiredSkills: ['Angular', 'RxJS', 'TypeScript'],
+      isApplied: false,
+      expiresAt: '2026-12-31T00:00:00.000Z',
+    },
+    {
+      id: '2',
+      title: 'Frontend Lead',
+      reportsTo: 'CTO',
+      experience: 7,
+      responsibilities: ['Leading team', 'Code Review'],
+      requiredSkills: ['Angular', 'Unit Testing'],
+      isApplied: false,
+      expiresAt: '2025-01-01T00:00:00.000Z', 
+    },
+  ]);
+
+  getJobsManager(): Observable<JobsResponse> {
+    const response: JobsResponse = {
+      success: true,
+      data: this.mockJobs(), 
+      message: 'Jobs fetched successfully'
+    };
+    return of(response).pipe(delay(800)); 
   }
 
-  getJobById(id: string): Observable<Job> {
+  deleteJob(id: string): Observable<JobsResponse> {
+    const currentJobs = this.mockJobs();
+    const filteredJobs = currentJobs.filter(j => j.id !== id);
+    this.mockJobs.set(filteredJobs);
+
+    const response: JobsResponse = {
+      success: true,
+      message: 'Job deleted successfully from Mock API'
+    };
+
+    return of(response).pipe(delay(500));
+  }
+
+  getJobsCandidate(): Observable<JobsResponse> {
+    const mockResponse: JobsResponse = {
+      success: true,
+      data: this.jobs(),
+    };
+
+    return of(mockResponse).pipe(delay(500));
+  }
+
+  getJobById(id: string): Observable<JobsResponse> {
     const job = this.jobs().find((j) => j.id === id);
+
     if (!job) {
-      return throwError(() => new Error('Job not found'));
+      const errorResponse: JobsResponse = {
+        success: false,
+        message: 'Job not found',
+        data: undefined,
+      };
+      return of(errorResponse).pipe(delay(300));
     }
-    return of(job).pipe(delay(300));
+    const successResponse: JobsResponse = {
+      success: true,
+      message: 'Job fetched successfully',
+      data: job,
+    };
+
+    return of(successResponse).pipe(delay(300));
   }
 
   addJob(jobData: Omit<Job, 'id' | 'isApplied'>): Observable<any> {
@@ -115,16 +186,6 @@ export class Jobs {
     };
     this.jobs.set(updatedJobs);
     return of({ success: true }).pipe(delay(800));
-  }
-
-  deleteJob(id: string): Observable<any> {
-    const currentJobs = this.jobs();
-    const updated = currentJobs.filter((j) => j.id !== id);
-    if (currentJobs.length === updated.length) {
-      return throwError(() => new Error('Job not found'));
-    }
-    this.jobs.set(updated);
-    return of({ success: true }).pipe(delay(300));
   }
 
   applyToJob(data: any): Observable<any> {

@@ -7,8 +7,9 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
-import { Jobs } from '../../../Core/services/Jobs';
 import { DatePickerModule } from 'primeng/datepicker';
+import { Jobs } from '../../../Core/services/Jobs';
+import { Job, JobsResponse } from '../../../Core/models/JobsData';
 
 @Component({
   selector: 'app-add-job',
@@ -65,18 +66,30 @@ export class AddJob implements OnInit {
 
   loadJobData(id: string) {
     this.jobsService.getJobById(id).subscribe({
-      next: (job) => {
-        const jobData = { ...job, expiresAt: job.expiresAt ? new Date(job.expiresAt) : new Date() };
-        job.responsibilities.forEach((res: string) => this.addResponsibility(res));
-        job.requiredSkills.forEach((skill: string) => this.addSkill(skill));
-        this.addJobForm.patchValue(jobData);
+      next: (res: JobsResponse) => {
+        if (res.success && res.data) {
+          const job = res.data as Job;
+
+          this.responsibilities.clear();
+          this.requiredSkills.clear();
+
+          job.responsibilities?.forEach((res: string) => this.addResponsibility(res));
+          job.requiredSkills?.forEach((skill: string) => this.addSkill(skill));
+
+          const jobData = {
+            ...job,
+            expiresAt: job.expiresAt ? new Date(job.expiresAt) : null,
+          };
+
+          this.addJobForm.patchValue(jobData);
+        } else {
+          this.showError(res.message || 'Job data not found');
+        }
       },
-      error: () =>
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Could not load job data',
-        }),
+      error: (err) => {
+        const errorMsg = err.error?.message || 'Could not load job data';
+        this.showError(errorMsg);
+      },
     });
   }
 
@@ -86,6 +99,7 @@ export class AddJob implements OnInit {
   get requiredSkills() {
     return this.addJobForm.get('requiredSkills') as FormArray;
   }
+
   addResponsibility(value: string = '') {
     this.responsibilities.push(
       this.fb.control(value, [Validators.required, Validators.minLength(10)])
@@ -101,6 +115,7 @@ export class AddJob implements OnInit {
   removeResponsibility(index: number) {
     if (this.responsibilities.length > 1) this.responsibilities.removeAt(index);
   }
+
   removeSkill(index: number) {
     if (this.requiredSkills.length > 1) this.requiredSkills.removeAt(index);
   }
@@ -112,29 +127,31 @@ export class AddJob implements OnInit {
     }
 
     this.isSubmitting.set(true);
-
+    
     const request$ = this.isEditMode()
       ? this.jobsService.updateJob(this.jobId!, this.addJobForm.value)
       : this.jobsService.addJob(this.addJobForm.value);
 
     request$.subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: this.isEditMode() ? 'Job updated successfully!' : 'Job created successfully!',
-        });
-        const targetRoute = this.isEditMode() ? '/manager/viewJobs' : '/manager/dashboard';
+      next: (res: JobsResponse) => {
+        if (res.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: res.message || (this.isEditMode() ? 'Job updated!' : 'Job created!'),
+          });
 
-        setTimeout(() => this.router.navigate([targetRoute]), 1500);
+          const targetRoute = this.isEditMode() ? '/manager/viewJobs' : '/manager/dashboard';
+          setTimeout(() => {
+            this.isSubmitting.set(false);
+            this.router.navigate([targetRoute]);
+          }, 1500);
+        }
       },
-      error: () => {
+      error: (err) => {
         this.isSubmitting.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Operation failed',
-        });
+        const errorMsg = err.error?.message || 'Operation failed';
+        this.showError(errorMsg);
       },
     });
   }
@@ -142,6 +159,10 @@ export class AddJob implements OnInit {
   isFieldInvalid(controlName: string): boolean {
     const control = this.addJobForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  private showError(msg: string) {
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
   }
 
   onCancel() {

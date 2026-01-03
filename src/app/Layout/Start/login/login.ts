@@ -48,6 +48,7 @@ export class Login {
 
   readonly isLoading = this.auth.isLoading;
   readonly isRememberMeEnabled = this.auth.isRememberMeEnabled;
+  readonly isForgetPasswordEnabled = this.auth.isForgetPasswordEnabled;
 
   loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(50)]),
@@ -89,11 +90,11 @@ export class Login {
     this.isSubmitted = true;
 
     if (this.loginForm.invalid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Please check your inputs',
-      });
+      // this.messageService.add({
+      //   severity: 'error',
+      //   summary: 'Error',
+      //   detail: 'Please check your inputs',
+      // });
       this.loginForm.markAllAsTouched();
       return;
     }
@@ -130,4 +131,8 @@ export class Login {
   navigateToRegister() {
     this.router.navigate(['/register']);
   }
+
+  navigateToForgotPassword() {
+  this.router.navigate(['/forgotPassword']);
+}
 }

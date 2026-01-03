@@ -26,36 +26,34 @@ export const authInterceptor = (
   const hideSpinner = () => {
     if (!skipSpinner) spinner.hide();
   };
+  const publicPaths = [
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password',
+    '/api/auth/resend-otp',
+  ];
 
-  if (
-    req.url.includes('/auth/') &&
-    !req.url.includes('/auth/refresh') &&
-    !req.url.includes('/auth/profile')
-  ) {
+  const isPublicPath = publicPaths.some((path) => req.url.includes(path));
+  if (isPublicPath) {
     return next(req).pipe(finalize(hideSpinner));
   }
 
   const token = auth.token;
-
-  if (!token && !req.url.includes('/auth/refresh')) {
-    if (!req.url.includes('/public/') && !req.url.includes('/auth/login')) {
-      // router.navigate(['/login']);
-    }
+  if (!token && !req.url.includes('/api/auth/refresh')) {
     return next(req).pipe(finalize(hideSpinner));
   }
-
   const authReq = req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`,
-      'X-Client-Time': new Date().toISOString(),
+      // 'X-Client-Time': new Date().toISOString(),
     },
   });
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       const isOtpError = error.error?.requiresOtp;
-
-      if (error.status === 401 && !req.url.includes('/auth/refresh') && !isOtpError) {
+      if (error.status === 401 && !req.url.includes('/api/auth/refresh') && !isOtpError) {
         if (auth.isRefreshEnabled()) {
           return auth.refreshToken().pipe(
             switchMap((res) => {
@@ -73,9 +71,7 @@ export const authInterceptor = (
               return throwError(() => refreshError);
             })
           );
-        }
-
-        else {
+        } else {
           auth.logout();
         }
       }

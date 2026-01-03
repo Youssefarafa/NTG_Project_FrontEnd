@@ -1,40 +1,51 @@
-export interface ProcessCandidate {
+export interface JobBasicInfo {
   id: string;
+  title: string;
+}
+
+export interface InternalReferee {
   name: string;
   email: string;
 }
 
-export interface HiringProcessRequest {
+export interface WorkExperience {
+  jobTitle: string;
+  companyName: string;
+  startDate: string; 
+  endDate: string; 
+  achievements: string;
+}
+
+export interface ApplicantJoinData {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  birthDate?: string | Date; 
+  university?: string;
+  faculty?: string;
+  department?: string;
+  graduationYear?: number;
+  cvFile: string;
+  hasInternalReference: boolean;
+  internalReferees: InternalReferee[];
+  workExperience: WorkExperience[];
+}
+
+export interface ApplicantsResponse {
+  success: boolean;
+  data?: ApplicantJoinData[]; 
+  message?: string;
+}
+
+export interface CreateProcessPayload {
   jobId: string;
   candidateIds: string[];
   testLink: string;
 }
 
-export interface HiringProcess {
-  id: string;
-  jobTitle: string;
-  candidates: ProcessCandidate[];
-  status: 'active' | 'completed';
-  completedAt?: Date;
-}
-
-export interface ApplicationDetail {
-  id: string;
-  applicantName: string;
-  applicantEmail: string;
-  applicationDate: Date;
-  age: number;
-  graduationYear: number;
-  university: string;
-  faculty: string;
-  department: string;
-  workExperience: Array<{
-    jobTitle: string;
-    companyName: string;
-    startDate: Date;
-    endDate: Date;
-    achievements: string;
-  }>;
-  hasInternalReference: boolean;
-  internalReferees: Array<{ name: string; email: string }>;
+export interface ProcessResponse {
+  success: boolean;
+  message: string;
+  data?: any; 
 }

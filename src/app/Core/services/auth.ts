@@ -27,6 +27,8 @@ export class Auth {
   readonly isOtpEnabled = signal<boolean>(false);
   readonly isRememberMeEnabled = signal<boolean>(false);
   readonly isRefreshEnabled = signal<boolean>(false);
+  readonly isForgetPasswordEnabled = signal<boolean>(false);
+
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
@@ -148,7 +150,35 @@ export class Auth {
       catchError((e) => this.handleHttpError(e)),
       finalize(() => this._isAuthenticating.set(false))
     );
-  } /* ===================== OTP Methods ===================== */
+  } /* ===================== Forget Password Logic ===================== */
+
+  forgotPassword(email: string): Observable<{ success: boolean; message: string }> {
+    this._isAuthenticating.set(true);
+    return this.http
+      .post<{ success: boolean; message: string }>(`${this.API_URL}/api/auth/forgot-password`, {
+        email,
+      })
+      .pipe(
+        catchError((e) => this.handleHttpError(e)),
+        finalize(() => this._isAuthenticating.set(false))
+      );
+  }
+
+  resetPassword(data: {
+    email: string;
+    code: string;
+    newPassword: string;
+  }): Observable<{ success: boolean; message: string }> {
+    this._isAuthenticating.set(true);
+    return this.http
+      .post<{ success: boolean; message: string }>(`${this.API_URL}/api/auth/reset-password`, data)
+      .pipe(
+        catchError((e) => this.handleHttpError(e)),
+        finalize(() => this._isAuthenticating.set(false))
+      );
+  }
+
+  /* ===================== OTP Methods ===================== */
 
   verifyOtp(data: VerifyOtpData): Observable<OtpResponse> {
     this._isAuthenticating.set(true);
@@ -167,7 +197,7 @@ export class Auth {
   resendOtp(email: string): Observable<{ success: boolean; message: string }> {
     return this.http
       .post<{ success: boolean; message: string }>(
-        `${this.API_URL}/auth/resend-otp`,
+        `${this.API_URL}/api/auth/resend-otp`,
         { email },
         {
           context: new HttpContext().set(SKIP_SPINNER, true),
@@ -300,7 +330,7 @@ export class Auth {
 
     return this.http
       .post<RefreshResponse>(
-        `${this.API_URL}/auth/refresh`,
+        `${this.API_URL}/api/auth/refresh`,
         {},
         {
           context: new HttpContext().set(SKIP_SPINNER, true),
@@ -331,23 +361,20 @@ export class Auth {
 
   /* ===================== Profile Management ===================== */
 
-  updateProfile(
-    data: Partial<User>
-  ): Observable<{ success: boolean; user: User; message?: string }> {
-    return this.http
-      .patch<{ success: boolean; user: User; message?: string }>(
-        `${this.API_URL}/auth/profile`,
-        data
-      )
-      .pipe(
-        tap((res) => {
-          if (res.success && res.user) {
-            this.storeUser(res.user);
-            this._user.set(res.user);
+  updateProfile(data: Partial<User>): Observable<any> {
+    return this.http.patch<any>(`${this.API_URL}/api/auth/profile`, data).pipe(
+      tap((res) => {
+        if (res.success) {
+          const currentUser = this.user();
+          if (currentUser) {
+            const updatedUser = { ...currentUser, ...data };
+            this.storeUser(updatedUser as User);
+            this._user.set(updatedUser as User);
           }
-        }),
-        catchError((e) => this.handleHttpError(e))
-      );
+        }
+      }),
+      catchError((e) => this.handleHttpError(e))
+    );
   }
 
   changePassword(data: {
@@ -355,7 +382,7 @@ export class Auth {
     newPassword: string;
   }): Observable<{ success: boolean; message: string }> {
     return this.http
-      .post<{ success: boolean; message: string }>(`${this.API_URL}/auth/change-password`, data)
+      .post<{ success: boolean; message: string }>(`${this.API_URL}/api/auth/change-password`, data)
       .pipe(catchError((e) => this.handleHttpError(e)));
   }
 

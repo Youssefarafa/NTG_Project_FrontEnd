@@ -110,6 +110,18 @@
             </div>
           </div>
 
+          @if (isForgetPasswordEnabled()) {
+          <div class="flex justify-start mt-2">
+            <button
+              type="button"
+              (click)="navigateToForgotPassword()"
+              class="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-600 hover:underline transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md px-2 py-1"
+            >
+              Forgot Password?
+            </button>
+          </div>
+          }
+          
           <p-button
             type="submit"
             [loading]="isLoading()"

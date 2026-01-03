@@ -1,23 +1,21 @@
 export interface User {
-  id: string;
+  id?: string;
   fullName: string;
   email: string;
-  phone: string;
+  phone?: string;
   birthDate?: string | Date; 
-  university: string;
-  faculty: string;
-  department: string;
-  graduationYear: number;
-  role: string; // 'Manager' | 'Candidate'
-  isVerified: boolean;
-  token?: string; 
+  university?: string;
+  faculty?: string;
+  department?: string;
+  graduationYear?: number;
+  role?: string; // 'Manager' | 'Candidate'
+  isVerified?: boolean;
 }
 
 export interface RegisterData {
   fullName: string;
   email: string;
   password: string;
-  phone?: string;
 }
 
 export interface RegisterResponse {

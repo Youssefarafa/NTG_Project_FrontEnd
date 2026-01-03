@@ -1,0 +1,40 @@
+::ng-deep .p-button.p-button-primary,
+::ng-deep .p-button-primary {
+  background-color: var(--primary-600) !important; 
+  border-color: var(--primary-600) !important;
+}
+
+::ng-deep .p-button-outlined.p-button-primary {
+  color: var(--primary-600) !important;
+  border: 2px solid var(--primary-600) !important;
+  background: transparent !important;
+}
+
+::ng-deep .p-button-outlined.p-button-primary:hover {
+  background: var(--primary-50) !important;
+}
+
+::ng-deep .p-inputtext:focus {
+  border-color: var(--primary-500) !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.1) !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.dark p-inputtext {
+    background-color: #151933 !important;
+    color: #ffffff !important;
+    border-color: rgba(79, 70, 229, 0.2) !important;
+}
+
+.dark p-inputtext:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+}

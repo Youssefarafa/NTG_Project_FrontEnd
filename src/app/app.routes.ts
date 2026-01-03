@@ -1,5 +1,12 @@
 import { Routes } from '@angular/router';
-import { authGuard, loginGuard, roleGuard, verifiedGuard } from './Core/guards/AuthGard';
+import {
+  authGuard,
+  loginGuard,
+  roleGuard,
+  verifiedGuard,
+  featureGuard,
+  unverifiedGuard,
+} from './Core/guards/AuthGard';
 
 export const routes: Routes = [
   {
@@ -8,9 +15,9 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
 
+  /* ================= START LAYOUT (Public & Guest) ================= */
   {
     path: '',
-    // canActivate: [loginGuard],
     loadComponent: () => import('./Layout/Start/start-layout').then((m) => m.StartLayout),
     children: [
       {
@@ -20,23 +27,41 @@ export const routes: Routes = [
       },
       {
         path: 'login',
+        // canActivate: [loginGuard], 
         loadComponent: () => import('./Layout/Start/login/login').then((m) => m.Login),
         title: 'Login',
       },
       {
         path: 'register',
+        // canActivate: [loginGuard],
         loadComponent: () => import('./Layout/Start/register/register').then((m) => m.Register),
         title: 'Register',
       },
       {
         path: 'confirmEmail',
+        // canActivate: [unverifiedGuard], 
         loadComponent: () =>
           import('./Layout/Start/confirm-email/confirm-email').then((m) => m.ConfirmEmail),
-        title: 'Confirm Email',
+        title: 'Confirm Your Email',
+      },
+      {
+        path: 'forgotPassword',
+        // canActivate: [featureGuard('isForgetPasswordEnabled')],
+        loadComponent: () =>
+          import('./Layout/Start/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+        title: 'Forgot Password',
+      },
+      {
+        path: 'resetPassword',
+        // canActivate: [featureGuard('isForgetPasswordEnabled')],
+        loadComponent: () =>
+          import('./Layout/Start/reset-password/reset-password').then((m) => m.ResetPassword),
+        title: 'Reset Password',
       },
     ],
   },
 
+  /* ================= CANDIDATE LAYOUT (Protected) ================= */
   {
     path: 'candidate',
     // canActivate: [authGuard, roleGuard(['Candidate']), verifiedGuard],
@@ -69,6 +94,7 @@ export const routes: Routes = [
     ],
   },
 
+  /* ================= MANAGER LAYOUT (Protected) ================= */
   {
     path: 'manager',
     // canActivate: [authGuard, roleGuard(['Manager']), verifiedGuard],
@@ -97,13 +123,17 @@ export const routes: Routes = [
       },
       {
         path: 'processActive/:id',
-        loadComponent: () => import('./Layout/Maneger/process-active/process-active').then((m) => m.ProcessActive),
-        title: 'Edit Job',
+        loadComponent: () =>
+          import('./Layout/Maneger/process-active/process-active').then((m) => m.ProcessActive),
+        title: 'Process Active',
       },
       {
         path: 'processComplete/:id',
-        loadComponent: () => import('./Layout/Maneger/process-complete/process-complete').then((m) => m.ProcessComplete),
-        title: 'Edit Job',
+        loadComponent: () =>
+          import('./Layout/Maneger/process-complete/process-complete').then(
+            (m) => m.ProcessComplete
+          ),
+        title: 'Process Complete',
       },
       {
         path: 'addProcess',
@@ -125,6 +155,7 @@ export const routes: Routes = [
     ],
   },
 
+  /* ================= SYSTEM ROUTES ================= */
   {
     path: 'unauthorized',
     loadComponent: () =>
@@ -133,7 +164,7 @@ export const routes: Routes = [
   },
   {
     path: 'verify-account',
-    canActivate: [authGuard],
+    // canActivate: [unverifiedGuard], 
     loadComponent: () =>
       import('./Layout/Start/confirm-email/confirm-email').then((m) => m.ConfirmEmail),
     title: 'Verify Your Account',
