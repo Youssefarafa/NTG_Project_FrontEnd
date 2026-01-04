@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { delay, Observable, of } from 'rxjs';
 import { DashboardResponse } from '../models/DashboardData';
 import { environment } from '../../Shared/environment';
+import { SKIP_SPINNER } from '../interceptors/AuthInterceptor';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class DashboardService {
   // searchHistory(query: string): Observable<DashboardResponse> {
   //   return this.http.get<DashboardResponse>(`${this.API_URL}/api/dashboard/history/search`, {
   //     params: { q: query },
+  //     context: new HttpContext().set(SKIP_SPINNER, true)
   //   });
   // }
 

@@ -1,12 +1,10 @@
 import { Routes } from '@angular/router';
-import {
-  authGuard,
-  loginGuard,
-  roleGuard,
-  verifiedGuard,
-  featureGuard,
-  unverifiedGuard,
-} from './Core/guards/AuthGard';
+import { authGuard } from './Core/guards/AuthGard';
+import { loginGuard } from './Core/guards/loginGuard';
+import { unverifiedGuard } from './Core/guards/unverifiedGuard';
+import { featureGuard } from './Core/guards/featureGuard';
+import { verifiedGuard } from './Core/guards/verifiedGuard';
+import { roleGuard } from './Core/guards/roleGuard';
 
 export const routes: Routes = [
   {

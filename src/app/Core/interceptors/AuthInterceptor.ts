@@ -12,20 +12,31 @@ import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 
 export const SKIP_SPINNER = new HttpContextToken<boolean>(() => false);
+let activeRequestsCount = 0;
+
 export const authInterceptor = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
   const auth = inject(Auth);
-  const router = inject(Router);
   const spinner = inject(NgxSpinnerService);
   const skipSpinner = req.context.get(SKIP_SPINNER);
 
-  if (!skipSpinner) spinner.show();
+  if (!skipSpinner) {
+    activeRequestsCount++;
+    spinner.show();
+  }
 
   const hideSpinner = () => {
-    if (!skipSpinner) spinner.hide();
+    if (!skipSpinner) {
+      activeRequestsCount--;
+      if (activeRequestsCount <= 0) {
+        activeRequestsCount = 0;
+        spinner.hide();
+      }
+    }
   };
+
   const publicPaths = [
     '/api/auth/login',
     '/api/auth/register',
@@ -35,18 +46,20 @@ export const authInterceptor = (
   ];
 
   const isPublicPath = publicPaths.some((path) => req.url.includes(path));
+
   if (isPublicPath) {
     return next(req).pipe(finalize(hideSpinner));
   }
 
   const token = auth.token;
+
   if (!token && !req.url.includes('/api/auth/refresh')) {
     return next(req).pipe(finalize(hideSpinner));
   }
+
   const authReq = req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`,
-      // 'X-Client-Time': new Date().toISOString(),
     },
   });
 
@@ -75,7 +88,6 @@ export const authInterceptor = (
           auth.logout();
         }
       }
-
       return throwError(() => error);
     }),
     finalize(hideSpinner)
