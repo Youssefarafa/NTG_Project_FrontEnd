@@ -342,5 +342,123 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-}
 
+  :root {
+    --bg-input: #f0fdf4; 
+    --border-input: #99f6e4; 
+    --text-input: #134e4a; 
+
+    --bg-modal-header: #0f766e; 
+    --text-modal-header: #ffffff;
+
+    --bg-modal-body: #f8fafc; 
+    --text-modal-body: #1e293b; 
+
+    --bg-option-hover: #e0f2f1;
+    --bg-option-selected: #0d9488; 
+  }
+
+  .app-dark {
+    --bg-modal-body: #042f2e;
+    --bg-modal-header: #115e59;
+    --text-modal-header: #f0fdfa;
+    --text-modal-body: #ccfbf1;
+    --bg-input: #134e4a;
+    --border-input: #2dd4bf;
+    --text-input: #f0fdfa;
+    --bg-option-hover: #115e59;
+    --bg-option-selected: #14b8a6;
+  }
+
+  body .p-dialog {
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  body .p-dialog .p-dialog-header {
+    background-color: var(--bg-modal-header) !important;
+    color: var(--text-modal-header) !important;
+    padding: 1.2rem 1.5rem !important;
+    border-bottom: none !important;
+  }
+
+  body .p-dialog .p-dialog-content {
+    background-color: var(--bg-modal-body) !important;
+    color: var(--text-modal-body) !important;
+    padding: 2rem 1.5rem !important;
+  }
+
+  body .p-dialog .p-dialog-footer {
+    background-color: var(--bg-modal-body) !important;
+    padding: 1rem 1.5rem !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+  }
+
+  body .p-select-overlay {
+    background-color: var(--bg-modal-body) !important;
+    border: 1px solid var(--border-input) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  body .p-select-option {
+    color: var(--text-modal-body) !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  body .p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus,
+  body .p-select-option:not(.p-select-option-selected):not(.p-disabled):hover {
+    background-color: var(--bg-option-hover) !important;
+  }
+
+  .app-dark body .p-select-option:hover {
+    color: white !important; 
+  }
+
+  body .p-confirm-dialog-accept,
+  body .p-dialog .p-button.p-button-primary {
+    background-color: var(--bg-modal-header) !important;
+    border: 1px solid var(--bg-modal-header) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  body .p-confirm-dialog-accept:hover,
+  body .p-dialog .p-button.p-button-primary:hover {
+    filter: brightness(1.1) !important; 
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  body .p-confirm-dialog-reject,
+  body .p-dialog .p-button-secondary {
+    background: transparent !important;
+    width: 20px;
+    color: #ffffff !important;
+  }
+
+  body .p-confirm-dialog-reject:hover,
+  body .p-dialog .p-button-secondary:hover {
+    background: #fff1f2 !important;
+    color: #ff2121 !important; 
+  }
+
+  .app-dark body .p-confirm-dialog-reject:hover {
+    background: rgba(225, 29, 72, 0.1) !important;
+    color: #fda4af !important;
+  }
+
+  body .p-inputtext,
+  body .p-select {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-input) !important;
+    color: var(--text-input) !important;
+    border-radius: 8px !important;
+  }
+
+  body .p-inputtext:focus,
+  body .p-select:focus {
+    border-color: var(--bg-modal-header) !important;
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2) !important;
+  }
+}

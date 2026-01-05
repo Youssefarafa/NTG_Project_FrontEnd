@@ -1,6 +1,13 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ApplicantJoinData, ApplicantsResponse, CreateProcessPayload } from '../models/ProcessData';
+import {
+  ApplicantJoinData,
+  ApplicantsResponse,
+  CreateProcessPayload,
+  FullProcessResponse,
+  ProcessCandidateDetails,
+  ProcessResponse,
+} from '../models/ProcessData';
 import { environment } from '../../Shared/environment';
 import { Observable, of, delay } from 'rxjs';
 
@@ -17,13 +24,30 @@ export class Process {
   //   return this.http.post<ProcessResponse>(`${this.API_URL}/api/process/create`, payload);
   // }
 
+  // getFullProcessDetails(processId: string): Observable<FullProcessResponse> {
+  //   return this.http.get<FullProcessResponse>(`${this.API_URL}/api/process/details/${processId}`);
+  // }
+
+  // updateEvaluations(processId: string, evaluations: any[]): Observable<ProcessResponse> {
+  //   const url = `${this.API_URL}/api/process/evaluations/${processId}`;
+  //   return this.http.put<ProcessResponse>(url, evaluations);
+  // }
+
+  // completeProcess(processId: string): Observable<ProcessResponse> {
+  //   const url = `${this.API_URL}/api/process/complete/${processId}`;
+  //   const body = {
+  //     completedAt: new Date().toISOString(),
+  //   };
+  //   return this.http.post<ProcessResponse>(url, body);
+  // }
+
   // ==========================================
   // 2. Mock API Methods
   // ==========================================
   private mockApplicants = signal<ApplicantJoinData[]>([
     {
       id: 'app-101',
-      fullName: 'Ahmed Mohamed Ali',
+      fullName: 'youssef arafa',
       email: 'ahmed.m@example.com',
       phone: '+20123456789',
       birthDate: '1996-05-15',
@@ -31,7 +55,7 @@ export class Process {
       faculty: 'Engineering',
       department: 'Computer Science',
       graduationYear: 2018,
-      cvFile: 'cv-ahmed.pdf',
+      cvFile: 'https://drive.google.com/file/d/your-google-drive-id-1/view?usp=sharing',
       hasInternalReference: true,
       internalReferees: [{ name: 'Eng. Youssef', email: 'khaled@company.com' }],
       workExperience: [
@@ -54,7 +78,7 @@ export class Process {
       faculty: 'Computer & IT',
       department: 'Software Engineering',
       graduationYear: 2020,
-      cvFile: 'cv-sara.pdf',
+      cvFile: 'https://drive.google.com/file/d/your-google-drive-id-1/view?usp=sharing',
       hasInternalReference: false,
       internalReferees: [],
       workExperience: [
@@ -94,5 +118,54 @@ export class Process {
     };
 
     return of(mockResponse).pipe(delay(1500));
+  }
+
+  getFullProcessDetails(processId: string): Observable<FullProcessResponse> {
+    console.log(`Mock: Fetching full details for process ID: ${processId}`);
+    const candidatesWithEvaluations: ProcessCandidateDetails[] = this.mockApplicants().map(
+      (applicant, index) => ({
+        ...applicant,
+        status: index === 0 ? 'Technically Approved' : 'New (ShortListed)',
+        grade: index === 0 ? '92/100' : undefined,
+        feedback: index === 0 ? 'Excellent technical skills and cultural fit.' : undefined,
+      })
+    );
+
+    const mockResponse: FullProcessResponse = {
+      success: true,
+      message: 'Process details loaded successfully from Mock API',
+      data: {
+        id: processId,
+        jobTitle: 'Senior Frontend Developer (Angular)',
+        status: 'Completed',
+        candidates: candidatesWithEvaluations,
+      },
+    };
+
+    return of(mockResponse).pipe(delay(1200));
+  }
+
+  updateEvaluations(processId: string, evaluations: any[]): Observable<ProcessResponse> {
+    console.log('Mock: Saving Evaluations for process:', processId, evaluations);
+    const mockResponse: ProcessResponse = {
+      success: true,
+      message: 'All evaluations have been saved successfully.',
+    };
+    return of(mockResponse).pipe(delay(1000));
+  }
+
+  completeProcess(processId: string): Observable<ProcessResponse> {
+    console.log(`Mock API: Ending process with ID: ${processId}`);
+
+    const mockResponse = {
+      success: true,
+      message: 'Hiring process has been marked as Completed successfully.',
+      data: {
+        id: processId,
+        status: 'Completed',
+        completedAt: new Date(),
+      },
+    };
+    return of(mockResponse).pipe(delay(1000));
   }
 }

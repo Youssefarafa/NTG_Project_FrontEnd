@@ -1,70 +1,103 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-// import { JobApplication } from '../../../Core/models/MyApplication';
+import { Component, OnInit, inject, signal , computed} from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Process } from '../../../Core/services/Process';
+import { FullProcessResponse, ProcessCandidateDetails } from '../../../Core/models/ProcessData';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ToastModule } from 'primeng/toast';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { DatePipe, CommonModule } from '@angular/common';
+import { DialogModule } from 'primeng/dialog'; 
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-process-complete',
   standalone: true,
-  // imports: [DatePipe, CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    TagModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    ToastModule,
+    RouterModule,
+    DialogModule,
+    InputTextModule,
+  ],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './process-complete.html',
   styleUrl: './process-complete.css',
 })
-export class ProcessComplete {
-  private route = inject(ActivatedRoute);
+export class ProcessComplete implements OnInit {
+  searchTerm = signal('');
   private processService = inject(Process);
+  private messageService = inject(MessageService);
+  private route = inject(ActivatedRoute);
 
-  // processId = signal<string | null>(null);
-  // candidatesList = signal<any[]>([]); // قائمة المتقدمين في هذه العملية
-  // selectedApplication = signal<any | null>(null);
-  // isLoading = signal<boolean>(false);
-  // error = signal<string | null>(null);
+  processData = signal<FullProcessResponse['data'] | null>(null);
+  isLoading = signal(false);
+  
+  displayModal = signal(false);
+  selectedCandidate = signal<ProcessCandidateDetails | null>(null);
 
-  // ngOnInit() {
-  //   const id = this.route.snapshot.paramMap.get('id');
-  //   if (id) {
-  //     this.processId.set(id);
-  //     this.loadAllData(id);
-  //   }
-  // }
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) this.loadProcessDetails(id);
+  }
 
-  // async loadAllData(id: string) {
-  //   this.isLoading.set(true);
+  loadProcessDetails(id: string) {
+    this.isLoading.set(true);
+    this.processService.getFullProcessDetails(id).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.processData.set(res.data);
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: res.message });
+        }
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Server Connection Failed' });
+      },
+    });
+  }
 
-  //   // 1. جلب قائمة المتقدمين أولاً (نفترض أن jobId هو 2 كمثال أو نمرره ديناميكياً)
-  //   // هنا نستخدم الـ ID القادم من الراوتر لجلب المتقدمين التابعين له
-  //   this.processService.getApplicantsByJob('2').subscribe({
-  //     next: (candidates) => {
-  //       this.candidatesList.set(candidates);
+  getStatusSeverity(status: string): 'success' | 'danger' | 'warn' | 'info' | 'secondary' {
+    const s = status.toLowerCase();
+    if (s.includes('approved')) return 'success';
+    if (s.includes('rejected')) return 'danger';
+    if (s.includes('waiting')) return 'warn';
+    if (s.includes('interview')) return 'info';
+    return 'secondary';
+  }
 
-  //       // 2. تحميل تفاصيل أول متقدم تلقائياً إذا وجدت القائمة
-  //       if (candidates.length > 0) {
-  //         this.loadApplicationData(candidates[0].id);
-  //       } else {
-  //         // إذا لم نجد قائمة، نحاول تحميل الـ ID المباشر من الرابط
-  //         this.loadApplicationData(id);
-  //       }
-  //     },
-  //     error: () => this.isLoading.set(false)
-  //   });
-  // }
+  countByStatus(candidates: ProcessCandidateDetails[], status: string): number {
+    return candidates.filter((c) => c.status === status).length;
+  }
 
-  // loadApplicationData(candidateId: string) {
-  //   this.processService.getApplicationDetails(candidateId).subscribe({
-  //     next: (data) => {
-  //       this.selectedApplication.set(data);
-  //       this.isLoading.set(false);
-  //     },
-  //     error: (err) => {
-  //       this.error.set('Candidate details not found.');
-  //       this.isLoading.set(false);
-  //     },
-  //   });
-  // }
+  viewDetails(candidate: ProcessCandidateDetails) {
+    this.selectedCandidate.set(candidate);
+    this.displayModal.set(true);
+  }
 
-  // selectCandidate(id: string) {
-  //   this.isLoading.set(true);
-  //   this.loadApplicationData(id);
-  // }
+  openCV(url: string) {
+    window.open(url, '_blank');
+  }
+  
+  filteredCandidates = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const data = this.processData();
+    if (!data) return [];
+    if (!term) return data.candidates;
+
+    return data.candidates.filter(c => 
+      c.fullName.toLowerCase().includes(term) || 
+      c.email.toLowerCase().includes(term)
+    );
+  });
+
+  onSearchChange(event: any) {
+    this.searchTerm.set(event.target.value);
+  }
 }

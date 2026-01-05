@@ -49,3 +49,30 @@ export interface ProcessResponse {
   message: string;
   data?: any; 
 }
+
+export type CandidateStatus = 
+  | 'New (ShortListed)'
+  | 'Called for Exam'
+  | 'Finished Exam'
+  | 'Called for Interview'
+  | 'Interviewed'
+  | 'Technically Approved'
+  | 'Technically Rejected'
+  | 'Technically Waiting List';
+
+export interface ProcessCandidateDetails extends ApplicantJoinData {
+  status: CandidateStatus;
+  grade?: string;
+  feedback?: string;
+}
+
+export interface FullProcessResponse {
+  success: boolean;
+  data: {
+    id: string;
+    jobTitle: string;
+    status: 'Active' | 'Completed';
+    candidates: ProcessCandidateDetails[]; 
+  };
+  message?: string;
+}

@@ -1,178 +1,342 @@
-<!-- <div class="container mx-auto px-5 py-8 max-w-6xl">
-  <div class="mb-8 flex items-center justify-between">
-    <button
-      routerLink="/manager/dashboard"
-      class="flex items-center text-primary-500 hover:text-primary-800 dark:text-primary-400 font-bold transition-all text-sm group"
-    >
-      <i class="pi pi-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Back to
-      Dashboard
-    </button>
-    <div class="flex items-center gap-3">
-      <span class="text-xs font-bold text-primary-400">Process ID: {{ processId() }}</span>
-      <span
-        class="px-4 py-1.5 bg-primary-950 text-white dark:bg-primary-100 dark:text-primary-950 rounded-full text-[10px] font-black uppercase tracking-widest"
-      >
-        Completed Process
-      </span>
-    </div>
-  </div>
+<p-toast></p-toast>
 
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-    <div class="lg:col-span-1 space-y-4">
-      <h3
-        class="text-sm font-black text-primary-900 dark:text-primary-100 uppercase tracking-widest px-2"
-      >
-        Candidates
-      </h3>
-      <div class="flex flex-col gap-2">
-        @for (c of candidatesList(); track c.id) {
+<div
+  class="min-h-screen bg-primary-50 dark:bg-primary-950 p-4 lg:p-8 transition-colors duration-300"
+>
+  <div class="max-w-7xl mx-auto">
+    @if (processData(); as process) {
+    <div
+      class="bg-white dark:bg-primary-900 rounded-3xl shadow-sm border-2 border-primary-500/20 dark:border-primary-500/40 p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-6"
+    >
+      <div class="flex items-center gap-5">
+        <div class="bg-primary-500 p-4 rounded-2xl shadow-lg shadow-primary-500/20">
+          <i class="pi pi-briefcase text-white text-3xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-black text-primary-900 dark:text-primary-50 leading-tight">
+            {{ process.jobTitle }}
+          </h1>
+          <div class="flex items-center gap-3 mt-1">
+            <p-tag
+              [value]="process.status"
+              [severity]="process.status === 'Active' ? 'success' : 'secondary'"
+              styleClass="text-[10px] px-3 font-bold"
+            ></p-tag>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
         <button
-          (click)="selectCandidate(c.id)"
-          [class.border-teal-500]="selectedApplication()?.applicantName === c.name"
-          [class.bg-white]="selectedApplication()?.applicantName === c.name"
-          class="flex items-center gap-3 p-3 rounded-xl border-2 border-transparent hover:border-primary-200 bg-primary-50/50 dark:bg-primary-800/50 transition-all text-left group"
+          pButton
+          icon="pi pi-arrow-left"
+          label="Back to Dashboard"
+          routerLink="/manager"
+          class="p-button-text p-button-secondary !rounded-xl text-primary-600 dark:!text-primary-300 hover:!bg-primary-700 hover:!text-primary-50 dark:hover:!bg-primary-300 dark:hover:!text-primary-950 transition-all duration-200"
+        ></button>
+        <button
+          pButton
+          icon="pi pi-refresh"
+          (click)="loadProcessDetails(process.id)"
+          class="p-button-rounded p-button-text !text-primary-500"
+        ></button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div
+        class="bg-white dark:bg-primary-900 p-6 rounded-3xl border-2 border-primary-500/10 dark:border-primary-500/30 shadow-sm transition-transform hover:scale-[1.02]"
+      >
+        <span
+          class="text-[10px] font-black text-primary-400 dark:text-primary-300 uppercase tracking-widest"
+          >Total Candidates</span
+        >
+        <p class="text-3xl font-black text-primary-900 dark:text-white mt-1">
+          {{ process.candidates.length }}
+        </p>
+      </div>
+      <div
+        class="bg-white dark:bg-primary-900 p-6 rounded-3xl border-2 border-green-500/20 dark:border-green-500/40 shadow-sm border-l-[6px] border-l-green-500 transition-transform hover:scale-[1.02]"
+      >
+        <span
+          class="text-[10px] font-black text-green-600/70 dark:text-green-400 uppercase tracking-widest"
+          >Approved</span
+        >
+        <p class="text-3xl font-black text-green-600 dark:text-green-400 mt-1">
+          {{ countByStatus(process.candidates, 'Technically Approved') }}
+        </p>
+      </div>
+      <div
+        class="bg-white dark:bg-primary-900 p-6 rounded-3xl border-2 border-primary-500/20 dark:border-primary-500/40 shadow-sm border-l-[6px] border-l-primary-500 transition-transform hover:scale-[1.02]"
+      >
+        <span
+          class="text-[10px] font-black text-primary-500 dark:text-primary-300 uppercase tracking-widest"
+          >Pending Review</span
+        >
+        <p class="text-3xl font-black text-primary-600 dark:text-primary-200 mt-1">
+          {{ countByStatus(process.candidates, 'New (ShortListed)') }}
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="bg-white dark:bg-primary-900 rounded-[2.5rem] shadow-xl border-2 border-primary-500/10 dark:border-primary-500/30 overflow-hidden"
+    >
+      <div
+        class="p-6 border-b border-primary-50 dark:border-primary-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-primary-50/30 dark:bg-primary-800/20"
+      >
+        <h2
+          class="text-lg font-black text-primary-800 dark:text-primary-100 uppercase tracking-tight"
+        >
+          Candidates Pipeline
+        </h2>
+        <div class="relative w-full sm:w-72">
+          <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-primary-400"></i>
+          <input
+            type="text"
+            pInputText
+            placeholder="Search name or email..."
+            (input)="onSearchChange($event)"
+            class="w-full !pl-10 !rounded-2xl !bg-white dark:!bg-primary-950 !border-primary-200 dark:!border-primary-700 !text-sm focus:ring-2 focus:ring-primary-500/50"
+          />
+        </div>
+      </div>
+
+      <div
+        class="hidden lg:grid grid-cols-3 px-8 py-4 bg-primary-50/10 dark:bg-primary-950/20 border-b border-primary-50 dark:border-primary-800 text-[10px] font-black text-primary-400 uppercase tracking-widest"
+      >
+        <div>Candidate Info</div>
+        <div class="text-center">Academic Status</div>
+        <div class="text-right">Quick Actions</div>
+      </div>
+
+      <div class="divide-y divide-primary-50 dark:divide-primary-800">
+        @for (candidate of filteredCandidates(); track candidate.id) {
+        <div
+          class="p-6 hover:bg-primary-50/50 dark:hover:bg-primary-800/40 transition-all duration-300 group"
+        >
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+            <div class="flex gap-4 items-center">
+              <div
+                class="w-14 h-14 shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-primary-500/30"
+              >
+                {{ candidate.fullName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="overflow-hidden">
+                <h3
+                  class="text-lg font-bold text-primary-900 dark:text-primary-50 truncate group-hover:text-primary-600 transition-colors"
+                >
+                  {{ candidate.fullName }}
+                </h3>
+                <p class="text-xs text-primary-500 truncate mb-2">{{ candidate.email }}</p>
+                <p-tag
+                  [value]="candidate.status"
+                  [severity]="getStatusSeverity(candidate.status)"
+                  styleClass="text-[8px] uppercase px-2 font-black"
+                ></p-tag>
+              </div>
+            </div>
+
+            <div class="flex justify-center items-center gap-12 text-center py-4 lg:py-0">
+              <div class="w-24">
+                <p
+                  class="text-[9px] uppercase font-black text-primary-400 dark:text-primary-500 mb-1"
+                >
+                  Graduation
+                </p>
+                <p class="text-sm font-bold text-primary-700 dark:text-primary-200">
+                  {{ candidate.graduationYear || 'N/A' }}
+                </p>
+              </div>
+              <div class="w-[1px] h-8 bg-primary-100 dark:bg-primary-800"></div>
+              <div class="w-24">
+                <p
+                  class="text-[9px] uppercase font-black text-primary-400 dark:text-primary-500 mb-1"
+                >
+                  Internal Ref
+                </p>
+                <i
+                  class="pi text-lg"
+                  [ngClass]="
+                    candidate.hasInternalReference
+                      ? 'pi-verified text-primary-500'
+                      : 'pi-times-circle text-primary-500 dark:text-primary-500'
+                  "
+                ></i>
+              </div>
+            </div>
+
+            <div class="flex gap-3 justify-end items-center">
+              <button
+                pButton
+                label="Full Profile"
+                icon="pi pi-id-card"
+                (click)="viewDetails(candidate)"
+                class="p-button-text p-button-sm !text-primary-600 dark:!text-primary-400 font-black"
+              ></button>
+              <div class="w-[1px] h-6 bg-primary-100 dark:bg-primary-800 mx-1"></div>
+              <button
+                pButton
+                icon="pi pi-file-pdf"
+                (click)="openCV(candidate.cvFile)"
+                class="p-button-primary p-button-sm !rounded-xl shadow-md transition-transform hover:scale-105"
+                pTooltip="Open CV"
+              ></button>
+            </div>
+          </div>
+        </div>
+        } @empty {
+        <div class="p-20 text-center flex flex-col items-center">
+          <i class="pi pi-search text-5xl text-primary-100 dark:text-primary-800 mb-4"></i>
+          <p class="text-primary-400 font-bold">No candidates found matching your criteria.</p>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="displayModal"
+  [modal]="true"
+  [header]="'Candidate Comprehensive File'"
+  [style]="{ width: '95vw', maxWidth: '850px' }"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="primary-dialog"
+  maskStyleClass="backdrop-blur-sm"
+>
+  @if (selectedCandidate(); as c) {
+  <div class="space-y-8 pt-4 pb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div
+        class="p-4 bg-primary-50/50 dark:bg-primary-800/30 rounded-2xl border border-primary-100 dark:border-primary-700"
+      >
+        <p class="text-[10px] font-black text-primary-400 uppercase">Contact Phone</p>
+        <p class="font-bold text-primary-900 dark:text-primary-50">{{ c.phone || 'N/A' }}</p>
+      </div>
+      <div
+        class="p-4 bg-primary-50/50 dark:bg-primary-800/30 rounded-2xl border border-primary-100 dark:border-primary-700"
+      >
+        <p class="text-[10px] font-black text-primary-400 uppercase">Birth Date</p>
+        <p class="font-bold text-primary-900 dark:text-primary-50">{{ c.birthDate || 'N/A' }}</p>
+      </div>
+      <div
+        class="p-4 bg-primary-50/50 dark:bg-primary-800/30 rounded-2xl border border-primary-100 dark:border-primary-700"
+      >
+        <p class="text-[10px] font-black text-primary-400 uppercase">Current Status</p>
+        <p-tag [value]="c.status" [severity]="getStatusSeverity(c.status)"></p-tag>
+      </div>
+    </div>
+
+    <div
+      class="bg-primary-50/20 dark:bg-primary-800/10 p-6 rounded-3xl border-2 border-primary-500/5"
+    >
+      <h4 class="text-xs font-black text-primary-500 uppercase mb-4 flex items-center gap-2">
+        <i class="pi pi-book"></i> Education Details
+      </h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+        <div>
+          <span class="text-primary-400 font-bold block text-[10px] uppercase">University</span>
+          <span class="dark:text-white font-semibold">{{ c.university }}</span>
+        </div>
+        <div>
+          <span class="text-primary-400 font-bold block text-[10px] uppercase">Faculty</span>
+          <span class="dark:text-white font-semibold">{{ c.faculty }}</span>
+        </div>
+        <div>
+          <span class="text-primary-400 font-bold block text-[10px] uppercase">Department</span>
+          <span class="dark:text-white font-semibold">{{ c.department }}</span>
+        </div>
+        <div>
+          <span class="text-primary-400 font-bold block text-[10px] uppercase">Graduation</span>
+          <span class="dark:text-white font-semibold">{{ c.graduationYear }}</span>
+        </div>
+      </div>
+    </div>
+
+    @if(c.hasInternalReference) {
+    <div class="bg-teal-50/30 dark:bg-teal-900/10 p-6 rounded-3xl border-2 border-teal-500/10">
+      <h4 class="text-xs font-black text-teal-600 uppercase mb-4 flex items-center gap-2">
+        <i class="pi pi-users"></i> Internal Endorsements
+      </h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        @for(ref of c.internalReferees; track ref.email) {
+        <div
+          class="bg-white dark:bg-primary-900 p-3 rounded-xl shadow-sm border border-teal-100 dark:border-teal-800 flex items-center gap-3"
         >
           <div
-            class="w-8 h-8 rounded-full bg-primary-200 dark:bg-primary-700 flex items-center justify-center text-xs font-bold text-primary-700 dark:text-primary-300"
+            class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-800 flex items-center justify-center text-teal-600"
           >
-            {{ c.name.charAt(0) }}
+            <i class="pi pi-user text-xs"></i>
           </div>
-          <div class="overflow-hidden">
-            <p class="text-xs font-bold text-primary-900 dark:text-white truncate">{{ c.name }}</p>
-            <p class="text-[10px] text-primary-400 truncate">{{ c.email }}</p>
+          <div>
+            <p class="text-sm font-bold">{{ ref.name }}</p>
+            <p class="text-[10px] text-primary-400">{{ ref.email }}</p>
           </div>
-        </button>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <div>
+      <h4
+        class="text-xs font-black text-primary-500 uppercase mb-6 tracking-widest flex items-center gap-2"
+      >
+        <i class="pi pi-briefcase"></i> Work Experience
+      </h4>
+      <div class="space-y-8">
+        @for(exp of c.workExperience; track $index) {
+        <div
+          class="relative pl-8 border-l-2 border-primary-100 dark:border-primary-800 pb-2 last:border-0"
+        >
+          <div
+            class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary-500 border-4 border-white dark:border-primary-900 shadow-sm"
+          ></div>
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1">
+            <p class="font-black text-primary-900 dark:text-primary-50 text-base leading-none">
+              {{ exp.jobTitle }}
+            </p>
+            <span
+              class="text-[10px] font-black text-primary-400 bg-primary-50 dark:bg-primary-800 px-2 py-1 rounded-md"
+              >{{ exp.startDate }} — {{ exp.endDate || 'Present' }}</span
+            >
+          </div>
+          <p class="text-sm font-bold text-primary-500 mb-3">{{ exp.companyName }}</p>
+          <div
+            class="p-4 bg-slate-50 dark:bg-primary-800/40 rounded-2xl text-xs text-primary-600 dark:text-primary-300 leading-relaxed italic border border-slate-100 dark:border-primary-800"
+          >
+            <i class="pi pi-info-circle mr-1 opacity-50"></i>{{ exp.achievements }}
+          </div>
+        </div>
+        } @empty {
+        <p class="text-center text-primary-300 italic text-sm py-4">No work experience provided.</p>
         }
       </div>
     </div>
 
-    <div class="lg:col-span-3">
-      @if (isLoading()) {
-      <div class="flex flex-col items-center justify-center py-20 space-y-4">
-        <i class="pi pi-spin pi-spinner text-4xl text-teal-600"></i>
-        <p class="text-primary-400 font-bold animate-pulse">Loading candidate details...</p>
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t-2 border-primary-50 dark:border-primary-800 pt-8"
+    >
+      <div
+        class="p-5 bg-primary-900 dark:bg-primary-50 rounded-3xl text-white dark:text-primary-900 shadow-xl shadow-primary-500/10"
+      >
+        <span class="text-[10px] font-black uppercase opacity-60">Final Evaluation Grade</span>
+        <div class="text-4xl font-black mt-1">{{ c.grade || '---' }}</div>
       </div>
-      } @else if (selectedApplication()) {
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 animate-fade-in">
-        <div class="xl:col-span-1 space-y-6">
-          <div
-            class="bg-white dark:bg-primary-800 border border-primary-100 dark:border-primary-700 rounded-3xl p-6 shadow-sm"
-          >
-            <div class="flex flex-col items-center text-center">
-              <div
-                class="w-24 h-24 bg-primary-100 dark:bg-primary-700 rounded-full flex items-center justify-center text-3xl font-black text-primary-600 dark:text-primary-300 mb-4 border-4 border-white dark:border-primary-900 shadow-xl"
-              >
-                {{ selectedApplication()?.applicantName?.charAt(0) }}
-              </div>
-              <h2 class="text-xl font-black text-primary-950 dark:text-white leading-tight">
-                {{ selectedApplication()?.applicantName }}
-              </h2>
-            </div>
-
-            <div class="mt-8 space-y-4 border-t border-primary-50 dark:border-primary-700/50 pt-6">
-              <div class="flex items-center gap-3">
-                <i class="pi pi-phone text-teal-600"></i>
-                <span class="text-sm font-bold text-primary-700 dark:text-primary-300">{{
-                  selectedApplication()?.phone
-                }}</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <i class="pi pi-file-pdf text-teal-600"></i>
-                <span class="text-sm font-bold text-primary-700 dark:text-primary-300 truncate">{{
-                  selectedApplication()?.cvFile
-                }}</span>
-              </div>
-            </div>
-          </div>
-
-          @if (selectedApplication()?.hasInternalReference) {
-          <div
-            class="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-100 dark:border-emerald-800 p-4 rounded-2xl"
-          >
-            <h5
-              class="text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase mb-2"
-            >
-              Reference
-            </h5>
-            @for (ref of selectedApplication()?.internalReferees; track ref.email) {
-            <p class="text-sm font-bold text-primary-900 dark:text-primary-100">{{ ref.name }}</p>
-            }
-          </div>
-          }
-        </div>
-
-        <div class="xl:col-span-2 space-y-6">
-          <div
-            class="bg-white dark:bg-primary-800 border border-primary-100 dark:border-primary-700 rounded-3xl p-8 shadow-sm"
-          >
-            <h3
-              class="text-lg font-black text-primary-950 dark:text-white mb-6 flex items-center gap-2"
-            >
-              <i class="pi pi-book text-primary-400"></i> Education
-            </h3>
-            <div class="grid grid-cols-2 gap-y-6">
-              <div>
-                <p class="text-[10px] font-black text-primary-400 uppercase tracking-widest">
-                  University
-                </p>
-                <p class="font-bold text-primary-800 dark:text-primary-100">
-                  {{ selectedApplication()?.university }}
-                </p>
-              </div>
-              <div>
-                <p class="text-[10px] font-black text-primary-400 uppercase tracking-widest">
-                  Graduation
-                </p>
-                <p class="font-bold text-primary-800 dark:text-primary-100">
-                  {{ selectedApplication()?.graduationYear }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="bg-white dark:bg-primary-800 border border-primary-100 dark:border-primary-700 rounded-3xl p-8 shadow-sm"
-          >
-            <h3
-              class="text-lg font-black text-primary-950 dark:text-white mb-6 flex items-center gap-2"
-            >
-              <i class="pi pi-briefcase text-primary-400"></i> Work Experience
-            </h3>
-            <div
-              class="space-y-8 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-primary-50 dark:before:bg-primary-700"
-            >
-              @for (exp of selectedApplication()?.workExperience; track exp.companyName) {
-              <div class="relative pl-10 group">
-                <div
-                  class="absolute left-0 top-1.5 w-6 h-6 bg-white dark:bg-primary-800 border-2 border-primary-200 dark:border-primary-600 rounded-full group-hover:border-teal-500 transition-colors z-10 flex items-center justify-center"
-                >
-                  <div
-                    class="w-2 h-2 bg-primary-200 dark:bg-primary-600 rounded-full group-hover:bg-teal-500 transition-colors"
-                  ></div>
-                </div>
-                <div class="flex justify-between mb-1">
-                  <h4 class="font-black text-primary-900 dark:text-white">{{ exp.jobTitle }}</h4>
-                  <span
-                    class="text-[9px] font-bold px-2 py-0.5 bg-primary-50 dark:bg-primary-900 text-primary-500 rounded uppercase"
-                  >
-                    {{ exp.startDate | date : 'MMM yyyy' }} - {{ exp.endDate | date : 'MMM yyyy' }}
-                  </span>
-                </div>
-                <p class="text-xs font-bold text-teal-700 dark:text-teal-400 mb-2">
-                  {{ exp.companyName }}
-                </p>
-                <p
-                  class="text-[11px] text-primary-500 dark:text-primary-400 leading-relaxed italic bg-primary-50/50 dark:bg-primary-900/30 p-3 rounded-xl border border-primary-50 dark:border-primary-700/50"
-                >
-                  "{{ exp.achievements }}"
-                </p>
-              </div>
-              }
-            </div>
-          </div>
-        </div>
+      <div
+        class="p-5 bg-white dark:bg-primary-800/50 rounded-3xl border border-primary-100 dark:border-primary-700"
+      >
+        <span class="text-[10px] font-black text-primary-400 uppercase"
+          >Technical Recruiter Feedback</span
+        >
+        <p class="text-sm font-medium text-primary-700 dark:text-primary-200 mt-2 leading-snug">
+          {{ c.feedback || 'The candidate is still undergoing the technical assessment phase.' }}
+        </p>
       </div>
-      }
     </div>
   </div>
-</div> -->
+  }
+</p-dialog>
