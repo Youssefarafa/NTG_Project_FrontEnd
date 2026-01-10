@@ -58,7 +58,7 @@
           </td>
           <td class="py-4 px-6 max-w-xs">
             <div class="flex flex-wrap gap-1">
-              @for (res of job.responsibilities?.slice(0, 2); track $index) {
+              @for (res of job.responsibilities?.slice(0, 2); track res) {
               <span
                 class="text-[10px] bg-teal-100 dark:bg-teal-800 px-2 py-0.5 rounded italic truncate"
               >
@@ -73,7 +73,7 @@
           </td>
           <td class="py-4 px-6">
             <div class="flex flex-wrap gap-1">
-              @for (skill of job.requiredSkills; track $index) {
+              @for (skill of job.requiredSkills; track skill) {
               <span
                 class="bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-[10px] px-2 py-0.5 rounded-full border border-teal-100 dark:border-teal-800"
               >
@@ -148,7 +148,7 @@
                     Responsibilities:
                   </h4>
                   <div class="flex flex-wrap gap-1">
-                    @for (res of job.responsibilities?.slice(0, 3); track $index) {
+                    @for (res of job.responsibilities?.slice(0, 3); track res) {
                     <span
                       class="text-[11px] bg-teal-50 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 px-2 py-1 rounded border border-teal-100 dark:border-teal-800 italic"
                     >
@@ -167,7 +167,7 @@
                     Skills:
                   </h4>
                   <div class="flex flex-wrap gap-2">
-                    @for (skill of job.requiredSkills; track $index) {
+                    @for (skill of job.requiredSkills; track skill) {
                     <span
                       class="bg-teal-600 text-white text-[10px] px-2.5 py-1 rounded-full shadow-sm"
                     >

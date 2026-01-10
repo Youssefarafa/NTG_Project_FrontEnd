@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -10,6 +18,7 @@ import { ToastModule } from 'primeng/toast';
 import { DatePickerModule } from 'primeng/datepicker';
 import { Jobs } from '../../../Core/services/Jobs';
 import { Job, JobsResponse } from '../../../Core/models/JobsData';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-add-job',
@@ -27,6 +36,7 @@ import { Job, JobsResponse } from '../../../Core/models/JobsData';
   providers: [MessageService],
   templateUrl: './add-job.html',
   styleUrl: './add-job.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddJob implements OnInit {
   private fb = inject(FormBuilder);
@@ -34,6 +44,8 @@ export class AddJob implements OnInit {
   private messageService = inject(MessageService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   minDate: Date = new Date();
   addJobForm: FormGroup;
@@ -65,32 +77,36 @@ export class AddJob implements OnInit {
   }
 
   loadJobData(id: string) {
-    this.jobsService.getJobById(id).subscribe({
-      next: (res: JobsResponse) => {
-        if (res.success && res.data) {
-          const job = res.data as Job;
+    this.jobsService
+      .getJobById(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res: JobsResponse) => {
+          if (res.success && res.data) {
+            const job = res.data as Job;
 
-          this.responsibilities.clear();
-          this.requiredSkills.clear();
+            this.responsibilities.clear();
+            this.requiredSkills.clear();
 
-          job.responsibilities?.forEach((res: string) => this.addResponsibility(res));
-          job.requiredSkills?.forEach((skill: string) => this.addSkill(skill));
+            job.responsibilities?.forEach((res: string) => this.addResponsibility(res));
+            job.requiredSkills?.forEach((skill: string) => this.addSkill(skill));
 
-          const jobData = {
-            ...job,
-            expiresAt: job.expiresAt ? new Date(job.expiresAt) : null,
-          };
+            const jobData = {
+              ...job,
+              expiresAt: job.expiresAt ? new Date(job.expiresAt) : null,
+            };
 
-          this.addJobForm.patchValue(jobData);
-        } else {
-          this.showError(res.message || 'Job data not found');
-        }
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Could not load job data';
-        this.showError(errorMsg);
-      },
-    });
+            this.addJobForm.patchValue(jobData);
+          } else {
+            this.showError(res.message || 'Job data not found');
+          }
+          this.cdRef.markForCheck();
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Could not load job data';
+          this.showError(errorMsg);
+        },
+      });
   }
 
   get responsibilities() {
@@ -104,35 +120,40 @@ export class AddJob implements OnInit {
     this.responsibilities.push(
       this.fb.control(value, [Validators.required, Validators.minLength(10)])
     );
+    this.cdRef.markForCheck();
   }
 
   addSkill(value: string = '') {
     this.requiredSkills.push(
       this.fb.control(value, [Validators.required, Validators.minLength(5)])
     );
+    this.cdRef.markForCheck();
   }
 
   removeResponsibility(index: number) {
     if (this.responsibilities.length > 1) this.responsibilities.removeAt(index);
+    this.cdRef.markForCheck();
   }
 
   removeSkill(index: number) {
     if (this.requiredSkills.length > 1) this.requiredSkills.removeAt(index);
+    this.cdRef.markForCheck();
   }
 
   submitApplication() {
     if (this.addJobForm.invalid) {
       this.addJobForm.markAllAsTouched();
+      this.cdRef.markForCheck();
       return;
     }
 
     this.isSubmitting.set(true);
-    
+
     const request$ = this.isEditMode()
       ? this.jobsService.updateJob(this.jobId!, this.addJobForm.value)
       : this.jobsService.addJob(this.addJobForm.value);
 
-    request$.subscribe({
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res: JobsResponse) => {
         if (res.success) {
           this.messageService.add({
@@ -140,10 +161,11 @@ export class AddJob implements OnInit {
             summary: 'Success',
             detail: res.message || (this.isEditMode() ? 'Job updated!' : 'Job created!'),
           });
-
+          this.cdRef.markForCheck();
           const targetRoute = this.isEditMode() ? '/manager/viewJobs' : '/manager/dashboard';
           setTimeout(() => {
             this.isSubmitting.set(false);
+            this.cdRef.markForCheck();
             this.router.navigate([targetRoute]);
           }, 1500);
         }
@@ -163,6 +185,7 @@ export class AddJob implements OnInit {
 
   private showError(msg: string) {
     this.messageService.add({ severity: 'error', summary: 'Error', detail: msg });
+    this.cdRef.markForCheck();
   }
 
   onCancel() {

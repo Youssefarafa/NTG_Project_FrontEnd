@@ -40,7 +40,7 @@
         </div>
 
         <div class="space-y-6 mt-4">
-          @for(exp of workExperience.controls; track $index) {
+          @for(exp of workExperience.controls; track exp) {
           <div
             [formGroupName]="$index"
             class="p-6 bg-primary-50 dark:bg-primary-700/30 rounded-lg relative border-l-4 border-teal-500"
@@ -173,7 +173,7 @@
             class="space-y-4 pt-4 border-t dark:border-primary-700"
             formArrayName="internalReferees"
           >
-            @for (ref of internalReferees.controls; track $index; let i = $index) {
+            @for (ref of internalReferees.controls; track ref; let i = $index) {
             <div [formGroupName]="i" class="flex items-start gap-4 animate-fade-in">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                 <input

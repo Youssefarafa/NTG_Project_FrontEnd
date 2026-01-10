@@ -3,9 +3,6 @@
 
 <div class="max-w-5xl mx-auto p-4 sm:p-6 min-h-screen">
   @if (isLoading() && !processData()) {
-  <div class="flex justify-center items-center h-64">
-    <i class="pi pi-spin pi-spinner text-4xl text-teal-600"></i>
-  </div>
   } @if (processData(); as currentProcess) {
   <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-8">
     <div>
@@ -221,7 +218,7 @@
       </h4>
       <div class="space-y-4">
         @if (app.workExperience && app.workExperience.length > 0) { @for(exp of app.workExperience;
-        track $index) {
+        track exp) {
         <div
           class="border-l-4 border-teal-500 pl-4 py-3 bg-primary-50 dark:bg-primary-800/40 rounded-r-lg shadow-sm"
         >

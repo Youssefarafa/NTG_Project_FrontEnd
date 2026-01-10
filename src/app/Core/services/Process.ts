@@ -137,7 +137,7 @@ export class Process {
       data: {
         id: processId,
         jobTitle: 'Senior Frontend Developer (Angular)',
-        status: 'Completed',
+        status: 'Active',
         candidates: candidatesWithEvaluations,
       },
     };

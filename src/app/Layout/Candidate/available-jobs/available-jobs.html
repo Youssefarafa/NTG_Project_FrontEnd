@@ -1,4 +1,5 @@
 <p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
 
 <div class="container mx-auto p-4 sm:p-8 min-h-screen">
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -58,7 +59,7 @@
           <ul
             class="list-disc list-inside text-primary-600 dark:text-primary-400 space-y-1 mt-2 text-sm"
           >
-            @for(resp of job.responsibilities?.slice(0, 3); track $index) {
+            @for(resp of job.responsibilities?.slice(0, 3); track resp) {
             <li>{{ resp }}</li>
             } @if(job.responsibilities!.length > 3) {
             <li class="text-primary-500 italic">...and more</li>
@@ -73,7 +74,7 @@
             Required Skills
           </h4>
           <div class="flex flex-wrap gap-2 mt-3">
-            @for(skill of job.requiredSkills; track $index) {
+            @for(skill of job.requiredSkills; track skill) {
             <p-tag
               [value]="skill"
               [rounded]="true"
@@ -94,7 +95,7 @@
           severity="danger"
           styleClass="w-full font-bold py-3 transition duration-300 transform hover:scale-105"
           [loading]="isLoading(job.id!)"
-          (onClick)="withdraw(job.id!)"
+          (onClick)="confirmWithdraw(job.id!, job.title!)"
         >
         </p-button>
         } @else {

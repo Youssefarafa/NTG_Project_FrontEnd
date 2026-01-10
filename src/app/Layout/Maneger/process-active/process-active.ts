@@ -1,4 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -19,6 +27,7 @@ import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-process-active',
@@ -39,6 +48,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
   providers: [MessageService, ConfirmationService],
   templateUrl: './process-active.html',
   styleUrl: './process-active.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProcessActive implements OnInit {
   private route = inject(ActivatedRoute);
@@ -46,11 +56,13 @@ export class ProcessActive implements OnInit {
   private processService = inject(Process);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   processData = signal<FullProcessResponse['data'] | null>(null);
   selectedCandidate = signal<ProcessCandidateDetails | null>(null);
   isModalOpen = signal(false);
-  isLoading = signal(false); 
+  isLoading = signal(false);
 
   evaluationForm!: FormGroup;
 
@@ -72,27 +84,32 @@ export class ProcessActive implements OnInit {
 
   loadProcessDetails(id: string) {
     this.isLoading.set(true);
-    this.processService.getFullProcessDetails(id).subscribe({
-      next: (res) => {
-        if (res.success && res.data) {
-          this.processData.set(res.data);
-          this.buildForm(res.data.candidates);
+    this.processService
+      .getFullProcessDetails(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (res.success && res.data) {
+            this.processData.set(res.data);
+            this.buildForm(res.data.candidates);
 
-          if (res.data.status === 'Completed') {
-            this.evaluationForm.disable();
+            if (res.data.status === 'Completed') {
+              this.evaluationForm.disable();
+            }
           }
-        }
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Connection Error',
-          detail: err.error?.message || 'Could not fetch process details.',
-        });
-      },
-    });
+          this.isLoading.set(false);
+          this.cdRef.markForCheck();
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Connection Error',
+            detail: err.error?.message || 'Could not fetch process details.',
+          });
+          this.cdRef.markForCheck();
+        },
+      });
   }
 
   buildForm(candidates: ProcessCandidateDetails[]) {
@@ -132,29 +149,34 @@ export class ProcessActive implements OnInit {
     if (!id) return;
 
     this.isLoading.set(true);
-    this.processService.updateEvaluations(id, this.evaluationForm.value.evaluations).subscribe({
-      next: (res) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Saved',
-          detail: res.message || 'All changes saved successfully.',
-        });
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Save Failed',
-          detail: err.error?.message || 'Error occurred while saving.',
-        });
-      },
-    });
+    this.processService
+      .updateEvaluations(id, this.evaluationForm.value.evaluations)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Saved',
+            detail: res.message || 'All changes saved successfully.',
+          });
+          this.isLoading.set(false);
+          this.cdRef.markForCheck();
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Save Failed',
+            detail: err.error?.message || 'Error occurred while saving.',
+          });
+          this.cdRef.markForCheck();
+        },
+      });
   }
 
   confirmEndProcess() {
     if (this.isLoading()) return;
-
+    this.cdRef.markForCheck();
     this.confirmationService.confirm({
       message:
         'Are you sure you want to end this process? This will lock all evaluations permanently.',
@@ -168,10 +190,11 @@ export class ProcessActive implements OnInit {
         if (!id) return;
 
         this.isLoading.set(true);
-        this.processService.completeProcess(id).subscribe({
+        this.cdRef.markForCheck();
+        this.processService.completeProcess(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: (res) => {
             this.processData.update((prev) => (prev ? { ...prev, status: 'Completed' } : null));
-            this.evaluationForm.disable(); 
+            this.evaluationForm.disable();
 
             this.messageService.add({
               severity: 'info',
@@ -179,6 +202,7 @@ export class ProcessActive implements OnInit {
               detail: res.message || 'The hiring process is now closed.',
             });
             this.isLoading.set(false);
+            this.cdRef.markForCheck();
           },
           error: (err) => {
             this.isLoading.set(false);
@@ -187,6 +211,7 @@ export class ProcessActive implements OnInit {
               summary: 'Error',
               detail: err.error?.message || 'Failed to complete the process.',
             });
+            this.cdRef.markForCheck();
           },
         });
       },

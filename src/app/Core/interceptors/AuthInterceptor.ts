@@ -8,8 +8,8 @@ import {
 import { inject } from '@angular/core';
 import { catchError, finalize, Observable, switchMap, throwError } from 'rxjs';
 import { Auth } from '../services/auth';
-import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { Router } from '@angular/router';
 
 export const SKIP_SPINNER = new HttpContextToken<boolean>(() => false);
 let activeRequestsCount = 0;
@@ -21,10 +21,14 @@ export const authInterceptor = (
   const auth = inject(Auth);
   const spinner = inject(NgxSpinnerService);
   const skipSpinner = req.context.get(SKIP_SPINNER);
+  // const router = inject(Router);
 
   if (!skipSpinner) {
-    activeRequestsCount++;
-    spinner.show();
+    // const isNavigating = router.getCurrentNavigation() !== null;
+    // if (!isNavigating) {
+      activeRequestsCount++;
+      spinner.show();
+    // }
   }
 
   const hideSpinner = () => {

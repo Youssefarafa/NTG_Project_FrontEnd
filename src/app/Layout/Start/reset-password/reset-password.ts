@@ -6,9 +6,9 @@ import {
   OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  DestroyRef,
 } from '@angular/core';
 import {
-  FormBuilder,
   Validators,
   ReactiveFormsModule,
   FormGroup,
@@ -29,11 +29,11 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -41,7 +41,6 @@ import { DividerModule } from 'primeng/divider';
     ButtonModule,
     MessageModule,
     ToastModule,
-    DividerModule,
     CardModule,
     IconFieldModule,
     InputIconModule,
@@ -49,63 +48,64 @@ import { DividerModule } from 'primeng/divider';
   providers: [MessageService],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ResetPassword implements OnInit {
+export class ResetPassword implements OnInit, OnDestroy {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly messageService = inject(MessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
+  private navigationTimer?: any;
   readonly isLoading = signal(false);
-  readonly countdown = signal<number>(0);
-  private timerInterval: any;
-
   passwordVisible = false;
   isSubmitted = false;
 
   resetForm = new FormGroup({
-    email: new FormControl({ value: '', disabled: true }, [Validators.required, Validators.email]),
-    code: new FormControl('', [Validators.required, Validators.minLength(4)]),
+    email: new FormControl({ value: '', disabled: true }),
+    code: new FormControl({ value: '', disabled: true }),
     newPassword: new FormControl('', [Validators.required, this.passwordStrengthValidator()]),
     confirmPassword: new FormControl('', [Validators.required, this.confirmPasswordValidator()]),
   });
 
   ngOnInit() {
-    const emailFromUrl = this.route.snapshot.queryParamMap.get('email') || '';
-    this.resetForm.patchValue({ email: emailFromUrl });
-    this.startCountdown();
-    this.resetForm.get('newPassword')?.valueChanges.subscribe(() => {
-      this.resetForm.get('confirmPassword')?.updateValueAndValidity();
-    });
+    const email = this.route.snapshot.queryParamMap.get('email');
+    const code = this.route.snapshot.queryParamMap.get('code');
+
+    if (!email || !code) {
+      this.router.navigate(['/verifyCode']);
+      return;
+    }
+
+    this.resetForm.patchValue({ email, code });
+
+    this.resetForm
+      .get('newPassword')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.resetForm.get('confirmPassword')?.updateValueAndValidity();
+      });
   }
 
-  // --- Logic Helpers ---
-
+  // --- Validators ---
   private passwordStrengthValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const password = control.value;
-      if (!password) return null;
-
-      const hasUpper = /[A-Z]/.test(password);
-      const hasLower = /[a-z]/.test(password);
-      const hasNumber = /\d/.test(password);
-      const hasSpecial = /[@$!%*?#&]/.test(password);
-      const hasValidLength = password.length >= 8;
-
-      if (!hasUpper || !hasLower || !hasNumber || !hasSpecial || !hasValidLength) {
-        return { weakPassword: true };
-      }
-      return null;
+      const v = control.value;
+      if (!v) return null;
+      const isValid =
+        /[A-Z]/.test(v) && /[a-z]/.test(v) && /\d/.test(v) && /[@$!%*?#&]/.test(v) && v.length >= 8;
+      return isValid ? null : { weakPassword: true };
     };
   }
 
   private confirmPasswordValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.parent) return null;
-      const password = control.parent.get('newPassword')?.value;
-      const confirmPassword = control.value;
-      return password === confirmPassword ? null : { passwordMismatch: true };
+      return control.value === control.parent.get('newPassword')?.value
+        ? null
+        : { passwordMismatch: true };
     };
   }
 
@@ -115,40 +115,12 @@ export class ResetPassword implements OnInit {
   }
 
   getFirstErrorMessage(fieldName: string): string {
-    const control = this.resetForm.get(fieldName);
-    if (!control || !control.errors) return '';
-    const errors = control.errors;
-
+    const errors = this.resetForm.get(fieldName)?.errors;
+    if (!errors) return '';
     if (errors['required']) return 'This field is required';
-    if (errors['minlength']) return `Min ${errors['minlength'].requiredLength} digits`;
-    if (errors['weakPassword']) return 'Weak password (needs Upper, Lower, Number & Symbol)';
+    if (errors['weakPassword']) return 'Password too weak';
     if (errors['passwordMismatch']) return 'Passwords do not match';
     return 'Invalid field';
-  }
-
-  // --- Actions ---
-
-  startCountdown() {
-    this.countdown.set(60);
-    if (this.timerInterval) clearInterval(this.timerInterval);
-    this.timerInterval = setInterval(() => {
-      this.countdown.update((v) => v - 1);
-      if (this.countdown() <= 0) clearInterval(this.timerInterval);
-      this.cdRef.markForCheck();
-    }, 1000);
-  }
-
-  onResendCode() {
-    if (this.countdown() > 0) return;
-    const email = this.resetForm.getRawValue().email || '';
-
-    this.auth.forgotPassword(email).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'info', summary: 'Resent', detail: 'New code sent!' });
-        this.startCountdown();
-      },
-      error: (err) => this.messageService.add({ severity: 'error', detail: err.message }),
-    });
   }
 
   togglePasswordVisibility() {
@@ -158,32 +130,29 @@ export class ResetPassword implements OnInit {
 
   onSubmit() {
     this.isSubmitted = true;
-    if (this.resetForm.invalid) {
-      this.resetForm.markAllAsTouched();
-      return;
-    }
-    const rawData = this.resetForm.getRawValue();
-    const payload = {
-      email: rawData.email!,
-      code: rawData.code!,
-      newPassword: rawData.newPassword!,
-    };
+    if (this.resetForm.invalid) return;
+
     this.isLoading.set(true);
-    this.auth.resetPassword(payload).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Password changed!',
-        });
-        setTimeout(() => this.router.navigate(['/login']), 2000);
-      },
-      error: (err) => {
-        this.messageService.add({ severity: 'error', detail: err.message });
-        this.isLoading.set(false);
-        this.cdRef.markForCheck();
-      },
-    });
+    const { email, code, newPassword } = this.resetForm.getRawValue();
+
+    this.auth
+      .resetPassword({ email: email!, code: code!, newPassword: newPassword! })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Password changed!',
+          });
+          this.navigationTimer = setTimeout(() => this.router.navigate(['/login']), 1000);
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', detail: err.message });
+          this.isLoading.set(false);
+          this.cdRef.markForCheck();
+        },
+      });
   }
 
   onBackToLogin() {
@@ -191,6 +160,6 @@ export class ResetPassword implements OnInit {
   }
 
   ngOnDestroy() {
-    if (this.timerInterval) clearInterval(this.timerInterval);
+    if (this.navigationTimer) clearTimeout(this.navigationTimer);
   }
 }

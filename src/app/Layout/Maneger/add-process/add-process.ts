@@ -1,4 +1,12 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  DestroyRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import {
@@ -23,6 +31,7 @@ import {
   ProcessResponse,
 } from '../../../Core/models/ProcessData';
 import { JobsResponse } from '../../../Core/models/JobsData';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'aap-add-process',
   standalone: true,
@@ -30,6 +39,7 @@ import { JobsResponse } from '../../../Core/models/JobsData';
   providers: [MessageService],
   templateUrl: './add-process.html',
   styleUrl: './add-process.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddProcess implements OnInit {
   // --- Signals ---
@@ -46,6 +56,8 @@ export class AddProcess implements OnInit {
   private jobsService = inject(Jobs);
   private messageService = inject(MessageService);
   private router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   // --- Form ---
   addProcessForm = this.fb.group({
@@ -59,7 +71,7 @@ export class AddProcess implements OnInit {
   }
 
   loadJobs() {
-    this.jobsService.getJobsManager().subscribe({
+    this.jobsService.getJobsManager().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response: JobsResponse) => {
         if (response.success && Array.isArray(response.data)) {
           const formattedJobs: JobBasicInfo[] = response.data.map((job) => ({
@@ -67,13 +79,16 @@ export class AddProcess implements OnInit {
             title: job.title || '',
           }));
           this.jobs.set(formattedJobs);
+          this.cdRef.markForCheck();
         } else {
           this.showToast('error', 'Process Error', response.message || 'Something went wrong');
+          this.cdRef.markForCheck();
         }
       },
       error: (err) => {
         const serverErrorMessage = err.error?.message || 'Server connection failed';
         this.showToast('error', 'Server Error', serverErrorMessage);
+        this.cdRef.markForCheck();
       },
     });
   }
@@ -82,7 +97,7 @@ export class AddProcess implements OnInit {
     const jobId = (event.target as HTMLSelectElement).value;
     this.selectedJobId.set(jobId);
 
-    this.processService.getApplicantsByJob(jobId).subscribe({
+    this.processService.getApplicantsByJob(jobId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response: ApplicantsResponse) => {
         if (response.success && response.data) {
           this.applicants.set(response.data);
@@ -90,10 +105,12 @@ export class AddProcess implements OnInit {
           response.data.forEach(() => {
             this.candidatesArray.push(new FormControl(false));
           });
+          this.cdRef.markForCheck();
         } else {
           this.applicants.set([]);
           this.candidatesArray.clear();
           this.showToast('error', 'Notification', response.message || 'No candidates found.');
+          this.cdRef.markForCheck();
         }
       },
       error: (err) => {
@@ -101,6 +118,7 @@ export class AddProcess implements OnInit {
         this.candidatesArray.clear();
         const errorMsg = err.error?.message || 'Technical error occurred';
         this.showToast('error', 'Server Error', errorMsg);
+        this.cdRef.markForCheck();
       },
     });
   }
@@ -112,7 +130,7 @@ export class AddProcess implements OnInit {
       this.isApplicationModalOpen.set(true);
     }
   }
-  
+
   createProcess() {
     if (this.addProcessForm.invalid) {
       this.addProcessForm.markAllAsTouched();
@@ -121,6 +139,7 @@ export class AddProcess implements OnInit {
     }
 
     this.isLoading.set(true);
+    this.cdRef.markForCheck();
     const selectedIds = this.applicants()
       .filter((_, index) => this.candidatesArray.at(index).value === true)
       .map((app) => app.id);
@@ -131,25 +150,28 @@ export class AddProcess implements OnInit {
       testLink: this.addProcessForm.value.testLink as string,
     };
 
-    this.processService.createHiringProcess(payload).subscribe({
+    this.processService.createHiringProcess(payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response: ProcessResponse) => {
         if (response.success) {
           this.showToast('success', 'Success', response.message || 'Hiring process initiated!');
           this.resetForm();
-
+          this.cdRef.markForCheck();
           setTimeout(() => {
             this.isLoading.set(false);
+            this.cdRef.markForCheck();
             this.router.navigate(['/manager/dashboard']);
           }, 1500);
         } else {
           this.showToast('error', 'Failed', response.message || 'Could not create process');
           this.isLoading.set(false);
+          this.cdRef.markForCheck()
         }
       },
       error: (err) => {
         const errorMsg = err.error?.message || 'Submission failed due to server error';
         this.showToast('error', 'Error', errorMsg);
         this.isLoading.set(false);
+        this.cdRef.markForCheck()
       },
     });
   }

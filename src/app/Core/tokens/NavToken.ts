@@ -68,6 +68,7 @@ export const BRAND_INFO_CANDIDATE = {
 
 export const NAV_LINKS_CANDIDATE = [
   { label: 'Available Jobs', link: '/candidate/availableJobs' },
+  // { label: 'My Applications', link: '/candidate/myApplications' },
   { label: 'My Profile', link: '/candidate/myProfile' },
 ];
 

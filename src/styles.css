@@ -336,6 +336,7 @@
     --p-text-color-secondary: rgb(var(--text-color-secondary));
     --p-text-muted-color: rgb(var(--text-muted));
   }
+
   body {
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -343,19 +344,71 @@
     text-rendering: optimizeLegibility;
   }
 
+  ::-webkit-scrollbar {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #e0e0e0 !important;
+    border-radius: 10px !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #008080 !important;
+    border-radius: 10px !important;
+    border: 3px solid #e0e0e0 !important;
+    transition: all 0.3s ease-in-out !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-track {
+      background: #121212 !important;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #00a8a8 !important;
+      border: 3px solid #121212 !important;
+    }
+  }
+
+  .dark ::-webkit-scrollbar-track,
+  .dark-mode ::-webkit-scrollbar-track {
+    background: #121212 !important;
+  }
+
+  .dark ::-webkit-scrollbar-thumb,
+  .dark-mode ::-webkit-scrollbar-thumb {
+    background: #00a8a8 !important;
+    border: 3px solid #121212 !important;
+  }
+
+  * {
+    scrollbar-width: auto !important;
+    scrollbar-color: #008080 #e0e0e0 !important;
+  }
+  /* ==========================================================================
+   1. Variables Definition (Unified Theme)
+   ========================================================================== */
+
   :root {
-    --bg-input: #f0fdf4; 
-    --border-input: #99f6e4; 
-    --text-input: #134e4a; 
-
-    --bg-modal-header: #0f766e; 
+    --bg-input: #f0fdf4;
+    --border-input: #99f6e4;
+    --text-input: #134e4a;
+    --bg-modal-header: #0f766e;
     --text-modal-header: #ffffff;
-
-    --bg-modal-body: #f8fafc; 
-    --text-modal-body: #1e293b; 
-
+    --bg-modal-body: #f8fafc;
+    --text-modal-body: #1e293b;
     --bg-option-hover: #e0f2f1;
-    --bg-option-selected: #0d9488; 
+    --bg-option-selected: #0d9488;
+    --divider-bg: #ffffff;
+    --bg-check: #f0fdfa;
+    --text-icon-check: #042f2e;
+    --error-color: #ef4444;
+    --bg-error-input: #fef2f2;
+    /* Table & DataView specific */
+    --table-header-bg: #b4ffed;
+    --table-header-text: #0f766e;
+    --table-border: #ccfbf1;
   }
 
   .app-dark {
@@ -368,8 +421,150 @@
     --text-input: #f0fdfa;
     --bg-option-hover: #115e59;
     --bg-option-selected: #14b8a6;
+    --divider-bg: #022c2b;
+    --bg-check: #03413f;
+    --text-icon-check: #afb0b0;
+    --error-color: #ff8080;
+    --bg-error-input: #450a0a;
+    /* Table & DataView specific */
+    --table-header-bg: #134e4a;
+    --table-header-text: #5eead4;
+    --table-border: #115e59;
   }
 
+  /* ==========================================================================
+   2. Global Elements (Inputs, Divider & General)
+   ========================================================================== */
+  body .p-divider-content {
+    background-color: var(--divider-bg) !important;
+  }
+
+  body .p-inputtext,
+  body .p-textarea,
+  body .p-select,
+  body .p-inputmask .p-inputtext {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-input) !important;
+    color: var(--text-input) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
+  }
+
+  body .p-inputtext:focus,
+  body .p-textarea:focus,
+  body .p-select:focus,
+  body .p-inputmask .p-inputtext:focus {
+    border-color: var(--bg-modal-header) !important;
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2) !important;
+  }
+
+  /* ==========================================================================
+   3. Table Styling (Datatable)
+   ========================================================================== */
+  body .p-datatable {
+    background: transparent;
+  }
+
+  body .p-datatable .p-datatable-thead > tr > th {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+    border-color: var(--table-border) !important;
+    padding: 1rem 1.5rem !important;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  body .p-datatable .p-datatable-tbody > tr > td {
+    background-color: var(--bg-modal-body) !important;
+    color: var(--text-modal-body) !important;
+    border-color: var(--table-border) !important;
+  }
+
+  /* ==========================================================================
+   4. Paginator Styling (Table & DataView)
+   ========================================================================== */
+  body .p-paginator {
+    background-color: var(--bg-modal-body) !important;
+    border-top: 1px solid var(--table-border) !important;
+    border-bottom-left-radius: 1rem !important;
+    border-bottom-right-radius: 1rem !important;
+    padding: 1rem !important;
+    justify-content: center;
+  }
+
+  body .p-paginator button,
+  body .p-paginator .p-paginator-page {
+    color: var(--bg-option-selected) !important;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50% !important;
+    background-color: var(--bg-input);
+    margin: 0 2px;
+  }
+
+  body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: var(--bg-option-selected) !important;
+    color: var(--text-modal-header) !important;
+  }
+
+  /* ==========================================================================
+   5. Overlays (Dropdown/Select, Radio, Checkbox)
+   ========================================================================== */
+  body .p-select-overlay {
+    background-color: var(--bg-modal-body) !important;
+    border: 1px solid var(--border-input) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  body .p-select-label {
+    color: var(--text-input) !important;
+    font-weight: 600 !important;
+    padding: 0.5rem !important;
+  }
+
+  body .p-select-option {
+    color: var(--text-modal-body) !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.2s;
+  }
+
+  body .p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus,
+  body .p-select-option:not(.p-select-option-selected):not(.p-disabled):hover {
+    background-color: var(--bg-option-hover) !important;
+  }
+
+  body .p-select-option.p-select-option-selected {
+    background: var(--bg-option-selected) !important;
+    color: var(--text-modal-header) !important;
+  }
+
+  /* Form Controls */
+  body .p-radiobutton-box {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-input) !important;
+  }
+
+  body .p-radiobutton-box.p-highlight {
+    border-color: var(--bg-option-selected) !important;
+  }
+
+  body .p-radiobutton-icon {
+    background-color: var(--bg-option-selected) !important;
+  }
+
+  body .p-checkbox-box {
+    background-color: var(--bg-check) !important;
+    border-color: var(--border-input) !important;
+  }
+
+  body .p-checkbox-box .p-checkbox-icon {
+    color: var(--text-icon-check) !important;
+  }
+
+  /* ==========================================================================
+   6. Dialog & Confirm Modal
+   ========================================================================== */
   body .p-dialog {
     border-radius: 12px !important;
     overflow: hidden;
@@ -380,7 +575,6 @@
     background-color: var(--bg-modal-header) !important;
     color: var(--text-modal-header) !important;
     padding: 1.2rem 1.5rem !important;
-    border-bottom: none !important;
   }
 
   body .p-dialog .p-dialog-content {
@@ -395,70 +589,82 @@
     border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
   }
 
-  body .p-select-overlay {
-    background-color: var(--bg-modal-body) !important;
-    border: 1px solid var(--border-input) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  body .p-select-option {
-    color: var(--text-modal-body) !important;
-    padding: 0.75rem 1rem !important;
-  }
-
-  body .p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus,
-  body .p-select-option:not(.p-select-option-selected):not(.p-disabled):hover {
-    background-color: var(--bg-option-hover) !important;
-  }
-
-  .app-dark body .p-select-option:hover {
-    color: white !important; 
-  }
-
+  /* ==========================================================================
+   7. Buttons (Primary, Secondary, Outlined)
+   ========================================================================== */
   body .p-confirm-dialog-accept,
   body .p-dialog .p-button.p-button-primary {
     background-color: var(--bg-modal-header) !important;
     border: 1px solid var(--bg-modal-header) !important;
-    transition: all 0.2s ease !important;
-  }
-
-  body .p-confirm-dialog-accept:hover,
-  body .p-dialog .p-button.p-button-primary:hover {
-    filter: brightness(1.1) !important; 
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-modal-header) !important;
   }
 
   body .p-confirm-dialog-reject,
   body .p-dialog .p-button-secondary {
     background: transparent !important;
-    width: 20px;
-    color: #ffffff !important;
+    color: var(--text-modal-body) !important;
+    border: 1px solid var(--border-input) !important;
   }
 
-  body .p-confirm-dialog-reject:hover,
-  body .p-dialog .p-button-secondary:hover {
+  body .p-confirm-dialog-reject:hover {
     background: #fff1f2 !important;
-    color: #ff2121 !important; 
+    color: #ff2121 !important;
+    border-color: #ff2121 !important;
   }
 
-  .app-dark body .p-confirm-dialog-reject:hover {
-    background: rgba(225, 29, 72, 0.1) !important;
-    color: #fda4af !important;
+  body .p-button-teal.p-button-outlined {
+    border-color: var(--bg-option-selected) !important;
+    color: var(--bg-option-selected) !important;
   }
 
-  body .p-inputtext,
-  body .p-select {
+  /* ==========================================================================
+   8. Validation & Errors
+   ========================================================================== */
+  body .p-inputtext.ng-invalid.ng-touched,
+  body .p-textarea.ng-invalid.ng-touched,
+  body .p-inputmask.ng-invalid.ng-touched .p-inputtext {
+    border-color: var(--error-color) !important;
+    background-color: var(--bg-error-input) !important;
+  }
+
+  .text-red-500 {
+    color: var(--error-color) !important;
+    font-size: 0.85rem;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ==========================================================================
+   9. DataView & Tags & datepicker & inputnumber
+   ========================================================================== */
+  body .p-dataview {
+    background: transparent;
+  }
+
+  body .p-dataview .p-dataview-content {
+    background: transparent;
+    border: none;
+  }
+
+  body .custom-skill-tag .p-tag {
     background-color: var(--bg-input) !important;
-    border-color: var(--border-input) !important;
-    color: var(--text-input) !important;
-    border-radius: 8px !important;
+    color: var(--bg-option-selected) !important;
+    border: 1px solid var(--border-input) !important;
+    font-size: 10px;
+    font-weight: 600;
   }
 
-  body .p-inputtext:focus,
-  body .p-select:focus {
-    border-color: var(--bg-modal-header) !important;
-    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2) !important;
+  body .p-datepicker.ng-invalid.ng-touched .p-inputtext,
+  body .p-inputnumber.ng-invalid.ng-touched .p-inputtext {
+    border-color: var(--error-color) !important;
+    background-color: var(--bg-error-input) !important;
+  }
+
+  body .p-datepicker.ng-invalid.ng-touched input,
+  body .p-inputnumber.ng-invalid.ng-touched input {
+    background-color: var(--bg-error-input) !important;
+    border-color: var(--error-color) !important;
   }
 }

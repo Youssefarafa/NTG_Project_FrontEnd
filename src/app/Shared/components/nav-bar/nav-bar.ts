@@ -1,4 +1,13 @@
-import { Component, signal, HostListener, Input, SimpleChanges, inject } from '@angular/core';
+import {
+  Component,
+  signal,
+  HostListener,
+  inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnDestroy,
+  input,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -12,29 +21,24 @@ import { Auth } from '../../../Core/services/auth';
   imports: [RouterModule, CommonModule, ToolbarModule],
   templateUrl: './nav-bar.html',
   styleUrl: './nav-bar.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NavBar {
+export class NavBar implements OnDestroy {
   private readonly authService = inject(Auth);
-  @Input() userName: string | null = null;
-  readonly userSignal = signal<string | null>(null);
-  @Input() navigation: AppNavigation | undefined = undefined;
-  readonly navSignal = signal<AppNavigation | undefined>(undefined);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  userName = input<string | null>(null);
+  navigation = input<AppNavigation | undefined>(undefined);
   readonly mobileMenu = signal(false);
   readonly openDropdown = signal<number | null>(null);
-  private closeTimer?: ReturnType<typeof setTimeout>;
+  private closeTimer?: any;
+  private focusTimer?: any;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['userName']) {
-      this.userSignal.set(this.userName);
-    }
-    if (changes['navigation']) {
-      this.navSignal.set(this.navigation);
-    }
+  ngOnDestroy(): void {
+    this.clearTimer();
+    if (this.focusTimer) clearTimeout(this.focusTimer);
   }
 
-  constructor(
-    public readonly DarkLightTheme: DarkLightTheme
-  ) {}
+  constructor(public readonly DarkLightTheme: DarkLightTheme) {}
 
   // Mobile Menu
   toggleMobileMenu(): void {
@@ -83,11 +87,13 @@ export class NavBar {
   }
 
   handleFocusOut(index: number): void {
-    setTimeout(() => {
+    if (this.focusTimer) clearTimeout(this.focusTimer);
+    this.focusTimer = setTimeout(() => {
       const focused = document.activeElement;
       const dropdown = document.querySelector(`#dropdown-${index}`);
       if (dropdown && !dropdown.contains(focused)) {
         this.closeDropdownMenu();
+        this.cdRef.markForCheck();
       }
     }, 100);
   }
@@ -104,7 +110,10 @@ export class NavBar {
   // Timer Management
   private startCloseTimer(delay = 150): void {
     this.clearTimer();
-    this.closeTimer = setTimeout(() => this.closeDropdownMenu(), delay);
+    this.closeTimer = setTimeout(() => {
+      this.closeDropdownMenu();
+      this.cdRef.markForCheck();
+    }, delay);
   }
 
   private clearTimer(): void {
@@ -145,6 +154,7 @@ export class NavBar {
     this.closeMobileMenu();
     if (button.label === 'Logout') {
       this.authService.logout();
+      this.cdRef.markForCheck();
     }
   }
 }

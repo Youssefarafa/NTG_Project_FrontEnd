@@ -1,49 +1,29 @@
-import { Component, ElementRef, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';;
+import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DarkLightTheme } from '../../../Core/services/DarkLightTheme';
+import { Auth } from '../../../Core/services/auth';
 
 @Component({
   selector: 'app-unauthorized',
+  standalone: true,
   imports: [ButtonModule, CardModule],
   templateUrl: './unauthorized.html',
   styleUrl: './unauthorized.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Unauthorized {
-  constructor(
-    private router: Router,
-    private renderer: Renderer2,
-    private el: ElementRef,
-    private _DarkLightTheme: DarkLightTheme
-  ) {}
+  private readonly auth = inject(Auth);
+  constructor(private router: Router, public _DarkLightTheme: DarkLightTheme) {}
 
   goHome() {
+    this.auth.logout();
     this.router.navigate(['/home']);
   }
 
   logout() {
+    this.auth.logout();
     this.router.navigate(['/login']);
-  }
-  ngOnInit() {
-    this.detectAndApplyTheme();
-  }
-
-  detectAndApplyTheme() {
-    const container = this.el.nativeElement.querySelector('.theme-container');
-
-    if (this._DarkLightTheme.isDark()) {
-      this.renderer.addClass(container, 'app-dark');
-    } else {
-      this.renderer.removeClass(container, 'app-dark');
-    }
-
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (e.matches) {
-        this.renderer.addClass(container, 'app-dark');
-      } else {
-        this.renderer.removeClass(container, 'app-dark');
-      }
-    });
   }
 }

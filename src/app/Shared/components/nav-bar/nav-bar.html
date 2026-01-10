@@ -3,20 +3,20 @@
   styleClass="px-4 dark:!bg-primary-950/60 !backdrop-blur-sm !border-0 !rounded-none"
 >
   <ng-template pTemplate="start">
-    @if (navSignal()) {
+    @if (navigation()) {
     <a
-      [routerLink]="navSignal()!.brand.Link || '/'"
+      [routerLink]="navigation()!.brand.Link || '/'"
       routerLinkActive="router-link-active"
       class="flex items-center space-x-2 no-underline"
       aria-label="Home"
     >
       <img
-        [src]="navSignal()!.brand.logoUrl"
-        [alt]="navSignal()!.brand.logoAlt || navSignal()!.brand.name"
+        [src]="navigation()!.brand.logoUrl"
+        [alt]="navigation()!.brand.logoAlt || navigation()!.brand.name"
         class="w-10 h-10 object-contain"
       />
       <span class="text-lg font-bold text-black dark:text-primary-50">
-        {{ navSignal()!.brand.name }}
+        {{ navigation()!.brand.name }}
       </span>
     </a>
     }
@@ -25,88 +25,82 @@
   <ng-template pTemplate="end">
     <div class="flex items-center space-x-6">
       <div class="hidden xl:flex items-center space-x-8">
-        @if (navSignal() && navSignal()!.navLinks) {
-        <ng-container
-          *ngFor="let item of navSignal()!.navLinks; trackBy: trackByLink; let i = index"
+        @if (navigation() && navigation()!.navLinks) { @for (item of navigation()?.navLinks; track
+        item.link || item.label; let i = $index) { @if (!item.children) {
+        <a
+          [routerLink]="item.link"
+          [routerLinkActive]="['text-primary-600', 'dark:text-primary-400', 'font-semibold']"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400"
+          tabindex="0"
+          [attr.aria-label]="item.label + ' page'"
         >
-          @if (!item.children) {
-          <a
-            [routerLink]="item.link"
-            [routerLinkActive]="['text-primary-600', 'dark:text-primary-400', 'font-semibold']"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400"
+          {{ item.label }}
+        </a>
+        } @else {
+        <div class="relative dropdown-container" [id]="'dropdown-' + i">
+          <button
+            [id]="'parent-' + i"
+            class="text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1 parent-button"
+            (click)="toggleDropdown(i)"
+            (mouseenter)="handleMouseEnter(i)"
+            (mouseleave)="handleMouseLeave()"
+            (focusin)="handleFocusIn(i)"
+            (focusout)="handleFocusOut(i)"
+            [attr.aria-expanded]="openDropdown() === i"
+            aria-haspopup="true"
+            [attr.aria-controls]="'submenu-' + i"
             tabindex="0"
-            [attr.aria-label]="item.label + ' page'"
           >
             {{ item.label }}
-          </a>
-          } @else {
-          <div class="relative dropdown-container" [id]="'dropdown-' + i">
-            <button
-              [id]="'parent-' + i"
-              class="text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1 parent-button"
-              (click)="toggleDropdown(i)"
-              (mouseenter)="handleMouseEnter(i)"
-              (mouseleave)="handleMouseLeave()"
-              (focusin)="handleFocusIn(i)"
-              (focusout)="handleFocusOut(i)"
-              [attr.aria-expanded]="openDropdown() === i"
-              aria-haspopup="true"
-              [attr.aria-controls]="'submenu-' + i"
+            <span class="text-[.5rem] opacity-60">▼</span>
+          </button>
+
+          @if (openDropdown() === i) {
+          <div
+            [id]="'submenu-' + i"
+            class="absolute left-0 z-50 w-48 mt-2 border shadow-lg rounded-md top-full bg-white dark:bg-primary-900 border-primary-100 dark:border-primary-800"
+            role="menu"
+            [attr.aria-labelledby]="'parent-' + i"
+            (mouseenter)="handleDropdownMouseEnter()"
+            (mouseleave)="handleDropdownMouseLeave()"
+          >
+            @for (child of item.children; track child.link || child.label) {
+            <a
+              [routerLink]="child.link"
+              [routerLinkActive]="[
+                'bg-primary-50',
+                'dark:bg-primary-800/50',
+                'text-primary-700',
+                'dark:text-primary-300'
+              ]"
+              class="block px-4 py-2 text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
               tabindex="0"
+              (click)="closeDropdownMenu()"
             >
-              {{ item.label }}
-              <span class="text-[.5rem] opacity-60">▼</span>
-            </button>
-            @if (openDropdown() === i) {
-            <div
-              [id]="'submenu-' + i"
-              class="absolute left-0 z-50 w-48 mt-2 border shadow-lg rounded-md top-full bg-white dark:bg-primary-900 border-primary-100 dark:border-primary-800"
-              role="menu"
-              [attr.aria-labelledby]="'parent-' + i"
-              (mouseenter)="handleDropdownMouseEnter()"
-              (mouseleave)="handleDropdownMouseLeave()"
-            >
-              @for (child of item.children; track child.link || child.label) {
-              <a
-                [routerLink]="child.link"
-                [routerLinkActive]="[
-                  'bg-primary-50',
-                  'dark:bg-primary-800/50',
-                  'text-primary-700',
-                  'dark:text-primary-300'
-                ]"
-                class="block px-4 py-2 text-primary-800 dark:text-primary-100 transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                tabindex="0"
-                (click)="closeDropdownMenu()"
-              >
-                {{ child.label }}
-              </a>
-              }
-            </div>
+              {{ child.label }}
+            </a>
             }
           </div>
           }
-        </ng-container>
-        } @if (navSignal() && navSignal()!.navLinks && navSignal()!.navLinks.length > 0) {
+        </div>
+        } } } @if (navigation() && navigation()!.navLinks && navigation()!.navLinks.length > 0) {
         <div class="h-5 w-px bg-primary-200 dark:bg-primary-800"></div>
-        } @if (userSignal()) {
+        } @if (userName()) {
         <div class="flex items-center space-x-3">
           <div
             class="flex items-center space-x-2 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/40 rounded-sm"
           >
             <span class="text-sm text-primary-900 dark:text-primary-400"> Welcome, </span>
-            <span
-              class="font-medium text-sm text-primary-900 dark:text-primary-300 tracking-tight"
-            >
-              {{ userSignal() }}
+            <span class="font-medium text-sm text-primary-900 dark:text-primary-300 tracking-tight">
+              {{ userName() }}
             </span>
           </div>
           <div class="h-5 w-px bg-primary-200 dark:bg-primary-800"></div>
         </div>
-        } @if (navSignal() && navSignal()!.navButtons) {
+        } @if (navigation() && navigation()!.navButtons) {
         <div class="mr-6 flex items-center space-x-6">
-          @for (button of navSignal()!.navButtons; track trackByLink($index, button)) { @if
+          @for (button of navigation()!.navButtons; track trackByLink($index, button)) { @if
           (button.link) {
           <a
             [routerLink]="button.link"
@@ -120,7 +114,12 @@
           </a>
           } @else {
 
-          <button class="{{ button.Classes }}" tabindex="0" [attr.aria-label]="button.label" (click)="handleButtonLogin(button)">
+          <button
+            class="{{ button.Classes }}"
+            tabindex="0"
+            [attr.aria-label]="button.label"
+            (click)="handleButtonLogin(button)"
+          >
             {{ button.label }}
           </button>
           } }
@@ -177,18 +176,18 @@
 <div
   class="fixed top-16 left-0 right-0 z-40 flex flex-col px-4 py-5 space-y-4 border-t-2 bg-white dark:!bg-primary-950/60 !backdrop-blur-lg border-primary-400 dark:border-primary-800 xl:hidden mobile-menu shadow-2xl transition-all"
 >
-  @if (userSignal()) {
+  @if (userName()) {
   <div class="pt-1 border-b border-primary-400 pb-4 dark:border-primary-800">
-    <div class="px-4 py-3 pt-2 bg-primary-50/10 dark:bg-primary-900/10 rounded-lg text-center w-full">
+    <div
+      class="px-4 py-3 pt-2 bg-primary-50/10 dark:bg-primary-900/10 rounded-lg text-center w-full"
+    >
       <span class="text-sm text-primary-500 dark:text-primary-400 mb-1">Welcome, </span>
-      <span class="text-primary-900 dark:text-primary-100 font-bold">{{
-        userSignal()
-      }}</span>
+      <span class="text-primary-900 dark:text-primary-100 font-bold">{{ userName() }}</span>
     </div>
   </div>
-  } @if (navSignal() && navSignal()!.navLinks) {
+  } @if (navigation() && navigation()!.navLinks) {
   <div class="flex flex-row flex-wrap gap-2 justify-between">
-    @for (item of navSignal()!.navLinks; track trackByLink($index, item)) { @if (!item.children) {
+    @for (item of navigation()!.navLinks; track trackByLink($index, item)) { @if (!item.children) {
     <a
       [routerLink]="item.link"
       [routerLinkActive]="[
@@ -235,9 +234,9 @@
     </div>
     } }
   </div>
-  } @if (navSignal() && navSignal()!.navButtons) {
+  } @if (navigation() && navigation()!.navButtons) {
   <div class="flex flex-row gap-3 pt-4 border-t border-primary-400 dark:border-primary-800">
-    @for (button of navSignal()!.navButtons; track trackByLink($index, button)) { @if (button.link)
+    @for (button of navigation()!.navButtons; track trackByLink($index, button)) { @if (button.link)
     {
     <a
       [routerLink]="button.link"

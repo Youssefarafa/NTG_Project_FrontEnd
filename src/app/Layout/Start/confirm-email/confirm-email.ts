@@ -9,6 +9,8 @@ import {
   ChangeDetectorRef,
   OnInit,
   OnDestroy,
+  ChangeDetectionStrategy,
+  DestroyRef,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -22,6 +24,7 @@ import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { Auth } from '../../../Core/services/auth';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-confirm-email',
@@ -39,8 +42,11 @@ import { Auth } from '../../../Core/services/auth';
   templateUrl: './confirm-email.html',
   styleUrl: './confirm-email.css',
   providers: [MessageService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmEmail implements OnInit, OnDestroy {
+  private readonly _destroyRef = inject(DestroyRef);
+  private navigationTimer: any;
   private readonly _AuthService = inject(Auth);
   private readonly _Router = inject(Router);
   private readonly _MessageService = inject(MessageService);
@@ -66,12 +72,8 @@ export class ConfirmEmail implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.timerSubscription?.unsubscribe();
-  }
-
   get isOtpValid(): boolean {
-    return this.digits.every((d) => d !== '');
+    return this.digits.every((d) => d !== '' && d !== null);
   }
 
   get formattedCountdown(): string {
@@ -89,14 +91,16 @@ export class ConfirmEmail implements OnInit, OnDestroy {
   startCountdown(): void {
     this.countdown = 300;
     this.timerSubscription?.unsubscribe();
-    this.timerSubscription = interval(1000).subscribe(() => {
-      if (this.countdown > 0) {
-        this.countdown--;
-        this.cdRef.markForCheck();
-      } else {
-        this.timerSubscription.unsubscribe();
-      }
-    });
+    this.timerSubscription = interval(1000)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(() => {
+        if (this.countdown > 0) {
+          this.countdown--;
+          this.cdRef.markForCheck();
+        } else {
+          this.timerSubscription.unsubscribe();
+        }
+      });
   }
 
   goBackAndChangeEmail(): void {
@@ -110,21 +114,26 @@ export class ConfirmEmail implements OnInit, OnDestroy {
     const email = this.emailToVerify();
     if (!email) return;
 
-    this._AuthService.resendOtp(email).subscribe({
-      next: (res) => {
-        this._MessageService.add({
-          severity: 'info',
-          summary: 'Code Resent',
-          detail: 'A new verification code has been sent to your email.',
-        });
-        this.digits = Array(6).fill('');
-        this.startCountdown();
-        this.errsubmitmessage = '';
-      },
-      error: (err) => {
-        this.errsubmitmessage = err.message;
-      },
-    });
+    this._AuthService
+      .resendOtp(email)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: () => {
+          this._MessageService.add({
+            severity: 'info',
+            summary: 'Code Resent',
+            detail: 'A new verification code has been sent to your email.',
+          });
+          this.digits = Array(6).fill('');
+          this.startCountdown();
+          this.errsubmitmessage = '';
+          this.cdRef.markForCheck();
+        },
+        error: (err) => {
+          this.errsubmitmessage = err.message;
+          this.cdRef.markForCheck();
+        },
+      });
   }
 
   onSubmit(): void {
@@ -132,23 +141,54 @@ export class ConfirmEmail implements OnInit, OnDestroy {
 
     const otp = this.digits.join('');
     const email = this.emailToVerify();
-
     this.errsubmitmessage = '';
 
-    this._AuthService.verifyOtp({ email, otp, type: 'register' }).subscribe({
-      next: (res) => {
-        this._MessageService.add({
-          severity: 'success',
-          summary: 'Verified',
-          detail: 'Your account has been successfully verified!',
-        });
-        setTimeout(() => this._Router.navigate(['/login']), 2000);
-      },
-      error: (err) => {
-        this.errsubmitmessage = err.message;
-        this.cdRef.markForCheck();
-      },
-    });
+    this._AuthService
+      .verifyOtp({ email, otp, type: 'register' })
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: () => {
+          this._MessageService.add({
+            severity: 'success',
+            summary: 'Verified',
+            detail: 'Your account has been successfully verified!',
+          });
+          this.cdRef.markForCheck();
+          this.navigationTimer = setTimeout(() => this._Router.navigate(['/login']), 1000);
+        },
+        error: (err) => {
+          this.errsubmitmessage = err.message;
+          this.cdRef.markForCheck();
+        },
+      });
+  }
+
+  onInput(event: Event, index: number) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.replace(/\D/g, '').slice(-1);
+
+    this.digits[index] = value;
+
+    if (value && index < 5) {
+      setTimeout(() => this.focusNext(index), 0);
+    } else if (this.isOtpValid) {
+      setTimeout(() => this.submitButton.nativeElement.focus(), 0);
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent, index: number): void {
+    if (event.key === 'Backspace') {
+      if (this.digits[index] === '' && index > 0) {
+        this.focusPrevious(index);
+      } else {
+        this.digits[index] = '';
+      }
+      event.preventDefault();
+    } else if (event.key === 'ArrowLeft') {
+      this.focusPrevious(index);
+    } else if (event.key === 'ArrowRight') {
+      this.focusNext(index);
+    }
   }
 
   onPaste(event: ClipboardEvent) {
@@ -156,38 +196,18 @@ export class ConfirmEmail implements OnInit, OnDestroy {
     const pasteData = event.clipboardData?.getData('text/plain').replace(/\D/g, '').slice(0, 6);
     if (!pasteData) return;
 
-    for (let i = 0; i < 6; i++) this.digits[i] = pasteData[i] || '';
+    const chars = pasteData.split('');
+    chars.forEach((char, i) => {
+      if (i < 6) this.digits[i] = char;
+    });
+
+    this.cdRef.markForCheck();
 
     if (this.isOtpValid) {
-      this.submitButton.nativeElement.focus();
+      setTimeout(() => this.submitButton.nativeElement.focus(), 0);
     } else {
       const firstEmpty = this.digits.findIndex((d) => d === '');
-      this.inputRefs.get(firstEmpty)?.nativeElement.focus();
-    }
-  }
-
-  trackByFn(index: number) {
-    return index;
-  }
-
-  onKeyDown(event: KeyboardEvent, index: number): void {
-    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'];
-    if (event.ctrlKey && event.key === 'v') return;
-    if (!/\d/.test(event.key) && !allowedKeys.includes(event.key)) event.preventDefault();
-
-    const input = event.target as HTMLInputElement;
-    if (event.key === 'Backspace' && input.value === '') this.focusPrevious(index);
-  }
-
-  onInput(event: Event, index: number) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value.slice(-1);
-    this.digits[index] = value;
-    this.cdRef.detectChanges();
-    if (value && index < 5) {
-      this.focusNext(index);
-    } else if (this.isOtpValid) {
-      this.submitButton.nativeElement.focus();
+      setTimeout(() => this.inputRefs.get(firstEmpty)?.nativeElement.focus(), 0);
     }
   }
 
@@ -197,5 +217,10 @@ export class ConfirmEmail implements OnInit, OnDestroy {
 
   private focusNext(index: number) {
     if (index < 5) this.inputRefs.get(index + 1)?.nativeElement.focus();
+  }
+
+  ngOnDestroy() {
+    this.timerSubscription?.unsubscribe();
+    if (this.navigationTimer) clearTimeout(this.navigationTimer);
   }
 }

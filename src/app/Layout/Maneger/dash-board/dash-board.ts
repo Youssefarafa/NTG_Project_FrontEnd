@@ -1,4 +1,13 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  DestroyRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { DashboardService } from '../../../Core/services/Dashboard';
@@ -10,6 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { BadgeModule } from 'primeng/badge';
 import { InputTextModule } from 'primeng/inputtext';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-dash-board',
@@ -26,11 +36,14 @@ import { InputTextModule } from 'primeng/inputtext';
   providers: [MessageService],
   templateUrl: './dash-board.html',
   styleUrl: './dash-board.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashBoard implements OnInit, OnDestroy {
+export class DashBoard implements OnInit {
   private dashboardService = inject(DashboardService);
   private router = inject(Router);
   private messageService = inject(MessageService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   // --- Signals ---
   totalJobs = signal(0);
@@ -42,7 +55,6 @@ export class DashBoard implements OnInit, OnDestroy {
 
   isSearching = signal(false);
   private searchSubject = new Subject<string>();
-  private destroy$ = new Subject<void>();
 
   ngOnInit() {
     this.loadDashboard();
@@ -50,25 +62,29 @@ export class DashBoard implements OnInit, OnDestroy {
   }
 
   loadDashboard() {
-    this.dashboardService.getDashboardData().subscribe({
-      next: (res: DashboardResponse) => {
-        if (res.success && res.data) {
-          const stats = res.data;
-          this.totalJobs.set(stats.totalJobs);
-          this.totalCandidates.set(stats.totalCandidates);
-          this.ongoingProcesses.set(stats.ongoingProcessesCount);
-          this.activeProcesses.set(stats.activePipelines);
-          this.allCompletedProcesses.set(stats.recentHistory);
-          this.filteredCompletedProcesses.set(stats.recentHistory);
-        } else {
-          this.showError('Dashboard Error', res.message || 'Data retrieval failed');
-        }
-      },
-      error: (err) => {
-        const backendMessage = err.error?.message || err.message || 'Internal Server Error';
-        this.showError('Connection Error', backendMessage);
-      },
-    });
+    this.dashboardService
+      .getDashboardData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res: DashboardResponse) => {
+          if (res.success && res.data) {
+            const stats = res.data;
+            this.totalJobs.set(stats.totalJobs);
+            this.totalCandidates.set(stats.totalCandidates);
+            this.ongoingProcesses.set(stats.ongoingProcessesCount);
+            this.activeProcesses.set(stats.activePipelines);
+            this.allCompletedProcesses.set(stats.recentHistory);
+            this.filteredCompletedProcesses.set(stats.recentHistory);
+            this.cdRef.markForCheck();
+          } else {
+            this.showError('Dashboard Error', res.message || 'Data retrieval failed');
+          }
+        },
+        error: (err) => {
+          const backendMessage = err.error?.message || err.message || 'Internal Server Error';
+          this.showError('Connection Error', backendMessage);
+        },
+      });
   }
 
   private setupSearchLogic() {
@@ -80,12 +96,14 @@ export class DashBoard implements OnInit, OnDestroy {
           if (!query.trim()) {
             this.filteredCompletedProcesses.set(this.allCompletedProcesses());
             this.isSearching.set(false);
+            this.cdRef.markForCheck();
             return of(null);
           }
           this.isSearching.set(true);
+          this.cdRef.markForCheck();
           return this.dashboardService.searchHistory(query);
         }),
-        takeUntil(this.destroy$)
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: (res) => {
@@ -101,6 +119,7 @@ export class DashBoard implements OnInit, OnDestroy {
             if (res.message) this.showError('Search Results', res.message);
           }
           this.isSearching.set(false);
+          this.cdRef.markForCheck();
         },
         error: (err) => {
           this.isSearching.set(false);
@@ -128,6 +147,7 @@ export class DashBoard implements OnInit, OnDestroy {
       detail: detail,
       life: 3000,
     });
+    this.cdRef.markForCheck();
   }
 
   scrollToActiveProcesses() {
@@ -139,11 +159,5 @@ export class DashBoard implements OnInit, OnDestroy {
   }
   navigateToProcessComplete(id: string) {
     this.router.navigate(['/manager/processComplete', id]);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.searchSubject.complete();
   }
 }

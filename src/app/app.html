@@ -1,27 +1,34 @@
 <div class="min-h-screen bg-primary-50 dark:bg-primary-950 transition-colors duration-500">
-  <div class="h-16"></div>
-  <router-outlet></router-outlet>
+
+  <main class="relative">
+    @if (isPageLoading) {
+    <div class="absolute inset-0 z-50 bg-primary-50 dark:bg-primary-950">
+      <app-skeleton></app-skeleton>
+    </div>
+    } @if (!isPageLoading) {
+    <div>
+      <router-outlet></router-outlet>
+    </div>
+    }
+  </main>
+
   <ngx-spinner
-    bdColor="rgba(13, 148, 136, 0.9)"
     size="large"
     color="#ffffff"
     type="ball-clip-rotate-multiple"
     [fullScreen]="true"
+    class="[&>.ngx-spinner-overlay]:!bg-[#042f2e]/90 dark:[&>.ngx-spinner-overlay]:!bg-[#020617]/98 dark:[&>.ngx-spinner-overlay]:backdrop-blur-md"
   >
     <div class="flex flex-col items-center justify-center mt-6 font-sans">
       <div class="mb-4 text-4xl text-white dark:text-primary-200 animate-pulse">
         <i class="fas fa-layer-group"></i>
       </div>
 
-      <p
-        class="text-lg font-light tracking-[0.2em] text-white dark:text-primary-50 uppercase animate-shimmer bg-gradient-to-r from-transparent via-primary-100 to-transparent bg-[length:200%_100%] bg-clip-text"
-      >
+      <p class="text-lg font-light tracking-[0.2em] text-white dark:text-primary-50 uppercase">
         Preparing Your Workspace...
       </p>
 
-      <div
-        class="relative w-32 h-0.5 mt-4 overflow-hidden bg-primary-800/30 dark:bg-primary-900/50"
-      >
+      <div class="relative w-32 h-0.5 mt-4 overflow-hidden bg-white/20 dark:bg-primary-900/50">
         <div class="absolute inset-0 bg-white dark:bg-primary-300 animate-loading-slide"></div>
       </div>
     </div>

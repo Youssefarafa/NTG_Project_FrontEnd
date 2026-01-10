@@ -5,6 +5,7 @@ import {
   inject,
   DestroyRef,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -67,6 +68,7 @@ export class MyApplication implements OnInit {
   private jobService = inject(Jobs);
   private messageService = inject(MessageService);
   private destroyRef = inject(DestroyRef);
+  private cdRef = inject(ChangeDetectorRef);
 
   jobId = signal<string | null>(null);
   jobTitle = signal<string | null>(null);
@@ -102,11 +104,14 @@ export class MyApplication implements OnInit {
     this.applicationForm
       .get('hasInternalReference')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((checked) =>
-        checked
-          ? this.internalReferees.length === 0 && this.addReferee()
-          : this.internalReferees.clear()
-      );
+      .subscribe((checked) => {
+        if (checked) {
+          if (this.internalReferees.length === 0) this.addReferee();
+        } else {
+          this.internalReferees.clear();
+        }
+        this.cdRef.markForCheck(); 
+      });
   }
 
   get workExperience() {
@@ -134,10 +139,12 @@ export class MyApplication implements OnInit {
         { validators: dateRangeValidator }
       )
     );
+    this.cdRef.markForCheck();
   }
 
   removeExperience(index: number) {
     this.workExperience.removeAt(index);
+    this.cdRef.markForCheck();
   }
 
   addReferee() {
@@ -147,15 +154,18 @@ export class MyApplication implements OnInit {
         email: ['', [Validators.required, Validators.email]],
       })
     );
+    this.cdRef.markForCheck();
   }
 
   removeReferee(index: number) {
     this.internalReferees.removeAt(index);
+    this.cdRef.markForCheck();
   }
 
   submitApplication() {
     if (this.applicationForm.invalid) {
       this.applicationForm.markAllAsTouched();
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -182,6 +192,7 @@ export class MyApplication implements OnInit {
           summary: 'Success',
           detail: 'Application submitted successfully!',
         });
+        this.cdRef.markForCheck();
         setTimeout(() => this.router.navigate(['/candidate/availableJobs']), 2000);
       },
       error: (err) => {
@@ -191,6 +202,7 @@ export class MyApplication implements OnInit {
           detail: err.message || 'Failed to apply for the job',
         });
         this.isSubmitting.set(false);
+        this.cdRef.markForCheck();
       },
     });
   }

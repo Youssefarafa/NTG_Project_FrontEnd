@@ -9,7 +9,7 @@ import Lara from '@primeng/themes/lara';
 import { routes } from './app.routes';
 import { CORE_PROVIDERS } from './Core/core.providers';
 import { providePrimeNG } from 'primeng/config';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule, provideAnimations } from '@angular/platform-browser/animations';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -21,7 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes, withPreloading(PreloadAllModules), withComponentInputBinding()),
-    provideAnimations(),
+    provideAnimations(),BrowserAnimationsModule,
     importProvidersFrom(NgxSpinnerModule.forRoot({ type: 'ball-clip-rotate-multiple' })),
     ...CORE_PROVIDERS,
     providePrimeNG({

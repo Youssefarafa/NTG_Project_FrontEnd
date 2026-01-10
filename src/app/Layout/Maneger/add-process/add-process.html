@@ -106,14 +106,8 @@
             [class.text-primary-400]="!isFieldInvalid('testLink')"
           ></i>
         </div>
-        <input
-          type="url"
-          id="testLink"
-          formControlName="testLink"
-          placeholder="https://example.com/test-id"
-          [class.border-red-500]="isFieldInvalid('testLink')"
-          class="w-full pl-10 pr-4 py-3 border bg-primary-50 border-primary-300 text-primary-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-primary-700 dark:text-primary-200 dark:border-primary-600"
-        />
+        <input type="url" id="testLink" formControlName="testLink"
+        placeholder="https://example.com/test-id" class="!ps-8 p-inputtext w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none" />
       </div>
       @if(isFieldInvalid('testLink')) {
       <p class="text-red-500 text-xs mt-1 animate-fadeIn">
@@ -220,7 +214,7 @@
           <i class="pi pi-users mr-2 text-teal-500"></i> Internal Referees
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          @for(ref of app.internalReferees; track $index) {
+          @for(ref of app.internalReferees; track ref) {
           <div
             class="p-4 bg-teal-50 dark:bg-teal-900/20 rounded-xl border border-teal-100 dark:border-teal-800"
           >
@@ -238,7 +232,7 @@
         </h3>
         @if (app.workExperience && app.workExperience.length > 0) {
         <div class="space-y-4">
-          @for(exp of app.workExperience; track $index) {
+          @for(exp of app.workExperience; track exp) {
           <div
             class="p-5 bg-white dark:bg-primary-900/50 rounded-2xl border-l-4 shadow-sm border border-primary-100 dark:border-primary-700 border-l-teal-500"
           >

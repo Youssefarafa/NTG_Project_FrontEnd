@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { Job, JobsResponse } from '../models/JobsData';
-import { ApplyJobRequest } from '../models/MyApplicationData';
+import { AppliedJob, AppliedJobsResponse, ApplyJobRequest } from '../models/MyApplicationData';
 import { environment } from '../../Shared/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,8 +11,8 @@ export class Jobs {
   // ==========================================
   // 1. Real API Methods
   // ==========================================
-  // private readonly API_URL = environment.apiUrl;
-  // private http = inject(HttpClient);
+  private readonly API_URL = environment.apiUrl;
+  private http = inject(HttpClient);
 
   // getJobsCandidate(): Observable<JobsResponse> {
   //   return this.http.get<JobsResponse>(`${this.API_URL}/api/jobsCandidate`);
@@ -50,6 +50,10 @@ export class Jobs {
   //   return this.http.post<JobsResponse>(`${this.API_URL}/api/job/apply`, data);
   // }
 
+  // getAppliedJobs(): Observable<AppliedJobsResponse> {
+  //   return this.http.get<AppliedJobsResponse>(`${this.API_URL}/api/job/applied-jobs`);
+  // }
+
   // withdrawJob(jobId: string): Observable<JobsResponse> {
   //   return this.http.delete<JobsResponse>(`${this.API_URL}/api/job/withdraw/${jobId}`);
   // }
@@ -85,7 +89,7 @@ export class Jobs {
       experience: 1,
       responsibilities: ['Design wireframe', 'Prototypes', 'Collaborate with devs'],
       requiredSkills: ['Figma', 'Adobe XD', 'User Research'],
-      isApplied: false,
+      isApplied: true,
     },
   ]);
 
@@ -108,27 +112,27 @@ export class Jobs {
       responsibilities: ['Leading team', 'Code Review'],
       requiredSkills: ['Angular', 'Unit Testing'],
       isApplied: false,
-      expiresAt: '2025-01-01T00:00:00.000Z', 
+      expiresAt: '2025-01-01T00:00:00.000Z',
     },
   ]);
 
   getJobsManager(): Observable<JobsResponse> {
     const response: JobsResponse = {
       success: true,
-      data: this.mockJobs(), 
-      message: 'Jobs fetched successfully'
+      data: this.mockJobs(),
+      message: 'Jobs fetched successfully',
     };
-    return of(response).pipe(delay(800)); 
+    return of(response).pipe(delay(800));
   }
 
   deleteJob(id: string): Observable<JobsResponse> {
     const currentJobs = this.mockJobs();
-    const filteredJobs = currentJobs.filter(j => j.id !== id);
+    const filteredJobs = currentJobs.filter((j) => j.id !== id);
     this.mockJobs.set(filteredJobs);
 
     const response: JobsResponse = {
       success: true,
-      message: 'Job deleted successfully from Mock API'
+      message: 'Job deleted successfully from Mock API',
     };
 
     return of(response).pipe(delay(500));
@@ -201,5 +205,69 @@ export class Jobs {
     updated[jobIndex] = { ...updated[jobIndex], isApplied: false };
     this.jobs.set(updated);
     return of({ success: true }).pipe(delay(400));
+  }
+
+  private appliedJobsMock = signal<AppliedJob[]>([
+    {
+      id: '1',
+      jobTitle: 'Frontend Developer',
+      appliedDate: '2025-01-05T10:30:00.000Z',
+      status: 'Called for Interview',
+      jobDetails: {
+        reportsTo: 'CTO',
+        experience: 2,
+        responsibilities: ['Develop UI components', 'Integrate APIs', 'Maintain codebase'],
+        requiredSkills: ['Angular', 'Tailwind CSS', 'TypeScript'],
+      },
+      applicationData: {
+        cvFile: 'https://example.com/my-cv.pdf',
+        hasInternalReference: true,
+        internalReferees: [{ name: 'Ahmed Ali', email: 'ahmed.a@company.com' }],
+        workExperience: [
+          {
+            jobTitle: 'Junior Web Developer',
+            companyName: 'Tech Solutions',
+            startDate: '2023-01-01',
+            endDate: '2024-12-01',
+            achievements: 'Built 10+ responsive dashboards using Angular.',
+          },
+        ],
+      },
+    },
+    {
+      id: '2',
+      jobTitle: 'Backend Developer',
+      appliedDate: '2025-01-08T14:20:00.000Z',
+      status: 'New (ShortListed)',
+      jobDetails: {
+        reportsTo: 'CTO',
+        experience: 3,
+        responsibilities: ['Develop REST APIs', 'Database management'],
+        requiredSkills: ['Node.js', 'Express', 'MongoDB'],
+      },
+      applicationData: {
+        cvFile: 'https://example.com/my-cv.pdf',
+        hasInternalReference: false,
+        internalReferees: [],
+        workExperience: [
+          {
+            jobTitle: 'Backend Intern',
+            companyName: 'Data Systems',
+            startDate: '2022-06-01',
+            endDate: '2022-12-01',
+            achievements: 'Optimized SQL queries reducing load time by 30%.',
+          },
+        ],
+      },
+    },
+  ]);
+
+  getAppliedJobs(): Observable<AppliedJobsResponse> {
+    const response: AppliedJobsResponse = {
+      success: true,
+      data: this.appliedJobsMock(),
+      message: 'Applied jobs fetched successfully',
+    };
+    return of(response).pipe(delay(1000)); 
   }
 }

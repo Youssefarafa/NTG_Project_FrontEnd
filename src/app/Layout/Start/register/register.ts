@@ -1,5 +1,5 @@
 import { Auth } from './../../../Core/services/auth';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // PrimeNG Components
 import { InputTextModule } from 'primeng/inputtext';
@@ -27,7 +28,6 @@ import { RegisterData } from '../../../Core/models/AuthData';
 @Component({
   selector: 'app-register',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -40,15 +40,17 @@ import { RegisterData } from '../../../Core/models/AuthData';
     IconFieldModule,
     InputIconModule,
   ],
+  providers: [MessageService],
   templateUrl: './register.html',
   styleUrl: './register.css',
-  providers: [MessageService],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly messageService = inject(MessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isLoading = this.auth.isLoading;
 
@@ -150,7 +152,7 @@ export class Register {
       password: this.f.password.value!,
     };
 
-    this.auth.register(registerData).subscribe({
+    this.auth.register(registerData).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.messageService.add({
           severity: 'success',

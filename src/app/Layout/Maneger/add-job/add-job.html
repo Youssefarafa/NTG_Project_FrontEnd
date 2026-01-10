@@ -55,10 +55,8 @@
               [min]="0"
               [max]="20"
               styleClass="w-full"
-              [class.ng-invalid]="isFieldInvalid('experience')"
-              [class.ng-dirty]="addJobForm.get('experience')?.dirty"
               placeholder="e.g. 5"
-              inputStyleClass="w-full px-4 py-3 border rounded-lg dark:bg-primary-700"
+              inputStyleClass="w-full px-4 py-3 border rounded-lg"
             ></p-inputNumber>
             @if (isFieldInvalid('experience')) {
             <small class="text-red-500 font-medium italic"
@@ -74,10 +72,8 @@
               [minDate]="minDate"
               appendTo="body"
               styleClass="w-full"
-              [class.ng-invalid]="isFieldInvalid('expiresAt')"
-              [class.ng-dirty]="addJobForm.get('expiresAt')?.dirty"
               placeholder="e.g. 2/30/2026"
-              inputStyleClass="w-full px-4 py-3 border rounded-lg dark:bg-primary-700"
+              inputStyleClass="w-full px-4 py-3 border rounded-lg"
             ></p-datepicker>
             @if (isFieldInvalid('expiresAt')) {
             <small class="text-red-500 font-medium italic">Please select an expiration date.</small>
@@ -100,7 +96,7 @@
             + Add
           </button>
         </div>
-        @for(resp of responsibilities.controls; track $index) {
+        @for(resp of responsibilities.controls; track resp) {
         <div class="mb-3">
           <div class="flex items-center gap-3">
             <input
@@ -139,7 +135,7 @@
             + Add
           </button>
         </div>
-        @for(skill of requiredSkills.controls; track $index) {
+        @for(skill of requiredSkills.controls; track skill) {
         <div class="mb-3">
           <div class="flex items-center gap-3">
             <input

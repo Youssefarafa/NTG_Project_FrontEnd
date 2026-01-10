@@ -1,0 +1,257 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+
+<div class="min-h-screen  p-4 sm:p-8 transition-colors duration-300">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+      <div>
+        <h1
+          class="text-4xl font-black text-primary-900 dark:text-white tracking-tight flex items-center gap-3"
+        >
+          <div class="p-3 bg-primary-600 text-white rounded-2xl shadow-lg shadow-primary-500/20">
+            <i class="pi pi-objects-column text-2xl"></i>
+          </div>
+          My Applications
+        </h1>
+        <p
+          class="text-primary-600 dark:text-primary-200 mt-2 font-bold text-lg flex items-center gap-2 ml-1"
+        >
+          <span class="w-2.5 h-2.5 rounded-full bg-primary-600 dark:bg-primary-400"></span>
+          Manage your career progress and application status
+        </p>
+      </div>
+      <p-button
+        label="Refresh"
+        icon="pi pi-sync"
+        [loading]="mainLoading()"
+        (onClick)="loadAppliedJobs()"
+        styleClass="p-button-raised bg-primary-700 border-none text-white rounded-xl shadow-xl px-6 py-3 transition-all hover:bg-primary-800 hover:scale-105"
+      >
+      </p-button>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      @for (app of appliedJobs(); track app.id) {
+      <div
+        class="bg-white dark:bg-primary-900 rounded-[2rem] shadow-sm border border-primary-200 dark:border-primary-800 flex flex-col transition-all hover:shadow-2xl hover:-translate-y-1 group overflow-hidden"
+      >
+        <div
+          class="px-8 py-5 bg-primary-100 dark:bg-primary-800/50 border-b border-primary-200 dark:border-primary-700 flex justify-between items-center"
+        >
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-full bg-white dark:bg-primary-700 border border-primary-200 dark:border-primary-600 flex items-center justify-center shadow-sm"
+            >
+              <i
+                class="pi pi-clock text-primary-600 dark:text-primary-400 text-xs animate-spin-slow"
+              ></i>
+            </div>
+            <span
+              class="text-[11px] font-extrabold uppercase tracking-widest text-primary-500 dark:text-primary-400"
+            >
+              Submitted:
+              <span class="text-primary-900 dark:text-white">{{
+                (app.appliedDate | date : 'mediumDate') ?? ''
+              }}</span>
+            </span>
+          </div>
+          <p-tag
+            [value]="app.status"
+            [severity]="getStatusSeverity(app.status)"
+            styleClass="px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm"
+          >
+          </p-tag>
+        </div>
+
+        <div class="p-8 lg:p-9 flex-grow">
+          <div class="mb-10">
+            <h2
+              class="text-2xl sm:text-3xl font-black text-primary-900 dark:text-white leading-tight mb-4 transition-colors"
+            >
+              {{ app.jobTitle }}
+            </h2>
+            <div class="flex flex-wrap gap-3">
+              <span
+                class="px-3 py-1.5 bg-white dark:bg-primary-800 text-primary-700 dark:text-primary-200 rounded-lg text-xs font-bold flex items-center gap-2 border border-primary-300 dark:border-primary-700 shadow-sm"
+              >
+                <i class="pi pi-user text-[10px] text-primary-600"></i>
+                {{ app.jobDetails.reportsTo }}
+              </span>
+              <span
+                class="px-3 py-1.5 bg-white dark:bg-primary-800 text-primary-700 dark:text-primary-200 rounded-lg text-xs font-bold flex items-center gap-2 border border-primary-300 dark:border-primary-700 shadow-sm"
+              >
+                <i class="pi pi-briefcase text-[10px] text-primary-600"></i>
+                {{ app.jobDetails.experience }}+ Years Exp.
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
+            <div class="md:col-span-5 space-y-8">
+              <div>
+                <h3
+                  class="text-[11px] font-black text-primary-800 dark:text-primary-400 uppercase tracking-widest mb-4 flex items-center gap-2"
+                >
+                  <i class="pi pi-list-check text-primary-600"></i> Responsibilities
+                </h3>
+                <ul class="space-y-2">
+                  @for (res of app.jobDetails.responsibilities; track res) {
+                  <li
+                    class="p-3 bg-primary-50 dark:bg-primary-800 rounded-xl border border-primary-200 dark:border-primary-700 text-xs font-medium text-primary-800 dark:text-primary-200 leading-relaxed transition-colors"
+                  >
+                    {{ res }}
+                  </li>
+                  }
+                </ul>
+              </div>
+
+              <div>
+                <h3
+                  class="text-[11px] font-black text-primary-800 dark:text-primary-400 uppercase tracking-widest mb-4 flex items-center gap-2"
+                >
+                  <i class="pi pi-bolt text-primary-600"></i> Required Skills
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                  @for (skill of app.jobDetails.requiredSkills; track skill) {
+                  <span
+                    class="px-3 py-1.5 bg-white dark:bg-primary-800 text-primary-900 dark:text-white border-2 border-primary-100 dark:border-primary-700 rounded-lg text-[10px] font-black shadow-sm"
+                  >
+                    {{ skill }}
+                  </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="md:col-span-7 space-y-8">
+              <div>
+                <h3
+                  class="text-[11px] font-black text-primary-800 dark:text-primary-400 uppercase tracking-widest mb-6 flex items-center gap-2"
+                >
+                  <i class="pi pi-history"></i> My Experience
+                </h3>
+                <div
+                  class="relative space-y-6 pl-5 border-l-2 border-primary-200 dark:border-primary-700"
+                >
+                  @for (exp of app.applicationData.workExperience; track exp) {
+                  <div class="relative">
+                    <div
+                      class="absolute -left-[27px] top-1.5 w-4 h-4 rounded-full bg-white dark:bg-primary-900 border-[4px] border-primary-600 shadow-sm z-10"
+                    ></div>
+
+                    <div
+                      class="group/exp bg-white dark:bg-primary-800/50 p-5 rounded-2xl border border-primary-200 dark:border-primary-700 shadow-sm hover:border-primary-300 dark:hover:border-primary-700 transition-all"
+                    >
+                      <div class="flex justify-between items-start mb-2">
+                        <p class="text-sm font-black text-primary-900 dark:text-white">
+                          {{ exp.jobTitle }}
+                        </p>
+                        <span
+                          class="text-[10px] font-bold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 px-2 py-1 rounded-md"
+                        >
+                          {{ exp.startDate | date : 'yyyy' }} - {{ exp.endDate | date : 'yyyy' }}
+                        </span>
+                      </div>
+                      <p
+                        class="text-xs text-primary-500 dark:text-primary-400 font-bold mb-3 flex items-center gap-1 uppercase tracking-wide"
+                      >
+                        <i class="pi pi-building text-[10px]"></i> {{ exp.companyName }}
+                      </p>
+                      <p
+                        class="text-xs leading-relaxed text-primary-700 dark:text-primary-300 font-medium"
+                      >
+                        {{ exp.achievements }}
+                      </p>
+                    </div>
+                  </div>
+                  }
+                </div>
+              </div>
+
+              @if (app.applicationData.hasInternalReference) {
+              <div class="pt-2">
+                <h3
+                  class="text-[11px] font-black text-primary-800 dark:text-primary-400 uppercase tracking-widest mb-4 flex items-center gap-2"
+                >
+                  <i class="pi pi-users"></i> Internal Refs
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  @for (ref of app.applicationData.internalReferees; track ref) {
+                  <div
+                    class="flex items-center gap-3 bg-primary-50 dark:bg-primary-900/20 p-3 rounded-xl border border-primary-100 dark:border-primary-800/50"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-full bg-primary-200 dark:bg-primary-800 flex items-center justify-center text-xs text-primary-800 dark:text-primary-200 font-black"
+                    >
+                      {{ ref.name[0] }}
+                    </div>
+                    <div class="flex flex-col overflow-hidden">
+                      <span class="text-[11px] font-bold text-primary-900 dark:text-white truncate">{{
+                        ref.name
+                      }}</span>
+                      <span
+                        class="text-[10px] text-primary-600 dark:text-primary-400 truncate font-medium"
+                        >{{ ref.email }}</span
+                      >
+                    </div>
+                  </div>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="p-6 bg-primary-100/70 dark:bg-primary-800/50 border-t border-primary-200 dark:border-primary-700 flex flex-col sm:flex-row gap-3"
+        >
+          <p-button
+            label="Review My CV"
+            icon="pi pi-file-pdf"
+            [outlined]="true"
+            (onClick)="viewCv(app.applicationData.cvFile)"
+            styleClass="w-full sm:flex-1 text-primary-600 dark:!text-primary-400 font-extrabold text-xs py-3.5 rounded-xl !border-1 !border-primary-400/90 hover:!bg-slate-300/30 dark:hover:!bg-slate-900/30 transition-all"
+          >
+          </p-button>
+
+          <p-button
+            label="Withdraw Application"
+            icon="pi pi-trash"
+            [loading]="isLoading(app.id)"
+            severity="danger"
+            [outlined]="true"
+            (onClick)="confirmWithdraw(app.id, app.jobTitle)"
+            styleClass="w-full sm:flex-1 font-bold text-xs py-3.5 rounded-xl border-2 hover:!bg-red-50 dark:hover:!bg-red-900/40 transition-all"
+          >
+          </p-button>
+        </div>
+      </div>
+      } @empty {
+      <div
+        class="col-span-full py-32 text-center bg-white dark:bg-primary-900 rounded-[2.5rem] border-2 border-dashed border-primary-300 dark:border-primary-700"
+      >
+        <div
+          class="inline-flex items-center justify-center w-24 h-24 bg-primary-50 dark:bg-primary-800 rounded-full mb-8"
+        >
+          <i class="pi pi-inbox text-4xl text-primary-300 dark:text-primary-700"></i>
+        </div>
+        <h2 class="text-3xl font-black text-primary-900 dark:text-white mb-4">
+          No Active Applications
+        </h2>
+        <p class="text-primary-600 dark:text-primary-400 max-w-sm mx-auto mb-8 text-base font-bold">
+          Your application list is currently empty. Ready to find your dream job?
+        </p>
+        <p-button
+          label="Explore Job Board"
+          icon="pi pi-arrow-right"
+          iconPos="right"
+          styleClass="p-button-lg p-button-primary rounded-full px-10 py-3 shadow-xl hover:scale-105 transition-transform"
+          (onClick)="onBackToAvailableJobs()"
+        >
+        </p-button>
+      </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, DestroyRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -34,11 +34,13 @@ import { TagModule } from 'primeng/tag';
   providers: [MessageService],
   templateUrl: './view-users.html',
   styleUrl: './view-users.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewUsers implements OnInit {
   private candidatesService = inject(Candidates);
   private messageService = inject(MessageService);
   private destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   allCandidates = signal<Candidate[]>([]);
   searchName = signal<string>('');
@@ -64,10 +66,13 @@ export class ViewUsers implements OnInit {
       .getCandidates()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => this.allCandidates.set(data),
+        next: (data) => {
+          this.allCandidates.set(data);
+          this.cdRef.markForCheck();
+        },
         error: (err: Error) => {
-          this.showToast('error', 'Server Error', err.message);
           this.allCandidates.set([]);
+          this.showToast('error', 'Server Error', err.message);
         },
       });
   }
@@ -82,5 +87,6 @@ export class ViewUsers implements OnInit {
 
   private showToast(severity: string, summary: string, detail: string) {
     this.messageService.add({ severity, summary, detail });
+    this.cdRef.markForCheck();
   }
 }

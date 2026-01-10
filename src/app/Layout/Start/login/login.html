@@ -50,7 +50,7 @@
               <p-message
                 severity="error"
                 [text]="getFirstErrorMessage('email')"
-                styleClass="!text-xs !py-1.5 !px-3 !bg-red-50/90 dark:!bg-red-900/40 !border-red-200 dark:!border-red-800 !text-red-700 dark:!text-red-300"
+                styleClass="!text-xs w-full"
               />
             </div>
             }
@@ -88,7 +88,7 @@
               <p-message
                 severity="error"
                 [text]="getFirstErrorMessage('password')"
-                styleClass="!text-xs !py-1.5 !px-3 !bg-red-50/90 dark:!bg-red-900/40 !border-red-200 dark:!border-red-800 !text-red-700 dark:!text-red-300"
+                styleClass="!text-xs w-full"
               />
             </div>
             }
@@ -121,7 +121,7 @@
             </button>
           </div>
           }
-          
+
           <p-button
             type="submit"
             [loading]="isLoading()"

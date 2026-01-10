@@ -1,0 +1,37 @@
+<div class=" mt-[0px] lg:mt-[-40px] lg:py-10  w-full animate-fadein">
+  <div
+    class="h-16 border-b border-primary-100 px-2 dark:border-primary-900/50 bg-slate-50 dark:bg-primary-950 shadow-lg flex items-center justify-between"
+  >
+
+    <div class="flex items-center gap-4">
+      <p-skeleton shape="circle" size="2.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+      <p-skeleton width="120px" height="1.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+    </div>
+    <div class="flex gap-4">
+      <div class="hidden lg:inline mt-[5px]">
+        <p-skeleton width="320px" height="1.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+      </div>
+      <p-skeleton
+        width="90px"
+        height="2rem"
+        borderRadius="20px"
+        styleClass="dark:bg-primary-900/20"
+      ></p-skeleton>
+      <p-skeleton shape="circle" size="2rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+    </div>
+  </div>
+
+  <div class="space-y-6 pt-4 px-7 " >
+    <div class="border border-primary-100 dark:border-primary-800/50 rounded-xl overflow-hidden">
+      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+      <div class="flex gap-4 p-4 border-b border-primary-50 dark:border-primary-900/30">
+        <p-skeleton width="5%" height="1.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+        <p-skeleton width="25%" height="1.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+        <p-skeleton width="40%" height="1.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+        <p-skeleton width="20%" height="1.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+        <p-skeleton width="10%" height="1.5rem" styleClass="dark:bg-primary-900/20"></p-skeleton>
+      </div>
+      }
+    </div>
+  </div>
+</div>

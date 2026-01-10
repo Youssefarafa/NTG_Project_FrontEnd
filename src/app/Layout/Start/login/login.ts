@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // PrimeNG Components
 import { InputTextModule } from 'primeng/inputtext';
@@ -21,7 +23,6 @@ import { LoginData } from '../../../Core/models/AuthData';
 @Component({
   selector: 'app-login',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -36,15 +37,17 @@ import { LoginData } from '../../../Core/models/AuthData';
     InputIconModule,
     CheckboxModule,
   ],
+  providers: [MessageService],
   templateUrl: './login.html',
   styleUrl: './login.css',
-  providers: [MessageService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Login {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly messageService = inject(MessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isLoading = this.auth.isLoading;
   readonly isRememberMeEnabled = this.auth.isRememberMeEnabled;
@@ -53,7 +56,7 @@ export class Login {
   loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(50)]),
     password: new FormControl('', [Validators.required]),
-    rememberMe: new FormControl(false), 
+    rememberMe: new FormControl(false),
   });
 
   passwordVisible = false;
@@ -105,12 +108,12 @@ export class Login {
       rememberMe: this.isRememberMeEnabled() ? this.f.rememberMe.value || false : false,
     };
 
-    this.auth.login(loginData).subscribe({
+    this.auth.login(loginData).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
-          detail: 'Login processing...', 
+          detail: 'Login processing...',
         });
 
         if (!!res.requiresOtp && this.auth.isOtpEnabled()) {
@@ -133,6 +136,6 @@ export class Login {
   }
 
   navigateToForgotPassword() {
-  this.router.navigate(['/forgotPassword']);
-}
+    this.router.navigate(['/forgotPassword']);
+  }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -9,10 +9,11 @@ import { CardModule } from 'primeng/card';
 @Component({
   selector: 'app-home',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterModule, ButtonModule, CardModule],
   templateUrl: './home.html',
+    styleUrl: './home.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home {
-  currentYear = new Date().getFullYear();
+  readonly currentYear = signal(new Date().getFullYear());
 }

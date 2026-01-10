@@ -1,4 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  DestroyRef,
+  OnDestroy,
+} from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -15,6 +23,7 @@ import { MessageModule } from 'primeng/message';
 import { DividerModule } from 'primeng/divider';
 
 import { Auth } from '../../../Core/services/auth';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-forgot-password',
@@ -34,15 +43,19 @@ import { Auth } from '../../../Core/services/auth';
   providers: [MessageService],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ForgotPassword {
+export class ForgotPassword implements OnDestroy {
   private fb = inject(FormBuilder);
   private authService = inject(Auth);
   private messageService = inject(MessageService);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+  private cdRef = inject(ChangeDetectorRef);
 
   isLoading = signal(false);
-
+  private navTimer: any;
+  
   forgotForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
   });
@@ -55,18 +68,20 @@ export class ForgotPassword {
 
     this.isLoading.set(true);
     const email = this.forgotForm.value.email!;
+    this.cdRef.markForCheck();
 
-    this.authService.forgotPassword(email).subscribe({
+    this.authService.forgotPassword(email).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Check your email',
           detail: res.message || 'Reset link sent successfully!',
         });
+        this.cdRef.markForCheck();
 
-        setTimeout(() => {
-          this.router.navigate(['/resetPassword'], { queryParams: { email } });
-        }, 2000);
+        this.navTimer = setTimeout(() => {
+          this.router.navigate(['/verifyCode'], { queryParams: { email } });
+        }, 1000);
       },
       error: (err) => {
         this.messageService.add({
@@ -75,6 +90,7 @@ export class ForgotPassword {
           detail: err.message || 'Something went wrong',
         });
         this.isLoading.set(false);
+        this.cdRef.markForCheck();
       },
     });
   }
@@ -86,5 +102,9 @@ export class ForgotPassword {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.forgotForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  ngOnDestroy() {
+    if (this.navTimer) clearTimeout(this.navTimer);
   }
 }

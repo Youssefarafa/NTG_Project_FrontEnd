@@ -1,2 +1,4 @@
 <app-nav-bar [userName]="userName()" [navigation]="navigation"></app-nav-bar>
-<router-outlet></router-outlet>
+<div [@routeAnimations]="getRouteAnimationData()" class="page-content pt-16">
+  <router-outlet></router-outlet>
+</div>

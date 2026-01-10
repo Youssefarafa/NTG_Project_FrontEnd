@@ -164,6 +164,19 @@ export class Auth {
       );
   }
 
+  verifyCode(data: {
+    email: string;
+    code: string;
+  }): Observable<{ success: boolean; message: string }> {
+    this._isAuthenticating.set(true);
+    return this.http
+      .post<{ success: boolean; message: string }>(`${this.API_URL}/api/auth/verify-code`, data)
+      .pipe(
+        catchError((e) => this.handleHttpError(e)),
+        finalize(() => this._isAuthenticating.set(false))
+      );
+  }
+
   resetPassword(data: {
     email: string;
     code: string;
