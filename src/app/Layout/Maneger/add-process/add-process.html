@@ -1,4 +1,5 @@
 <p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
 <div
   class="max-w-4xl lg:mx-auto bg-white dark:bg-primary-800 p-6 sm:p-8 rounded-2xl shadow-2xl transition-colors duration-300 mt-10 !mb-10 mx-7"
@@ -7,9 +8,21 @@
     <h1 class="text-3xl sm:text-4xl font-bold text-primary-900 dark:text-primary-100">
       Create New Hiring Process
     </h1>
-    <p class="text-primary-50 dark:text-primary-400 mt-2">
+    <p class="text-primary-700 dark:text-primary-400 mt-2">
       Select a job, choose candidates, and provide a test link to begin the assessment.
     </p>
+    @if (showEmailWarning()) {
+    <div
+      class="mb-3 mt-3 flex items-start gap-3 rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-yellow-800 animate-fadeIn dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200"
+    >
+      <i class="pi pi-exclamation-triangle mt-0.5 text-lg"></i>
+      <p class="text-sm leading-relaxed">
+        <strong>Warning:</strong>
+        Please complete all required steps (job selection, candidates, and test link) before editing
+        the email content to avoid unexpected errors.
+      </p>
+    </div>
+    }
   </div>
 
   <form [formGroup]="addProcessForm" (ngSubmit)="createProcess()" novalidate>
@@ -54,6 +67,7 @@
               type="checkbox"
               [id]="'applicant-' + i"
               [formControlName]="i"
+              (change)="onCandidateChange()"
               class="h-6 w-6 text-teal-600 rounded border-2 border-primary-400 dark:border-primary-500 bg-white dark:bg-primary-700 checked:bg-teal-600 focus:ring-teal-500 transition-all cursor-pointer"
             />
             <div class="ml-3 flex flex-col">
@@ -106,13 +120,63 @@
             [class.text-primary-400]="!isFieldInvalid('testLink')"
           ></i>
         </div>
-        <input type="url" id="testLink" formControlName="testLink"
-        placeholder="https://example.com/test-id" class="!ps-8 p-inputtext w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none" />
+        <input
+          type="url"
+          id="testLink"
+          formControlName="testLink"
+          placeholder="https://example.com/test-id"
+          class="!ps-8 p-inputtext w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none"
+        />
       </div>
       @if(isFieldInvalid('testLink')) {
       <p class="text-red-500 text-xs mt-1 animate-fadeIn">
         Please enter a valid URL (e.g., https://link.com).
       </p>
+      }
+    </div>
+
+    <div class="mb-8"></div>
+
+    <div class="mb-8">
+      <label class="block text-primary-700 dark:text-primary-300 font-semibold mb-2">
+        4. Customize Email Content
+      </label>
+      <div class="card">
+        <p-editor
+          formControlName="emailBody"
+          (onFocus)="onEmailFocus()"
+          [style]="{ height: '320px' }"
+          styleClass="w-full"
+        >
+          <ng-template pTemplate="header">
+            <span class="ql-formats">
+              <button type="button" class="ql-bold" aria-label="Bold"></button>
+              <button type="button" class="ql-italic" aria-label="Italic"></button>
+              <button type="button" class="ql-underline" aria-label="Underline"></button>
+            </span>
+            <span class="ql-formats">
+              <button type="button" class="ql-list" value="ordered"></button>
+              <button type="button" class="ql-list" value="bullet"></button>
+            </span>
+          </ng-template>
+        </p-editor>
+      </div>
+      <div class="flex gap-3 mt-2">
+        <button
+          type="button"
+          (click)="resetToTemplate()"
+          class="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-semibold underline"
+        >
+          <i class="pi pi-redo mr-1"></i>Reset to Template
+        </button>
+        @if(isEmailEditedManually()) {
+        <span class="text-xs text-amber-600 dark:text-amber-400 italic">
+          (Email has been manually edited)
+        </span>
+        }
+      </div>
+      @if(isFieldInvalid('emailBody')) {
+      <p class="text-red-500 text-xs mt-1 animate-fadeIn">Email content cannot be empty.</p>
       }
     </div>
 
@@ -206,6 +270,34 @@
             >, {{ app.faculty }} ({{ app.department }})
           </p>
         </div>
+        <div class="col-span-1 sm:col-span-3 flex flex-wrap gap-4 mt-4">
+          <a
+            [href]="app.cvFile"
+            target="_blank"
+            class="flex-1 min-w-[140px] flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-xl font-bold transition-all shadow-lg shadow-teal-500/20"
+          >
+            <i class="pi pi-file-pdf text-xl"></i>
+            View Resume (CV)
+          </a>
+
+          @if (app.linkedInProfile) {
+          <a
+            [href]="app.linkedInProfile"
+            target="_blank"
+            class="flex-1 min-w-[140px] flex items-center justify-center gap-2 bg-[#0077b5] hover:bg-[#006da3] text-white px-4 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20"
+          >
+            <i class="pi pi-linkedin text-xl"></i>
+            LinkedIn Profile
+          </a>
+          } @else {
+          <div
+            class="flex-1 min-w-[140px] flex items-center justify-center gap-2 bg-primary-100 dark:bg-primary-700 text-primary-400 dark:text-primary-500 px-4 py-3 rounded-xl font-bold cursor-not-allowed border border-dashed border-primary-300 dark:border-primary-600"
+          >
+            <i class="pi pi-linkedin text-xl"></i>
+            No LinkedIn Provided
+          </div>
+          }
+        </div>
       </div>
 
       @if (app.hasInternalReference) {
@@ -280,3 +372,4 @@
   </div>
 </div>
 }
+<br />

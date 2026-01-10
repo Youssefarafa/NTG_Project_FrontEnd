@@ -15,6 +15,7 @@ export interface ApplyJobRequest {
   jobId: string;
   isApplied: boolean;
   cvFile: string;
+  linkedInProfile?: string;
   hasInternalReference: boolean;
   internalReferees: InternalReferee[];
   workExperience: WorkExperience[];

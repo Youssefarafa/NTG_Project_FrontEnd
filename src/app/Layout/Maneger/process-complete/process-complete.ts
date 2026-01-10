@@ -11,7 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Process } from '../../../Core/services/Process';
 import { FullProcessResponse, ProcessCandidateDetails } from '../../../Core/models/ProcessData';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -34,7 +34,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     DialogModule,
     InputTextModule,
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService],
   templateUrl: './process-complete.html',
   styleUrl: './process-complete.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

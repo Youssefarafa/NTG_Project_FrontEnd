@@ -27,6 +27,7 @@ export interface ApplicantJoinData {
   department?: string;
   graduationYear?: number;
   cvFile: string;
+  linkedInProfile?: string;
   hasInternalReference: boolean;
   internalReferees: InternalReferee[];
   workExperience: WorkExperience[];
@@ -42,6 +43,7 @@ export interface CreateProcessPayload {
   jobId: string;
   candidateIds: string[];
   testLink: string;
+  emailBody: string;
 }
 
 export interface ProcessResponse {

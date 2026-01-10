@@ -389,7 +389,6 @@
   /* ==========================================================================
    1. Variables Definition (Unified Theme)
    ========================================================================== */
-
   :root {
     --bg-input: #f0fdf4;
     --border-input: #99f6e4;
@@ -409,6 +408,8 @@
     --table-header-bg: #b4ffed;
     --table-header-text: #0f766e;
     --table-border: #ccfbf1;
+    /* Editor specific icons */
+    --editor-icons: #64748b;
   }
 
   .app-dark {
@@ -430,6 +431,8 @@
     --table-header-bg: #134e4a;
     --table-header-text: #5eead4;
     --table-border: #115e59;
+    /* Editor specific icons */
+    --editor-icons: #94a3b8;
   }
 
   /* ==========================================================================
@@ -539,7 +542,6 @@
     color: var(--text-modal-header) !important;
   }
 
-  /* Form Controls */
   body .p-radiobutton-box {
     background-color: var(--bg-input) !important;
     border-color: var(--border-input) !important;
@@ -618,7 +620,69 @@
   }
 
   /* ==========================================================================
-   8. Validation & Errors
+   8. PrimeNG Editor Customization (Unified Style)
+   ========================================================================== */
+  body .p-editor-container {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 2px solid var(--bg-modal-header) !important;
+    display: block !important;
+  }
+
+  body .ql-toolbar.ql-snow {
+    background-color: var(--bg-input) !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-input) !important;
+    padding: 10px !important;
+  }
+
+  .app-dark body .ql-toolbar.ql-snow {
+    background-color: var(--bg-modal-header) !important;
+  }
+
+  body .ql-container.ql-snow,
+  body .ql-container.ql-snow .ql-editor {
+    background-color: #e2e8f0 !important;
+    border: none !important;
+    min-height: 320px !important;
+  }
+
+  .app-dark body .ql-container.ql-snow,
+  .app-dark body .ql-container.ql-snow .ql-editor {
+    background-color: var(--bg-modal-body) !important;
+  }
+
+  body .ql-editor.ql-blank::before {
+    color: inherit !important;
+    opacity: 0.6;
+  }
+
+  body .ql-snow .ql-stroke {
+    stroke: var(--editor-icons) !important;
+  }
+
+  body .ql-snow .ql-fill {
+    fill: var(--editor-icons) !important;
+  }
+
+  body .p-editor-container:focus-within {
+    border-color: var(--bg-option-selected) !important;
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2) !important;
+    transition: border-color 0.3s ease !important;
+  }
+
+  body .ql-snow.ql-toolbar button:hover .ql-stroke,
+  body .ql-snow.ql-toolbar button.ql-active .ql-stroke {
+    stroke: var(--bg-option-selected) !important;
+  }
+
+  body .ql-snow.ql-toolbar button:hover .ql-fill,
+  body .ql-snow.ql-toolbar button.ql-active .ql-fill {
+    fill: var(--bg-option-selected) !important;
+  }
+  
+  /* ==========================================================================
+   9. Validation & Errors
    ========================================================================== */
   body .p-inputtext.ng-invalid.ng-touched,
   body .p-textarea.ng-invalid.ng-touched,
@@ -637,7 +701,7 @@
   }
 
   /* ==========================================================================
-   9. DataView & Tags & datepicker & inputnumber
+   10. DataView & Tags & datepicker & inputnumber
    ========================================================================== */
   body .p-dataview {
     background: transparent;

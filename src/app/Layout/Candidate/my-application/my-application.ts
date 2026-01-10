@@ -99,6 +99,7 @@ export class MyApplication implements OnInit {
       workExperience: this.fb.array([]),
       hasInternalReference: [false],
       internalReferees: this.fb.array([]),
+      linkedInProfile: ['', [Validators.pattern(/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+\/?$/)]],
     });
 
     this.applicationForm
@@ -176,6 +177,7 @@ export class MyApplication implements OnInit {
       jobId: this.jobId()!,
       isApplied: true,
       cvFile: raw.cvLink,
+      linkedInProfile: raw.linkedInProfile,
       hasInternalReference: raw.hasInternalReference,
       internalReferees: raw.internalReferees,
       workExperience: raw.workExperience.map((exp: any) => ({

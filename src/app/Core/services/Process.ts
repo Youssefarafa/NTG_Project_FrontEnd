@@ -56,6 +56,7 @@ export class Process {
       department: 'Computer Science',
       graduationYear: 2018,
       cvFile: 'https://drive.google.com/file/d/your-google-drive-id-1/view?usp=sharing',
+      linkedInProfile: 'https://linkedin.com/in/youssef_arafa',
       hasInternalReference: true,
       internalReferees: [{ name: 'Eng. Youssef', email: 'khaled@company.com' }],
       workExperience: [

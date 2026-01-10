@@ -77,6 +77,12 @@ export class ProcessActive implements OnInit {
     'Technically Waiting List',
   ];
 
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.confirmationService.close();
+    });
+  }
+
   ngOnInit() {
     const processId = this.route.snapshot.paramMap.get('id');
     if (processId) this.loadProcessDetails(processId);
